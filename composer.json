@@ -1,0 +1,49 @@
+{
+    "name": "sitegeist/schemeonyou",
+    "description": "JSON Schema integration for Neos.Flow via https://github.com/api-platform/json-schema",
+    "type": "neos-package",
+    "license": "LGPL-3.0",
+    "require": {
+        "php": "^8.1",
+        "neos/flow": "^8.0",
+        "api-platform/json-schema": "^3.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "phpstan/phpstan": "^1.10",
+        "mikey179/vfsstream": "^1.6",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sitegeist\\SchemeOnYou\\": "Classes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Sitegeist\\SchemeOnYou\\Tests\\": "Tests/"
+        }
+    },
+    "scripts": {
+        "lint:code-style": [
+            "phpcs --extensions=php --colors --standard=PSR12 ./Classes",
+            "phpcs --extensions=php --colors --standard=PSR12 ./Tests"
+        ],
+        "lint:static-analysis": "phpstan analyse",
+        "lint": [
+            "@install",
+            "@lint:code-style",
+            "@lint:static-analysis"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "neos/composer-plugin": true
+        }
+    },
+    "extra": {
+        "neos": {
+            "package-key": "Sitegeist.SchemeOnYou"
+        }
+    }
+}
