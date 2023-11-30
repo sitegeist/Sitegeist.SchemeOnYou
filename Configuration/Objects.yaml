@@ -1,0 +1,14 @@
+ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface:
+  scope: 'singleton'
+  className: ApiPlatform\Metadata\Resource\Factory\AttributesResourceMetadataCollectionFactory
+
+ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface:
+  scope: 'singleton'
+  className: ApiPlatform\Metadata\Resource\Factory\AttributesResourceNameCollectionFactory
+  arguments:
+    1:
+      setting: 'Sitegeist.SchemeOnYou.resourcePaths'
+
+ApiPlatform\JsonSchema\SchemaFactoryInterface:
+  factoryObjectName: Sitegeist\SchemeOnYou\Infrastructure\FactoryFactory
+  factoryMethodName: createSchemaFactory
