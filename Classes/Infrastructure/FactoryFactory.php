@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Infrastructure;
 
 use ApiPlatform\JsonSchema\SchemaFactory;
-use ApiPlatform\Metadata\Property\Factory\AttributePropertyMetadataFactory;
+use ApiPlatform\Metadata\Property\Factory\DefaultPropertyMetadataFactory;
 use ApiPlatform\Metadata\Property\Factory\PropertyInfoPropertyNameCollectionFactory;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use Neos\Flow\Annotations as Flow;
@@ -35,7 +35,7 @@ class FactoryFactory
                 [$extractor],
                 [$extractor],
             )),
-            new AttributePropertyMetadataFactory()
+            new DefaultPropertyMetadataFactory()
         );
     }
 }
