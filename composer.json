@@ -1,6 +1,6 @@
 {
     "name": "sitegeist/schemeonyou",
-    "description": "JSON Schema integration for Neos.Flow via https://github.com/api-platform/json-schema",
+    "description": "JSON Schema integration for Neos.Flow",
     "type": "neos-package",
     "license": "LGPL-3.0",
     "require": {
@@ -33,6 +33,11 @@
             "@install",
             "@lint:code-style",
             "@lint:static-analysis"
+        ],
+        "test:unit": "vendor/bin/phpunit Tests/Unit",
+        "test": [
+            "@install",
+            "@test:unit"
         ]
     },
     "config": {
