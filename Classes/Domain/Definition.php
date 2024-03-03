@@ -15,7 +15,7 @@ final readonly class Definition implements \JsonSerializable
     public function __construct(
         public string $type,
         public string $description,
-        public ?array $enum
+        public ?array $enum = null
     ) {
     }
 
@@ -24,8 +24,10 @@ final readonly class Definition implements \JsonSerializable
      */
     public static function fromClassName(string $className): self
     {
-        if (enum_exists($className) || true) {
+        if (enum_exists($className)) {
             return self::fromReflectionEnum(new \ReflectionEnum($className));
+        } elseif (class_exists($className)) {
+            return self::fromReflectionClass(new \ReflectionClass($className));
         }
         throw new \DomainException('Cannot create definition from incomprehensible type ' . $className, 1709500131);
     }
@@ -55,11 +57,42 @@ final readonly class Definition implements \JsonSerializable
         };
     }
 
+    public static function fromReflectionClass(\ReflectionClass $reflection): self
+    {
+        if (!in_array('JsonSerializable', $reflection->getInterfaceNames())) {
+            throw new \DomainException(
+                'Given class ' . $reflection->name . ' does not implement the required \JsonSerializable interface',
+                1709503193
+            );
+        }
+
+        $jsonSerializeReturnType = $reflection->getMethod('jsonSerialize')->getReturnType();
+        $returnType = $jsonSerializeReturnType instanceof \ReflectionNamedType ? $jsonSerializeReturnType->getName() : null;
+        $allowedReturnTypes = ['string', 'int', 'float', 'array'];
+        if (!in_array($returnType, $allowedReturnTypes)) {
+            throw new \DomainException(
+                'Given class ' . $reflection->name . ' has invalid return type for jsonSerializable, must be one of "'
+                . implode('","', $allowedReturnTypes) . '"',
+                1709503874
+            );
+        }
+
+        return new self(
+            match ($returnType) {
+                'string' => 'string',
+                'int' => 'int',
+                'float' => 'number',
+                'array' => 'object'
+            },
+            ReflectionDescriptionCollection::fromReflection($reflection)->render(),
+        );
+    }
+
     /**
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return get_object_vars($this);
+        return array_filter(get_object_vars($this));
     }
 }

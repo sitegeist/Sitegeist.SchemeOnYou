@@ -9,15 +9,28 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Domain\Definition;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\DayOfWeek;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Identifier;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\ImportantNumber;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Number;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\QuantitativeValue;
 
 #[Flow\Proxy(false)]
 final class DefinitionTest extends TestCase
 {
-    public function testFromClassName(): void
+    /**
+     * @dataProvider definitionProvider
+     * @param class-string $className
+     */
+    public function testFromClassName(string $className, Definition $expectedDefinition): void
     {
-        Assert::assertEquals(
-            new Definition(
+        Assert::assertEquals($expectedDefinition, Definition::fromClassName($className));
+    }
+
+    public static function definitionProvider(): iterable
+    {
+        yield 'stringEnum' => [
+            'className' => DayOfWeek::class,
+            'expectedDefinition' => new Definition(
                 'string',
                 'see https://schema.org/DayOfWeek',
                 [
@@ -28,21 +41,44 @@ final class DefinitionTest extends TestCase
                     'https://schema.org/Friday',
                     'https://schema.org/Saturday',
                     'https://schema.org/Sunday',
-                ]
+                ],
             ),
-            Definition::fromClassName(DayOfWeek::class)
-        );
+        ];
 
-        Assert::assertEquals(
-            new Definition(
+        yield 'intEnum' => [
+            'className' => ImportantNumber::class,
+            'expectedDefinition' => new Definition(
                 'int',
                 'important numbers only',
                 [
                     23,
-                    42
-                ]
+                    42,
+                ],
             ),
-            Definition::fromClassName(ImportantNumber::class)
-        );
+        ];
+
+        yield 'stringValueObject' => [
+            'className' => Identifier::class,
+            'expectedDefinition' => new Definition(
+                'string',
+                'see https://schema.org/identifier',
+            ),
+        ];
+
+        yield 'intValueObject' => [
+            'className' => QuantitativeValue::class,
+            'expectedDefinition' => new Definition(
+                'int',
+                'see https://schema.org/QuantitativeValue',
+            ),
+        ];
+
+        yield 'floatValueObject' => [
+            'className' => Number::class,
+            'expectedDefinition' => new Definition(
+                'number',
+                'see https://schema.org/Number',
+            ),
+        ];
     }
 }
