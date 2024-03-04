@@ -19,7 +19,7 @@ final readonly class Definition
     /**
      * @param \ReflectionClass<object> $reflection
      */
-    public static function fromReflection(\ReflectionClass $reflection): self
+    public static function fromReflectionClass(\ReflectionClass $reflection): self
     {
         $definitionReflections = $reflection->getAttributes(Definition::class);
         if (count($definitionReflections) !== 1) {

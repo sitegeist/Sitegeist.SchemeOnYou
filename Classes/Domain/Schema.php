@@ -6,6 +6,7 @@ namespace Sitegeist\SchemeOnYou\Domain;
 
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Definition\DefinitionCollection;
+use Sitegeist\SchemeOnYou\Domain\Path\PathCollection;
 
 #[Flow\Proxy(false)]
 final readonly class Schema implements \JsonSerializable

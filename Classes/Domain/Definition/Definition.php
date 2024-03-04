@@ -42,14 +42,14 @@ final readonly class Definition implements \JsonSerializable
 
     private static function fromReflectionEnum(\ReflectionEnum $reflection): self
     {
-        $definitionMetadata = DefinitionMetadata::fromReflection($reflection);
+        $definitionMetadata = DefinitionMetadata::fromReflectionClass($reflection);
         return match ($reflection->getBackingType()?->getName()) {
             'string' => new self(
                 $definitionMetadata->name ?: $reflection->getShortName(),
                 'string',
                 $definitionMetadata->description,
                 array_map(
-                /** @phpstan-ignore-next-line parameter and return types are enforced before */
+                    /** @phpstan-ignore-next-line parameter and return types are enforced before */
                     fn (\ReflectionEnumBackedCase $case): string => $case->getBackingValue(),
                     $reflection->getCases()
                 )
@@ -103,7 +103,7 @@ final readonly class Definition implements \JsonSerializable
                 return self::fromObjectReflectionClass($reflection);
             }
         }
-        $definitionMetadata = DefinitionMetadata::fromReflection($reflection);
+        $definitionMetadata = DefinitionMetadata::fromReflectionClass($reflection);
 
         return new self(
             name: $definitionMetadata->name ?: $reflection->getShortName(),
@@ -125,12 +125,12 @@ final readonly class Definition implements \JsonSerializable
      */
     private static function fromCollectionReflectionClass(\ReflectionClass $reflection): self
     {
-        $definitionMetadata = DefinitionMetadata::fromReflection($reflection);
+        $definitionMetadata = DefinitionMetadata::fromReflectionClass($reflection);
         /** @var \ReflectionNamedType $parameterType */
         $parameterType = ($reflection->getConstructor()?->getParameters() ?: [])[0]->getType();
         /** @var class-string $parameterClassName */
         $parameterClassName = $parameterType->getName();
-        $parameterMetadata = DefinitionMetadata::fromReflection(new \ReflectionClass($parameterClassName));
+        $parameterMetadata = DefinitionMetadata::fromReflectionClass(new \ReflectionClass($parameterClassName));
 
         return new self(
             name: $definitionMetadata->name ?: $reflection->getShortName(),
@@ -145,7 +145,7 @@ final readonly class Definition implements \JsonSerializable
      */
     private static function fromObjectReflectionClass(\ReflectionClass $reflection): self
     {
-        $definitionMetadata = DefinitionMetadata::fromReflection($reflection);
+        $definitionMetadata = DefinitionMetadata::fromReflectionClass($reflection);
 
         $properties = [];
         $required = [];

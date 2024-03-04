@@ -71,7 +71,7 @@ final readonly class SchemaType implements \JsonSerializable
             ],
             default => match (true) {
                 class_exists($reflectionType->getName()), enum_exists($reflectionType->getName())
-                    => DefinitionMetadata::fromReflection(
+                    => DefinitionMetadata::fromReflectionClass(
                         new \ReflectionClass($reflectionType->getName())
                     )->toReferenceType(),
                 default => throw new \DomainException(
@@ -98,7 +98,7 @@ final readonly class SchemaType implements \JsonSerializable
      */
     public static function fromReflectionClass(\ReflectionClass $reflectionClass): self
     {
-        return new self(DefinitionMetadata::fromReflection($reflectionClass)->toReferenceType());
+        return new self(DefinitionMetadata::fromReflectionClass($reflectionClass)->toReferenceType());
     }
 
     public static function fromReflectionUnionType(\ReflectionUnionType $reflectionUnionType): self

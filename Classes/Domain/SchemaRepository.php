@@ -8,7 +8,9 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Reflection\ReflectionService;
 use Sitegeist\SchemeOnYou\Domain\Definition\DefinitionCollection;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Definition as DefinitionMetadata;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Path as PathMetadata;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Endpoint as EndpointAttribute;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Path as PathAttribute;
+use Sitegeist\SchemeOnYou\Domain\Path\PathCollection;
 
 #[Flow\Scope('singleton')]
 final class SchemaRepository
@@ -20,11 +22,19 @@ final class SchemaRepository
 
     public function findSchema(): Schema
     {
-        $pathAnnotatedClasses = $this->reflectionService->getClassNamesByAnnotation(PathMetadata::class);
         $definitionAnnotatedClasses = $this->reflectionService->getClassNamesByAnnotation(DefinitionMetadata::class);
+        $pathAnnotatedClasses = $this->reflectionService->getClassNamesByAnnotation(EndpointAttribute::class);
+        $pathMethodsByClassName = [];
+        foreach ($pathAnnotatedClasses as $className) {
+            /** @var class-string $className */
+            $pathMethods = $this->reflectionService->getMethodsAnnotatedWith($className, PathAttribute::class);
+            if (!empty($pathMethods)) {
+                $pathMethodsByClassName[$className] = $pathMethods;
+            }
+        }
 
         return new Schema(
-            PathCollection::fromClassNames($pathAnnotatedClasses),
+            PathCollection::fromMethodNames($pathMethodsByClassName),
             DefinitionCollection::fromClassNames($definitionAnnotatedClasses)
         );
     }
