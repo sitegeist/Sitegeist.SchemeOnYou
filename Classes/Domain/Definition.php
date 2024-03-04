@@ -17,7 +17,10 @@ final readonly class Definition implements \JsonSerializable
         public string $name,
         public string $type,
         public string $description,
-        public ?array $enum = null
+        public ?array $enum = null,
+        public ?array $properties = null,
+        public ?array $required = null,
+        public ?array $items = null,
     ) {
     }
 
@@ -83,15 +86,46 @@ final readonly class Definition implements \JsonSerializable
         }
         $definitionMetadata = DefinitionMetadata::fromReflection($reflection);
 
+        $properties = [];
+        $required = [];
+        $items = null;
+        $type = null;
+        if ($returnType === 'array') {
+            if (count($reflection->getConstructor()->getParameters()) === 1) {
+                $onlyParameter = $reflection->getConstructor()->getParameters()[0];
+                if ($onlyParameter->isVariadic()) {
+                    /** @var \ReflectionNamedType $type */
+                    $parameterType = $onlyParameter->getType();
+                    $parameterClassName = $parameterType->getName();
+                    $type = 'array';
+                    $items = [
+                        '$ref' => '#/definitions/' . \mb_substr($parameterClassName, \mb_strrpos($parameterClassName, '\\') + 1)
+                    ];
+                }
+            } else {
+                foreach ($reflection->getConstructor()->getParameters() as $reflectionParameter) {
+                    $properties[$reflectionParameter->name] = [
+                        'type' => 'string'
+                    ];
+                    if (!$reflectionParameter->isDefaultValueAvailable()) {
+                        $required[] = $reflectionParameter->name;
+                    }
+                }
+            }
+        }
+
         return new self(
-            $definitionMetadata->name ?: $reflection->getShortName(),
-            match ($returnType) {
+            name: $definitionMetadata->name ?: $reflection->getShortName(),
+            type: $type ?: match ($returnType) {
                 'string' => 'string',
                 'int' => 'int',
                 'float' => 'number',
                 'array' => 'object'
             },
-            $definitionMetadata->description
+            description: $definitionMetadata->description,
+            properties: ($properties === []) ? null : $properties,
+            required: ($required === []) ? null : $required,
+            items: $items
         );
     }
 

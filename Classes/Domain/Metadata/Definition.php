@@ -26,10 +26,11 @@ final readonly class Definition
                 1709537723
             );
         }
+        $arguments = $definitionReflections[0]->getArguments();
 
         return new self(
-            $definitionReflections[0]->getArguments()[0],
-            $definitionReflections[0]->getArguments()[1] ?? null,
+            $arguments['description'] ?? $arguments[0],
+            $arguments['name'] ?? $arguments[1] ?? null,
         );
     }
 }

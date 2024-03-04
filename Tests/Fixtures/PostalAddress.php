@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Tests\Fixtures;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Definition;
 
-/**
- * @see https://schema.org/PostalAddress
- */
+#[Definition(description: 'see https://schema.org/PostalAddress')]
 #[Flow\Proxy(false)]
-final readonly class PostalAddress
+final readonly class PostalAddress implements \JsonSerializable
 {
     public function __construct(
         public string $streetAddress,
@@ -18,5 +17,13 @@ final readonly class PostalAddress
         public ?string $addressCountry = 'DE',
         public ?string $postOfficeBoxNumber = null
     ) {
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return get_object_vars($this);
     }
 }

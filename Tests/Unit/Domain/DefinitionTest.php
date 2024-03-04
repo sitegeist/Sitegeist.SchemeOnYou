@@ -12,21 +12,23 @@ use Sitegeist\SchemeOnYou\Tests\Fixtures\DayOfWeek;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Identifier;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\ImportantNumber;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Number;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\PostalAddress;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\PostalAddressCollection;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\QuantitativeValue;
 
 #[Flow\Proxy(false)]
 final class DefinitionTest extends TestCase
 {
     /**
-     * @dataProvider definitionProvider
+     * @dataProvider validClassesProvider
      * @param class-string $className
      */
-    public function testFromClassName(string $className, Definition $expectedDefinition): void
+    public function testFromClassNameCreatesDefinitionsForValidClasses(string $className, Definition $expectedDefinition): void
     {
         Assert::assertEquals($expectedDefinition, Definition::fromClassName($className));
     }
 
-    public static function definitionProvider(): iterable
+    public static function validClassesProvider(): iterable
     {
         yield 'stringEnum' => [
             'className' => DayOfWeek::class,
@@ -83,6 +85,45 @@ final class DefinitionTest extends TestCase
                 'Number',
                 'number',
                 'see https://schema.org/Number',
+            ),
+        ];
+
+        yield 'arrayValueObject' => [
+            'className' => PostalAddress::class,
+            'expectedDefinition' => new Definition(
+                name: 'PostalAddress',
+                type: 'object',
+                description: 'see https://schema.org/PostalAddress',
+                properties: [
+                    'streetAddress' => [
+                        'type' => 'string',
+                    ],
+                    'addressRegion' => [
+                        'type' => 'string',
+                    ],
+                    'addressCountry' => [
+                        'type' => 'string',
+                    ],
+                    'postOfficeBoxNumber' => [
+                        'type' => 'string',
+                    ],
+                ],
+                required: [
+                    'streetAddress',
+                    'addressRegion',
+                ],
+            ),
+        ];
+
+        yield 'listValueObject' => [
+            'className' => PostalAddressCollection::class,
+            'expectedDefinition' => new Definition(
+                name: 'PostalAddressCollection',
+                type: 'array',
+                description: 'a collection of postal addresses, see https://schema.org/PostalAddress',
+                items: [
+                    '$ref' => '#/definitions/PostalAddress',
+                ],
             ),
         ];
     }
