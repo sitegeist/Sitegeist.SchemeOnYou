@@ -7,13 +7,19 @@ namespace Sitegeist\SchemeOnYou\Domain;
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
-final readonly class Schema
+final readonly class Schema implements \JsonSerializable
 {
+    public function __construct(
+        private PathCollection $paths,
+        private DefinitionCollection $definitions,
+    ) {
+    }
+
     /**
-     * @phpstan-param class-string $className
+     * @return array<string,mixed>
      */
-    public static function fromClassName(string $className): self
+    public function jsonSerialize(): array
     {
-        return new self();
+        return get_object_vars($this);
     }
 }

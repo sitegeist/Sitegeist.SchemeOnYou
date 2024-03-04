@@ -31,6 +31,7 @@ final class DefinitionTest extends TestCase
         yield 'stringEnum' => [
             'className' => DayOfWeek::class,
             'expectedDefinition' => new Definition(
+                'DayOfWeek',
                 'string',
                 'see https://schema.org/DayOfWeek',
                 [
@@ -48,6 +49,7 @@ final class DefinitionTest extends TestCase
         yield 'intEnum' => [
             'className' => ImportantNumber::class,
             'expectedDefinition' => new Definition(
+                'ImportantNumber',
                 'int',
                 'important numbers only',
                 [
@@ -60,6 +62,7 @@ final class DefinitionTest extends TestCase
         yield 'stringValueObject' => [
             'className' => Identifier::class,
             'expectedDefinition' => new Definition(
+                'Identifier',
                 'string',
                 'see https://schema.org/identifier',
             ),
@@ -68,6 +71,7 @@ final class DefinitionTest extends TestCase
         yield 'intValueObject' => [
             'className' => QuantitativeValue::class,
             'expectedDefinition' => new Definition(
+                'QuantitativeValue',
                 'int',
                 'see https://schema.org/QuantitativeValue',
             ),
@@ -76,6 +80,7 @@ final class DefinitionTest extends TestCase
         yield 'floatValueObject' => [
             'className' => Number::class,
             'expectedDefinition' => new Definition(
+                'Number',
                 'number',
                 'see https://schema.org/Number',
             ),

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Tests\Fixtures;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\SchemeOnYou\Domain as Scheme;
+use Sitegeist\SchemeOnYou\Domain\Metadata as Scheme;
 
-#[Scheme\Description('see https://schema.org/QuantitativeValue')]
+#[Scheme\Definition('see https://schema.org/QuantitativeValue')]
 #[Flow\Proxy(false)]
 final readonly class QuantitativeValue implements \JsonSerializable
 {

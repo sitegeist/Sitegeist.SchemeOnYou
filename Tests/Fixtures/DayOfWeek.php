@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Tests\Fixtures;
 
-use Sitegeist\SchemeOnYou\Domain as Scheme;
+use Sitegeist\SchemeOnYou\Domain\Metadata as Scheme;
 
-#[Scheme\Description('see https://schema.org/DayOfWeek')]
+#[Scheme\Definition('see https://schema.org/DayOfWeek')]
 enum DayOfWeek: string
 {
     case DAY_MONDAY = 'https://schema.org/Monday';

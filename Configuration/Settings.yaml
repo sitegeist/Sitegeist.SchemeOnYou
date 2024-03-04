@@ -1,0 +1,4 @@
+Sitegeist:
+  SchemeOnYou:
+    # The target path where to write the schema, relative to FLOW_PATH_ROOT
+    schemaTargetFilePath: 'schema.json'

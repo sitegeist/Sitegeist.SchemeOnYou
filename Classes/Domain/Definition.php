@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Definition as DefinitionMetadata;
 
 #[Flow\Proxy(false)]
 final readonly class Definition implements \JsonSerializable
@@ -13,6 +14,7 @@ final readonly class Definition implements \JsonSerializable
      * @param array<int,int|string>|null $enum
      */
     public function __construct(
+        public string $name,
         public string $type,
         public string $description,
         public ?array $enum = null
@@ -34,18 +36,21 @@ final readonly class Definition implements \JsonSerializable
 
     private static function fromReflectionEnum(\ReflectionEnum $reflection): self
     {
+        $definitionMetadata = DefinitionMetadata::fromReflection($reflection);
         return match ($reflection->getBackingType()?->getName()) {
             'string' => new self(
+                $definitionMetadata->name ?: $reflection->getShortName(),
                 'string',
-                ReflectionDescriptionCollection::fromReflection($reflection)->render(),
+                $definitionMetadata->description,
                 array_map(
                     fn (\ReflectionEnumBackedCase $case): string => $case->getBackingValue(),
                     $reflection->getCases()
                 )
             ),
             'int' => new self(
+                $definitionMetadata->name ?: $reflection->getShortName(),
                 'int',
-                ReflectionDescriptionCollection::fromReflection($reflection)->render(),
+                $definitionMetadata->description,
                 array_map(
                     fn (\ReflectionEnumBackedCase $case): int => $case->getBackingValue(),
                     $reflection->getCases()
@@ -76,15 +81,17 @@ final readonly class Definition implements \JsonSerializable
                 1709503874
             );
         }
+        $definitionMetadata = DefinitionMetadata::fromReflection($reflection);
 
         return new self(
+            $definitionMetadata->name ?: $reflection->getShortName(),
             match ($returnType) {
                 'string' => 'string',
                 'int' => 'int',
                 'float' => 'number',
                 'array' => 'object'
             },
-            ReflectionDescriptionCollection::fromReflection($reflection)->render(),
+            $definitionMetadata->description
         );
     }
 
