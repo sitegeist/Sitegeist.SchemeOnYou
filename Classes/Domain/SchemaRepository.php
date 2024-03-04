@@ -6,13 +6,13 @@ namespace Sitegeist\SchemeOnYou\Domain;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Reflection\ReflectionService;
+use Sitegeist\SchemeOnYou\Domain\Definition\DefinitionCollection;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Definition as DefinitionMetadata;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Path as PathMetadata;
 
 #[Flow\Scope('singleton')]
 final class SchemaRepository
 {
-
     public function __construct(
         private readonly ReflectionService $reflectionService
     ) {

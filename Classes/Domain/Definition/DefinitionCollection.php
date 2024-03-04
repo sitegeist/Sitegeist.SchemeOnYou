@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SchemeOnYou\Domain;
+namespace Sitegeist\SchemeOnYou\Domain\Definition;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\SchemeOnYou\Domain\Definition\Definition;
 
 #[Flow\Proxy(false)]
 final readonly class DefinitionCollection implements \JsonSerializable

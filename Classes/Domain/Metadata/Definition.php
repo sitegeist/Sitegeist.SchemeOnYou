@@ -16,7 +16,10 @@ final readonly class Definition
     ) {
     }
 
-    public static function fromReflection(\ReflectionClass|\ReflectionEnum $reflection): self
+    /**
+     * @param \ReflectionClass<object> $reflection
+     */
+    public static function fromReflection(\ReflectionClass $reflection): self
     {
         $definitionReflections = $reflection->getAttributes(Definition::class);
         if (count($definitionReflections) !== 1) {
@@ -30,7 +33,17 @@ final readonly class Definition
 
         return new self(
             $arguments['description'] ?? $arguments[0],
-            $arguments['name'] ?? $arguments[1] ?? null,
+            $arguments['name'] ?? $arguments[1] ?? $reflection->getShortName(),
         );
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    public function toReferenceType(): array
+    {
+        return [
+            '$ref' => '#/definitions/' . $this->name
+        ];
     }
 }

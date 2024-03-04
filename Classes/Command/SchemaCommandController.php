@@ -21,6 +21,7 @@ final class SchemaCommandController extends CommandController
     {
         $schema = $this->schemaRepository->findSchema();
         file_put_contents(
+            /** @phpstan-ignore-next-line known constant */
             FLOW_PATH_ROOT . $this->schemaTargetFilePath,
             \json_encode($schema, JSON_THROW_ON_ERROR + JSON_PRETTY_PRINT)
         );

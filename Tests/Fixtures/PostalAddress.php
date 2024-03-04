@@ -20,6 +20,19 @@ final readonly class PostalAddress implements \JsonSerializable
     }
 
     /**
+     * @param array<string,mixed> $values
+     */
+    public static function fromArray(array $values): self
+    {
+        return new self(
+            $values['streetAddress'],
+            $values['addressRegion'],
+            $values['addressCountry'] ?? 'DE',
+            $values['postOfficeBoxNumber'] ?? null,
+        );
+    }
+
+    /**
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array

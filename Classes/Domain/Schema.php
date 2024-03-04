@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\SchemeOnYou\Domain\Definition\DefinitionCollection;
 
 #[Flow\Proxy(false)]
 final readonly class Schema implements \JsonSerializable

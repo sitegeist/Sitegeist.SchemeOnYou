@@ -17,7 +17,7 @@ final readonly class PostalAddressCollection implements \JsonSerializable
     private array $items;
 
     public function __construct(
-        PostalAddress... $items
+        PostalAddress ...$items
     ) {
         $this->items = $items;
     }

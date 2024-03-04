@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SchemeOnYou\Domain;
+namespace Sitegeist\SchemeOnYou\Domain\Definition;
 
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Definition as DefinitionMetadata;
@@ -12,6 +12,9 @@ final readonly class Definition implements \JsonSerializable
 {
     /**
      * @param array<int,int|string>|null $enum
+     * @param array<string,SchemaType> $properties
+     * @param array<int,string> $required
+     * @param array<string,string> $items
      */
     public function __construct(
         public string $name,
@@ -46,6 +49,7 @@ final readonly class Definition implements \JsonSerializable
                 'string',
                 $definitionMetadata->description,
                 array_map(
+                /** @phpstan-ignore-next-line parameter and return types are enforced before */
                     fn (\ReflectionEnumBackedCase $case): string => $case->getBackingValue(),
                     $reflection->getCases()
                 )
@@ -55,16 +59,21 @@ final readonly class Definition implements \JsonSerializable
                 'int',
                 $definitionMetadata->description,
                 array_map(
+                    /** @phpstan-ignore-next-line parameter and return types are enforced before */
                     fn (\ReflectionEnumBackedCase $case): int => $case->getBackingValue(),
                     $reflection->getCases()
                 )
             ),
             default => throw new \InvalidArgumentException(
-                'Cannot create definition from non-backed enum ' . $reflection->name, 1709499876
+                'Cannot create definition from non-backed enum ' . $reflection->name,
+                1709499876
             ),
         };
     }
 
+    /**
+     * @param \ReflectionClass<object> $reflection
+     */
     public static function fromReflectionClass(\ReflectionClass $reflection): self
     {
         if (!in_array('JsonSerializable', $reflection->getInterfaceNames())) {
@@ -75,7 +84,9 @@ final readonly class Definition implements \JsonSerializable
         }
 
         $jsonSerializeReturnType = $reflection->getMethod('jsonSerialize')->getReturnType();
-        $returnType = $jsonSerializeReturnType instanceof \ReflectionNamedType ? $jsonSerializeReturnType->getName() : null;
+        $returnType = $jsonSerializeReturnType instanceof \ReflectionNamedType
+            ? $jsonSerializeReturnType->getName()
+            : null;
         $allowedReturnTypes = ['string', 'int', 'float', 'array'];
         if (!in_array($returnType, $allowedReturnTypes)) {
             throw new \DomainException(
@@ -84,48 +95,73 @@ final readonly class Definition implements \JsonSerializable
                 1709503874
             );
         }
+
+        if ($returnType === 'array') {
+            if (IsCollection::isSatisfiedByReflectionClass($reflection)) {
+                return self::fromCollectionReflectionClass($reflection);
+            } else {
+                return self::fromObjectReflectionClass($reflection);
+            }
+        }
+        $definitionMetadata = DefinitionMetadata::fromReflection($reflection);
+
+        return new self(
+            name: $definitionMetadata->name ?: $reflection->getShortName(),
+            type: match ($returnType) {
+                'string' => 'string',
+                'int' => 'int',
+                'float' => 'number',
+                default => throw new \DomainException(
+                    'Cannot resolve definition type for type ' . $returnType,
+                    1709567351
+                )
+            },
+            description: $definitionMetadata->description,
+        );
+    }
+
+    /**
+     * @param \ReflectionClass<object> $reflection
+     */
+    private static function fromCollectionReflectionClass(\ReflectionClass $reflection): self
+    {
+        $definitionMetadata = DefinitionMetadata::fromReflection($reflection);
+        /** @var \ReflectionNamedType $parameterType */
+        $parameterType = ($reflection->getConstructor()?->getParameters() ?: [])[0]->getType();
+        /** @var class-string $parameterClassName */
+        $parameterClassName = $parameterType->getName();
+        $parameterMetadata = DefinitionMetadata::fromReflection(new \ReflectionClass($parameterClassName));
+
+        return new self(
+            name: $definitionMetadata->name ?: $reflection->getShortName(),
+            type: 'array',
+            description: $definitionMetadata->description,
+            items: $parameterMetadata->toReferenceType()
+        );
+    }
+
+    /**
+     * @param \ReflectionClass<object> $reflection
+     */
+    private static function fromObjectReflectionClass(\ReflectionClass $reflection): self
+    {
         $definitionMetadata = DefinitionMetadata::fromReflection($reflection);
 
         $properties = [];
         $required = [];
-        $items = null;
-        $type = null;
-        if ($returnType === 'array') {
-            if (count($reflection->getConstructor()->getParameters()) === 1) {
-                $onlyParameter = $reflection->getConstructor()->getParameters()[0];
-                if ($onlyParameter->isVariadic()) {
-                    /** @var \ReflectionNamedType $type */
-                    $parameterType = $onlyParameter->getType();
-                    $parameterClassName = $parameterType->getName();
-                    $type = 'array';
-                    $items = [
-                        '$ref' => '#/definitions/' . \mb_substr($parameterClassName, \mb_strrpos($parameterClassName, '\\') + 1)
-                    ];
-                }
-            } else {
-                foreach ($reflection->getConstructor()->getParameters() as $reflectionParameter) {
-                    $properties[$reflectionParameter->name] = [
-                        'type' => 'string'
-                    ];
-                    if (!$reflectionParameter->isDefaultValueAvailable()) {
-                        $required[] = $reflectionParameter->name;
-                    }
-                }
+        foreach ($reflection->getConstructor()?->getParameters() ?: [] as $reflectionParameter) {
+            $properties[$reflectionParameter->name] = SchemaType::fromReflectionParameter($reflectionParameter);
+            if (!$reflectionParameter->isDefaultValueAvailable()) {
+                $required[] = $reflectionParameter->name;
             }
         }
 
         return new self(
             name: $definitionMetadata->name ?: $reflection->getShortName(),
-            type: $type ?: match ($returnType) {
-                'string' => 'string',
-                'int' => 'int',
-                'float' => 'number',
-                'array' => 'object'
-            },
+            type: 'object',
             description: $definitionMetadata->description,
-            properties: ($properties === []) ? null : $properties,
-            required: ($required === []) ? null : $required,
-            items: $items
+            properties: $properties,
+            required: $required
         );
     }
 
