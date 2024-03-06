@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SchemeOnYou\Domain\Definition;
+namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
-final readonly class DefinitionCollection implements \JsonSerializable
+final readonly class OpenApiSchemaCollection implements \JsonSerializable
 {
-    /** @var array<Definition> */
+    /** @var array<OpenApiSchema> */
     private array $items;
 
     public function __construct(
-        Definition ...$items
+        OpenApiSchema ...$items
     ) {
         $this->items = $items;
     }
@@ -24,16 +24,21 @@ final readonly class DefinitionCollection implements \JsonSerializable
     public static function fromClassNames(array $classNames): self
     {
         return new self(...array_map(
-            fn (string $className): Definition => Definition::fromClassName($className),
+            fn (string $className): OpenApiSchema => OpenApiSchema::fromClassName($className),
             $classNames
         ));
     }
 
     /**
-     * @return array<Definition>
+     * @return array<string, OpenApiSchema>
      */
     public function jsonSerialize(): array
     {
-        return $this->items;
+        $result = [];
+        foreach ($this->items as $schema) {
+            $result[$schema->name] = $schema;
+        }
+
+        return $result;
     }
 }

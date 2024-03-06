@@ -2,30 +2,31 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SchemeOnYou\Domain\Definition;
+namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
 use Psr\Http\Message\UriInterface;
 use Ramsey\Uuid\UuidInterface;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Definition as DefinitionMetadata;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as DefinitionMetadata;
 
 #[Flow\Proxy(false)]
 final readonly class SchemaType implements \JsonSerializable
 {
     /**
-     * @param array<string,mixed> $typeDeclaration
+     * @param array<string,mixed>|OpenApiReference $typeDeclaration
      */
     public function __construct(
-        public array $typeDeclaration,
+        public array|OpenApiReference $typeDeclaration,
     ) {
     }
 
-    public static function fromReflectionParameter(\ReflectionParameter $reflectionParameter): self
-    {
+    public static function selfOrReferenceFromReflectionParameter(
+        \ReflectionParameter $reflectionParameter
+    ): self|OpenApiReference {
         $type = $reflectionParameter->getType();
 
         return match (true) {
-            $type instanceof \ReflectionNamedType => self::fromReflectionNamedType($type),
+            $type instanceof \ReflectionNamedType => self::selfOrReferenceFromReflectionNamedType($type),
             $type instanceof \ReflectionUnionType => self::fromReflectionUnionType($type),
             $type instanceof \ReflectionIntersectionType => throw new \DomainException(
                 'Cannot resolve schema type from intersection type given for parameter '
@@ -38,8 +39,9 @@ final readonly class SchemaType implements \JsonSerializable
         };
     }
 
-    public static function fromReflectionNamedType(\ReflectionNamedType $reflectionType): self
-    {
+    public static function selfOrReferenceFromReflectionNamedType(
+        \ReflectionNamedType $reflectionType
+    ): self|OpenApiReference {
         $type = match ($reflectionType->getName()) {
             'bool', 'boolean' => [
                 'type' => 'boolean'
@@ -71,9 +73,9 @@ final readonly class SchemaType implements \JsonSerializable
             ],
             default => match (true) {
                 class_exists($reflectionType->getName()), enum_exists($reflectionType->getName())
-                    => DefinitionMetadata::fromReflectionClass(
+                    => OpenApiSchema::fromReflectionClass(
                         new \ReflectionClass($reflectionType->getName())
-                    )->toReferenceType(),
+                    )->toReference(),
                 default => throw new \DomainException(
                     'Cannot resolve schema type for type ' . $reflectionType->getName(),
                     1709560846
@@ -90,7 +92,7 @@ final readonly class SchemaType implements \JsonSerializable
                     ]
                 ]
             ])
-            : new self($type);
+            : ($type instanceof OpenApiReference ? $type : new self($type));
     }
 
     /**
@@ -111,7 +113,7 @@ final readonly class SchemaType implements \JsonSerializable
                     1709560366
                 );
             }
-            $types[] = self::fromReflectionNamedType($reflectionType);
+            $types[] = self::selfOrReferenceFromReflectionNamedType($reflectionType);
         }
         if ($reflectionUnionType->allowsNull()) {
             $types[] = [
@@ -125,9 +127,9 @@ final readonly class SchemaType implements \JsonSerializable
     }
 
     /**
-     * @return array<string,mixed>
+     * @return array<string,mixed>|OpenApiReference
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): array|OpenApiReference
     {
         return $this->typeDeclaration;
     }

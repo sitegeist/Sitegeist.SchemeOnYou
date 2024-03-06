@@ -9,9 +9,9 @@ use Neos\Flow\Annotations as Flow;
 use Psr\Http\Message\UriInterface;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Definition;
+use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 
-#[Definition(description: 'a thing composed of all primitive types')]
+#[OpenApi\Schema(description: 'a thing composed of all primitive types')]
 #[Flow\Proxy(false)]
 final readonly class WeirdThing implements \JsonSerializable
 {

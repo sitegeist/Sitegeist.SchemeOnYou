@@ -8,14 +8,17 @@ use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Metadata\HttpMethod;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Path as PathMetadata;
 
+/**
+ * @see https://swagger.io/specification/#path-item-object
+ */
 #[Flow\Proxy(false)]
-final readonly class Path implements \JsonSerializable
+final readonly class OpenApiPathItem implements \JsonSerializable
 {
     public function __construct(
-        public string $uriPath,
+        public PathDefinition $pathDefinition,
         public HttpMethod $httpMethod,
-        public PathParameterCollection $parameters,
-        public PathResponseCollection $responses,
+        public OpenApiParameterCollection $parameters,
+        public OpenApiResponses $responses,
     ) {
     }
 
@@ -27,13 +30,18 @@ final readonly class Path implements \JsonSerializable
         $reflectionClass = new \ReflectionClass($className);
         $reflectionMethod = $reflectionClass->getMethod($methodName);
 
+        return self::fromReflectionMethod($reflectionMethod);
+    }
+
+    public static function fromReflectionMethod(\ReflectionMethod $reflectionMethod): self
+    {
         $pathMetadata = PathMetadata::fromReflection($reflectionMethod);
 
         return new self(
-            $pathMetadata->uriPath,
+            $pathMetadata->pathDefinition,
             $pathMetadata->httpMethod,
-            PathParameterCollection::fromMethodArguments($reflectionMethod),
-            PathResponseCollection::fromReflectionMethod($reflectionMethod),
+            OpenApiParameterCollection::fromMethodArguments($reflectionMethod),
+            OpenApiResponses::fromReflectionMethod($reflectionMethod),
         );
     }
 

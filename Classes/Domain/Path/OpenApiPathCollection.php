@@ -7,13 +7,13 @@ namespace Sitegeist\SchemeOnYou\Domain\Path;
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
-final readonly class PathCollection implements \JsonSerializable
+final readonly class OpenApiPathCollection implements \JsonSerializable
 {
-    /** @var array<Path> */
+    /** @var array<OpenApiPathItem> */
     private array $items;
 
     public function __construct(
-        Path ...$items
+        OpenApiPathItem ...$items
     ) {
         $this->items = $items;
     }
@@ -26,20 +26,20 @@ final readonly class PathCollection implements \JsonSerializable
         $paths = [];
         foreach ($methodNames as $className => $methodNamesForClass) {
             foreach ($methodNamesForClass as $methodName) {
-                $paths[] = Path::fromMethodName($className, $methodName);
+                $paths[] = OpenApiPathItem::fromMethodName($className, $methodName);
             }
         }
         return new self(...$paths);
     }
 
     /**
-     * @return array<string,array<string,Path>>
+     * @return array<string,array<string,OpenApiPathItem>>
      */
     public function jsonSerialize(): array
     {
         $result = [];
         foreach ($this->items as $item) {
-            $result[$item->uriPath][$item->httpMethod->value] = $item;
+            $result[$item->pathDefinition->value][$item->httpMethod->value] = $item;
         }
 
         return $result;

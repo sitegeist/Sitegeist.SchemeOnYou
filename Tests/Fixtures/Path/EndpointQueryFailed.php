@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SchemeOnYou\Tests\Fixtures;
+namespace Sitegeist\SchemeOnYou\Tests\Fixtures\Path;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\SchemeOnYou\Domain\Metadata as Schema;
+use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 
-#[Schema\Definition('the endpoint response')]
-#[Schema\PathResponse(statusCode: 200, description: 'the query was successful')]
+#[OpenApi\Schema('the endpoint query failure response')]
+#[OpenApi\PathResponse(statusCode: 400, description: 'the query failed')]
 #[Flow\Proxy(false)]
-final readonly class EndpointResponse
+final readonly class EndpointQueryFailed implements \JsonSerializable
 {
     public function __construct(
-        public string $thing,
+        public string $reason,
     ) {
     }
 
@@ -22,7 +22,7 @@ final readonly class EndpointResponse
      */
     public static function fromArray(array $values): self
     {
-        return new self($values['thing']);
+        return new self($values['reason']);
     }
 
     /**

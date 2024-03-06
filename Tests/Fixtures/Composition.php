@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Tests\Fixtures;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\SchemeOnYou\Domain\Metadata as Scheme;
+use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 
-#[Scheme\Definition('a composition of types')]
+#[OpenApi\Schema('a composition of types')]
 #[Flow\Proxy(false)]
 final readonly class Composition implements \JsonSerializable
 {

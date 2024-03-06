@@ -6,14 +6,17 @@ namespace Sitegeist\SchemeOnYou\Domain\Path;
 
 use Neos\Flow\Annotations as Flow;
 
+/**
+ * @see https://swagger.io/specification/#responses-object
+ */
 #[Flow\Proxy(false)]
-final readonly class PathResponseCollection implements \JsonSerializable
+final readonly class OpenApiResponses implements \JsonSerializable
 {
-    /** @var array<PathResponse> */
+    /** @var array<OpenApiResponse> */
     private array $items;
 
     public function __construct(
-        PathResponse ...$items
+        OpenApiResponse ...$items
     ) {
         $this->items = $items;
     }
@@ -36,14 +39,14 @@ final readonly class PathResponseCollection implements \JsonSerializable
                 . $reflectionMethod->class . '::' . $reflectionMethod->name,
                 1709585530
             ),
-            \ReflectionNamedType::class => new self(PathResponse::fromClassName($returnType->getName())),
+            \ReflectionNamedType::class => new self(OpenApiResponse::fromClassName($returnType->getName())),
             \ReflectionUnionType::class => new self(...array_map(
-                function (\ReflectionNamedType|\ReflectionIntersectionType $type): PathResponse {
+                function (\ReflectionNamedType|\ReflectionIntersectionType $type): OpenApiResponse {
                     if ($type instanceof \ReflectionIntersectionType) {
                         throw new \DomainException('Cannot resolve path responses from intersection types', 1709593361);
                     }
                     $className = $type->getName();
-                    return PathResponse::fromClassName($className);
+                    return OpenApiResponse::fromClassName($className);
                 },
                 $returnType->getTypes()
             )),
@@ -55,16 +58,13 @@ final readonly class PathResponseCollection implements \JsonSerializable
     }
 
     /**
-     * @return array<int,array<string,mixed>>
+     * @return array<int,OpenApiResponse>
      */
     public function jsonSerialize(): array
     {
         $result = [];
         foreach ($this->items as $item) {
-            $result[$item->statusCode] = [
-                'description' => $item->description,
-                'schema' => $item->schema
-            ];
+            $result[$item->statusCode] = $item;
         }
 
         return $result;

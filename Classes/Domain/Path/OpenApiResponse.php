@@ -5,19 +5,22 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Path;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Definition as DefinitionAttribute;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as DefinitionAttribute;
 use Sitegeist\SchemeOnYou\Domain\Metadata\PathResponse as PathResponseAttribute;
 
+/**
+ * @see https://swagger.io/specification/#response-object
+ */
 #[Flow\Proxy(false)]
-final readonly class PathResponse implements \JsonSerializable
+final readonly class OpenApiResponse implements \JsonSerializable
 {
     /**
-     * @param array<string,mixed> $schema
+     * @param array<string,mixed> $content
      */
     public function __construct(
         public int $statusCode,
         public string $description,
-        public array $schema,
+        public array $content,
     ) {
     }
 
@@ -34,7 +37,11 @@ final readonly class PathResponse implements \JsonSerializable
         return new self(
             statusCode: $pathResponseAttribute->statusCode,
             description: $pathResponseAttribute->description,
-            schema: $definitionAttribute->toReferenceType()
+            content: [
+                'application/json' => [
+                    'schema' => $definitionAttribute->toReferenceType()
+                ]
+            ]
         );
     }
 
@@ -43,6 +50,9 @@ final readonly class PathResponse implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return get_object_vars($this);
+        return [
+            'description' => $this->description,
+            'content' => $this->content
+        ];
     }
 }

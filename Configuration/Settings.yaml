@@ -1,4 +1,15 @@
 Sitegeist:
   SchemeOnYou:
     # The target path where to write the schema, relative to FLOW_PATH_ROOT
-    schemaTargetFilePath: 'schema.json'
+    schemaTargetFilePath: 'Web/swagger.json'
+    # The OpenApi root object, see https://swagger.io/specification/#openapi-object
+    rootObject:
+      openapi: '3.1.0'
+      info: {}
+      servers: {}
+      paths: {}
+      webhooks: {}
+      components: {}
+      security: {}
+      tags: {}
+      externalDocs: {}

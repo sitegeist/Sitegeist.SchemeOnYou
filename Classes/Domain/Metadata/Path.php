@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Metadata;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 
 #[Flow\Proxy(false)]
 #[\Attribute]
 final readonly class Path
 {
     public function __construct(
-        public string $uriPath,
+        public PathDefinition $pathDefinition,
         public HttpMethod $httpMethod,
     ) {
     }
@@ -32,7 +33,7 @@ final readonly class Path
         $arguments = $pathReflections[0]->getArguments();
 
         return new self(
-            $arguments['uriPath'] ?? $arguments[0],
+            $arguments['pathDefinition'] ?? $arguments[0],
             $arguments['httpMethod'] ?? $arguments[1],
         );
     }

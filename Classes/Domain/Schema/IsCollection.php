@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SchemeOnYou\Domain\Definition;
+namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
 

@@ -2,19 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SchemeOnYou\Domain\Definition;
+namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Definition as DefinitionMetadata;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaMetadata;
 
 #[Flow\Proxy(false)]
-final readonly class Definition implements \JsonSerializable
+final readonly class OpenApiSchema implements \JsonSerializable
 {
     /**
      * @param array<int,int|string>|null $enum
-     * @param array<string,SchemaType> $properties
+     * @codingStandardsIgnoreStart
+     * @param array<string,SchemaType|OpenApiReference|array<string,array<string,SchemaType|OpenApiReference>>> $properties
+     * @codingStandardsIgnoreEnd
      * @param array<int,string> $required
-     * @param array<string,string> $items
      */
     public function __construct(
         public string $name,
@@ -23,7 +24,7 @@ final readonly class Definition implements \JsonSerializable
         public ?array $enum = null,
         public ?array $properties = null,
         public ?array $required = null,
-        public ?array $items = null,
+        public ?OpenApiReference $items = null,
     ) {
     }
 
@@ -42,7 +43,7 @@ final readonly class Definition implements \JsonSerializable
 
     private static function fromReflectionEnum(\ReflectionEnum $reflection): self
     {
-        $definitionMetadata = DefinitionMetadata::fromReflectionClass($reflection);
+        $definitionMetadata = SchemaMetadata::fromReflectionClass($reflection);
         return match ($reflection->getBackingType()?->getName()) {
             'string' => new self(
                 $definitionMetadata->name ?: $reflection->getShortName(),
@@ -103,10 +104,10 @@ final readonly class Definition implements \JsonSerializable
                 return self::fromObjectReflectionClass($reflection);
             }
         }
-        $definitionMetadata = DefinitionMetadata::fromReflectionClass($reflection);
+        $schemaMetadata = SchemaMetadata::fromReflectionClass($reflection);
 
         return new self(
-            name: $definitionMetadata->name ?: $reflection->getShortName(),
+            name: $schemaMetadata->name ?: $reflection->getShortName(),
             type: match ($returnType) {
                 'string' => 'string',
                 'int' => 'int',
@@ -116,7 +117,7 @@ final readonly class Definition implements \JsonSerializable
                     1709567351
                 )
             },
-            description: $definitionMetadata->description,
+            description: $schemaMetadata->description,
         );
     }
 
@@ -125,12 +126,12 @@ final readonly class Definition implements \JsonSerializable
      */
     private static function fromCollectionReflectionClass(\ReflectionClass $reflection): self
     {
-        $definitionMetadata = DefinitionMetadata::fromReflectionClass($reflection);
+        $definitionMetadata = SchemaMetadata::fromReflectionClass($reflection);
         /** @var \ReflectionNamedType $parameterType */
         $parameterType = ($reflection->getConstructor()?->getParameters() ?: [])[0]->getType();
         /** @var class-string $parameterClassName */
         $parameterClassName = $parameterType->getName();
-        $parameterMetadata = DefinitionMetadata::fromReflectionClass(new \ReflectionClass($parameterClassName));
+        $parameterMetadata = SchemaMetadata::fromReflectionClass(new \ReflectionClass($parameterClassName));
 
         return new self(
             name: $definitionMetadata->name ?: $reflection->getShortName(),
@@ -141,28 +142,75 @@ final readonly class Definition implements \JsonSerializable
     }
 
     /**
-     * @param \ReflectionClass<object> $reflection
+     * @param \ReflectionClass<object> $reflectionClass
      */
-    private static function fromObjectReflectionClass(\ReflectionClass $reflection): self
+    private static function fromObjectReflectionClass(\ReflectionClass $reflectionClass): self
     {
-        $definitionMetadata = DefinitionMetadata::fromReflectionClass($reflection);
+        $definitionMetadata = SchemaMetadata::fromReflectionClass($reflectionClass);
 
         $properties = [];
         $required = [];
-        foreach ($reflection->getConstructor()?->getParameters() ?: [] as $reflectionParameter) {
-            $properties[$reflectionParameter->name] = SchemaType::fromReflectionParameter($reflectionParameter);
+        foreach ($reflectionClass->getConstructor()?->getParameters() ?: [] as $reflectionParameter) {
+            $type = $reflectionParameter->getType();
+            if ($type === null) {
+                throw new \DomainException(
+                    'Cannot resolve schema reference for untyped constructor parameter '
+                    . $reflectionParameter->name . ' of class ' . $reflectionClass->name,
+                    1709718001
+                );
+            }
+            $properties[$reflectionParameter->name] = match (get_class($type)) {
+                \ReflectionNamedType::class => SchemaType::selfOrReferenceFromReflectionNamedType($type),
+                \ReflectionUnionType::class => [
+                    'oneOf' => array_map(
+                        fn (\ReflectionType $singleType): SchemaType|OpenApiReference
+                            => match (get_class($singleType)) {
+                                \ReflectionIntersectionType::class,
+                                    => throw new \DomainException(
+                                        'Cannot resolve schema reference from intersection type'
+                                        . ' given for constructor parameter'
+                                        . $reflectionParameter->name . ' of class ' . $reflectionClass->name,
+                                        1709560366
+                                    ),
+                                \ReflectionNamedType::class => SchemaType::selfOrReferenceFromReflectionNamedType(
+                                    $singleType
+                                ),
+                                default => throw new \DomainException('wat')
+                            },
+                        $type->getTypes()
+                    )
+                ],
+                \ReflectionIntersectionType::class => throw new \DomainException(
+                    'Cannot resolve schema reference from intersection type given for constructor parameter'
+                    . $reflectionParameter->name . ' of class ' . $reflectionClass->name,
+                    1709560366
+                ),
+                default => throw new \DomainException(
+                    'Cannot resolve schema reference for untyped constructor parameter '
+                    . $reflectionParameter->name . ' of class ' . $reflectionClass->name,
+                    1709718001
+                )
+            };
+            $properties[$reflectionParameter->name] = SchemaType::selfOrReferenceFromReflectionParameter(
+                $reflectionParameter
+            );
             if (!$reflectionParameter->isDefaultValueAvailable()) {
                 $required[] = $reflectionParameter->name;
             }
         }
 
         return new self(
-            name: $definitionMetadata->name ?: $reflection->getShortName(),
+            name: $definitionMetadata->name ?: $reflectionClass->getShortName(),
             type: 'object',
             description: $definitionMetadata->description,
             properties: $properties,
             required: $required
         );
+    }
+
+    public function toReference(): OpenApiReference
+    {
+        return new OpenApiReference('#/components/schemas/' . $this->name);
     }
 
     /**

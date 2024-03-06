@@ -6,23 +6,29 @@ namespace Sitegeist\SchemeOnYou\Domain;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Reflection\ReflectionService;
-use Sitegeist\SchemeOnYou\Domain\Definition\DefinitionCollection;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Definition as DefinitionMetadata;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaAttribute;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Endpoint as EndpointAttribute;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Path as PathAttribute;
-use Sitegeist\SchemeOnYou\Domain\Path\PathCollection;
+use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathCollection;
+use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
 
 #[Flow\Scope('singleton')]
-final class SchemaRepository
+final class OpenApiDocumentRepository
 {
+    /**
+     * @var array<string,mixed>
+     */
+    #[Flow\InjectConfiguration(path: 'rootObject')]
+    protected array $rootObjectConfiguration;
+
     public function __construct(
         private readonly ReflectionService $reflectionService
     ) {
     }
 
-    public function findSchema(): Schema
+    public function findDocument(): OpenApiDocument
     {
-        $definitionAnnotatedClasses = $this->reflectionService->getClassNamesByAnnotation(DefinitionMetadata::class);
+        $schemaAnnotatedClassesNames = $this->reflectionService->getClassNamesByAnnotation(SchemaAttribute::class);
         $pathAnnotatedClasses = $this->reflectionService->getClassNamesByAnnotation(EndpointAttribute::class);
         $pathMethodsByClassName = [];
         foreach ($pathAnnotatedClasses as $className) {
@@ -33,9 +39,12 @@ final class SchemaRepository
             }
         }
 
-        return new Schema(
-            PathCollection::fromMethodNames($pathMethodsByClassName),
-            DefinitionCollection::fromClassNames($definitionAnnotatedClasses)
+        return OpenApiDocument::createFromConfiguration(
+            $this->rootObjectConfiguration,
+            OpenApiPathCollection::fromMethodNames($pathMethodsByClassName),
+            new OpenApiComponents(
+                OpenApiSchemaCollection::fromClassNames($schemaAnnotatedClassesNames)
+            )
         );
     }
 }

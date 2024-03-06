@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Metadata;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiReference;
 
 #[Flow\Proxy(false)]
 #[\Attribute]
-final readonly class Definition
+final readonly class Schema
 {
     public function __construct(
         public string $description,
@@ -21,7 +22,7 @@ final readonly class Definition
      */
     public static function fromReflectionClass(\ReflectionClass $reflection): self
     {
-        $definitionReflections = $reflection->getAttributes(Definition::class);
+        $definitionReflections = $reflection->getAttributes(Schema::class);
         if (count($definitionReflections) !== 1) {
             throw new \DomainException(
                 'There must be exactly one definition attribute declared in class ' . $reflection->name
@@ -37,13 +38,8 @@ final readonly class Definition
         );
     }
 
-    /**
-     * @return array<string,string>
-     */
-    public function toReferenceType(): array
+    public function toReferenceType(): OpenApiReference
     {
-        return [
-            '$ref' => '#/definitions/' . $this->name
-        ];
+        return new OpenApiReference('#/components/schemas/' . $this->name);
     }
 }
