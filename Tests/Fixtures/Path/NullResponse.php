@@ -10,7 +10,7 @@ use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 #[OpenApi\Schema('the null response')]
 #[OpenApi\PathResponse(statusCode: 200, description: 'the query resulted in null')]
 #[Flow\Proxy(false)]
-final readonly class NullResponse
+final readonly class NullResponse implements \JsonSerializable
 {
     public function __construct(
         public null $value = null,

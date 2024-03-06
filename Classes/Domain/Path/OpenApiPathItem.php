@@ -35,7 +35,7 @@ final readonly class OpenApiPathItem implements \JsonSerializable
 
     public static function fromReflectionMethod(\ReflectionMethod $reflectionMethod): self
     {
-        $pathMetadata = PathMetadata::fromReflection($reflectionMethod);
+        $pathMetadata = PathMetadata::fromReflectionMethod($reflectionMethod);
 
         return new self(
             $pathMetadata->pathDefinition,

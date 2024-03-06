@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Path;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as DefinitionAttribute;
 use Sitegeist\SchemeOnYou\Domain\Metadata\PathResponse as PathResponseAttribute;
+use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchema;
 
 /**
  * @see https://swagger.io/specification/#response-object
@@ -30,8 +30,7 @@ final readonly class OpenApiResponse implements \JsonSerializable
             throw new \DomainException('Cannot resolve path responses from non-class strings', 1709593290);
         }
         $reflectionClass = new \ReflectionClass($className);
-
-        $definitionAttribute = DefinitionAttribute::fromReflectionClass($reflectionClass);
+        $schema = OpenApiSchema::fromReflectionClass($reflectionClass);
         $pathResponseAttribute = PathResponseAttribute::fromReflectionClass($reflectionClass);
 
         return new self(
@@ -39,7 +38,7 @@ final readonly class OpenApiResponse implements \JsonSerializable
             description: $pathResponseAttribute->description,
             content: [
                 'application/json' => [
-                    'schema' => $definitionAttribute->toReferenceType()
+                    'schema' => $schema->toReference()
                 ]
             ]
         );

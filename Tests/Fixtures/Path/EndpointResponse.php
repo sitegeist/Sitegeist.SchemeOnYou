@@ -10,7 +10,7 @@ use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 #[OpenApi\Schema('the endpoint response')]
 #[OpenApi\PathResponse(statusCode: 200, description: 'the query was successful')]
 #[Flow\Proxy(false)]
-final readonly class EndpointResponse
+final readonly class EndpointResponse implements \JsonSerializable
 {
     public function __construct(
         public string $thing,

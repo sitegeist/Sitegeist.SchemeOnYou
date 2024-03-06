@@ -131,13 +131,13 @@ final readonly class OpenApiSchema implements \JsonSerializable
         $parameterType = ($reflection->getConstructor()?->getParameters() ?: [])[0]->getType();
         /** @var class-string $parameterClassName */
         $parameterClassName = $parameterType->getName();
-        $parameterMetadata = SchemaMetadata::fromReflectionClass(new \ReflectionClass($parameterClassName));
+        $parameterSchema = self::fromReflectionClass(new \ReflectionClass($parameterClassName));
 
         return new self(
             name: $definitionMetadata->name ?: $reflection->getShortName(),
             type: 'array',
             description: $definitionMetadata->description,
-            items: $parameterMetadata->toReferenceType()
+            items: $parameterSchema->toReference()
         );
     }
 

@@ -18,15 +18,15 @@ final readonly class Path
     }
 
     /**
-     * @param \ReflectionMethod $reflection
+     * @param \ReflectionMethod $reflectionMethod
      */
-    public static function fromReflection(\ReflectionMethod $reflection): self
+    public static function fromReflectionMethod(\ReflectionMethod $reflectionMethod): self
     {
-        $pathReflections = $reflection->getAttributes(Path::class);
+        $pathReflections = $reflectionMethod->getAttributes(Path::class);
         if (count($pathReflections) !== 1) {
             throw new \DomainException(
                 'There must be exactly one path attribute declared in method '
-                . $reflection->class . '::' . $reflection->name . ', ' . count($pathReflections) . ' given',
+                . $reflectionMethod->class . '::' . $reflectionMethod->name . ', ' . count($pathReflections) . ' given',
                 1709584594
             );
         }

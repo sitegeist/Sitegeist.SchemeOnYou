@@ -71,7 +71,7 @@ final class OpenApiPathItemTest extends TestCase
                         ParameterLocation::LOCATION_QUERY,
                         'the endpoint query',
                         true,
-                        OpenApiReference::fromSchemaName('EndpointQuery')
+                        new OpenApiReference('#/components/schemas/EndpointQuery')
                     )
                 ),
                 new OpenApiResponses(
@@ -100,7 +100,7 @@ final class OpenApiPathItemTest extends TestCase
                         in: ParameterLocation::LOCATION_PATH,
                         description: 'the endpoint query',
                         required: true,
-                        schema:  OpenApiReference::fromSchemaName('EndpointQuery')
+                        schema: new OpenApiReference('#/components/schemas/EndpointQuery')
                     ),
                     new OpenApiParameter(
                         name: 'anotherEndpointQuery',
@@ -109,7 +109,7 @@ final class OpenApiPathItemTest extends TestCase
                         required: true,
                         content: [
                             'application/json' => [
-                                'schema' => OpenApiReference::fromSchemaName('AnotherEndpointQuery')
+                                'schema' => new OpenApiReference('#/components/schemas/AnotherEndpointQuery')
                             ]
                         ],
                         style: 'deepObject'

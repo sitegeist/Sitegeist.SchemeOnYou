@@ -7,7 +7,6 @@ namespace Sitegeist\SchemeOnYou\Domain\Schema;
 use Neos\Flow\Annotations as Flow;
 use Psr\Http\Message\UriInterface;
 use Ramsey\Uuid\UuidInterface;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as DefinitionMetadata;
 
 #[Flow\Proxy(false)]
 final readonly class SchemaType implements \JsonSerializable
@@ -43,6 +42,9 @@ final readonly class SchemaType implements \JsonSerializable
         \ReflectionNamedType $reflectionType
     ): self|OpenApiReference {
         $type = match ($reflectionType->getName()) {
+            'null' => [
+                'type' => 'null'
+            ],
             'bool', 'boolean' => [
                 'type' => 'boolean'
             ],
@@ -93,14 +95,6 @@ final readonly class SchemaType implements \JsonSerializable
                 ]
             ])
             : ($type instanceof OpenApiReference ? $type : new self($type));
-    }
-
-    /**
-     * @param \ReflectionClass<object> $reflectionClass
-     */
-    public static function fromReflectionClass(\ReflectionClass $reflectionClass): self
-    {
-        return new self(DefinitionMetadata::fromReflectionClass($reflectionClass)->toReferenceType());
     }
 
     public static function fromReflectionUnionType(\ReflectionUnionType $reflectionUnionType): self

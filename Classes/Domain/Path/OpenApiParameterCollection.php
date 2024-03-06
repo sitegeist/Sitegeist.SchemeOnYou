@@ -5,21 +5,19 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Path;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiReference;
 use Traversable;
 
 /**
- * @implements \IteratorAggregate<OpenApiParameter|OpenApiReference>
+ * @implements \IteratorAggregate<OpenApiParameter>
  */
 #[Flow\Proxy(false)]
 final readonly class OpenApiParameterCollection implements \JsonSerializable, \IteratorAggregate
 {
-    /** @var array<OpenApiParameter|OpenApiReference> */
+    /** @var array<OpenApiParameter> */
     private array $items;
 
-    public function __construct(
-        OpenApiParameter|OpenApiReference ...$items
-    ) {
+    public function __construct(OpenApiParameter ...$items)
+    {
         $this->items = $items;
     }
 
@@ -33,7 +31,7 @@ final readonly class OpenApiParameterCollection implements \JsonSerializable, \I
     }
 
     /**
-     * @return array<OpenApiParameter|OpenApiReference>
+     * @return array<OpenApiParameter>
      */
     public function jsonSerialize(): array
     {

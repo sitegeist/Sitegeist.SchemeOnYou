@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Metadata;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiReference;
 
 #[Flow\Proxy(false)]
 #[\Attribute]
@@ -36,10 +35,5 @@ final readonly class Schema
             $arguments['description'] ?? $arguments[0],
             $arguments['name'] ?? $arguments[1] ?? $reflection->getShortName(),
         );
-    }
-
-    public function toReferenceType(): OpenApiReference
-    {
-        return new OpenApiReference('#/components/schemas/' . $this->name);
     }
 }
