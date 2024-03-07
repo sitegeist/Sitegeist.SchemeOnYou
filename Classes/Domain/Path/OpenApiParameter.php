@@ -46,7 +46,7 @@ final readonly class OpenApiParameter implements \JsonSerializable
         if (!class_exists($type)) {
             throw new \DomainException(
                 'Path parameters can only be resolved from class parameters, ' . $type . ' given for parameter '
-                . $reflectionParameter->getDeclaringClass()->name
+                . $reflectionParameter->getDeclaringClass()?->name
                 . '::' . $reflectionParameter->getDeclaringFunction()->name
                 . '::' . $reflectionParameter->name,
                 1709592649
@@ -56,7 +56,7 @@ final readonly class OpenApiParameter implements \JsonSerializable
         if (!$reflectionClass->implementsInterface(RequestParameterContract::class)) {
             throw new \DomainException(
                 'Classes used as path parameters must implement the ' . RequestParameterContract::class . ' interface, '
-                . $type . ' given for parameter ' . $reflectionParameter->getDeclaringClass()->name
+                . $type . ' given for parameter ' . $reflectionParameter->getDeclaringClass()?->name
                 . '::' . $reflectionParameter->getDeclaringFunction()->name
                 . '::' . $reflectionParameter->name . ' does not',
                 1709720053
