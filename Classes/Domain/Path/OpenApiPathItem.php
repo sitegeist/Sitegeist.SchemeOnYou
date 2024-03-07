@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Path;
 
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\ObjectManagement\Proxy\ProxyInterface;
 use Sitegeist\SchemeOnYou\Domain\Metadata\HttpMethod;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Path as PathMetadata;
 
@@ -28,6 +29,13 @@ final readonly class OpenApiPathItem implements \JsonSerializable
     public static function fromMethodName(string $className, string $methodName): self
     {
         $reflectionClass = new \ReflectionClass($className);
+        if ($reflectionClass->implementsInterface(ProxyInterface::class)) {
+            $parentClass = $reflectionClass->getParentClass();
+            if (!$parentClass) {
+                throw new \DomainException('Given class is a proxy class but has no original');
+            }
+            $reflectionClass = $parentClass;
+        }
         $reflectionMethod = $reflectionClass->getMethod($methodName);
 
         return self::fromReflectionMethod($reflectionMethod);
