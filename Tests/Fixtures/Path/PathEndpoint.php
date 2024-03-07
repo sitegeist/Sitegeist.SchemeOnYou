@@ -9,7 +9,6 @@ use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 
-#[OpenApi\Endpoint]
 #[Flow\Proxy(false)]
 final readonly class PathEndpoint
 {

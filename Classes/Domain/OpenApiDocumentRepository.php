@@ -6,8 +6,8 @@ namespace Sitegeist\SchemeOnYou\Domain;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Reflection\ReflectionService;
+use Sitegeist\SchemeOnYou\Application\OpenApiController;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaAttribute;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Endpoint as EndpointAttribute;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Path as PathAttribute;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathCollection;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
@@ -29,9 +29,9 @@ final class OpenApiDocumentRepository
     public function findDocument(): OpenApiDocument
     {
         $schemaAnnotatedClassesNames = $this->reflectionService->getClassNamesByAnnotation(SchemaAttribute::class);
-        $pathAnnotatedClasses = $this->reflectionService->getClassNamesByAnnotation(EndpointAttribute::class);
+        $openApiControllers = $this->reflectionService->getAllSubClassNamesForClass(OpenApiController::class);
         $pathMethodsByClassName = [];
-        foreach ($pathAnnotatedClasses as $className) {
+        foreach ($openApiControllers as $className) {
             /** @var class-string $className */
             $pathMethods = $this->reflectionService->getMethodsAnnotatedWith($className, PathAttribute::class);
             if (!empty($pathMethods)) {
