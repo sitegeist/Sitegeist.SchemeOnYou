@@ -36,11 +36,7 @@ abstract class OpenApiController implements ControllerInterface
             $uriBuilder
         );
 
-        if (method_exists($this, 'initializeAction')) {
-            $this->initializeAction();
-        }
-
-        $actionName = $request->getControllerActionName() . 'Action';
+        $actionName = $request->getControllerActionName() . 'Endpoint';
         if (!method_exists($this, $actionName)) {
             throw new \DomainException(
                 'Missing action "' . $request->getControllerActionName() . '" in ' . static::class,
@@ -50,7 +46,7 @@ abstract class OpenApiController implements ControllerInterface
 
         $parameters = ParameterFactory::resolveParameters(get_class($this), $actionName, $this->request);
 
-        $result = $this->{$request->getControllerActionName() . 'Action'}(...$parameters);
+        $result = $this->$actionName(...$parameters);
 
         $this->response->setContent(\json_encode($result, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
     }
