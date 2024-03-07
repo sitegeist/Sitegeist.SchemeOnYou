@@ -57,6 +57,9 @@ final readonly class SchemaType implements \JsonSerializable
             'float' => [
                 'type' => 'number'
             ],
+            'array' => [
+                'type' => 'array'
+            ],
             'DateTimeImmutable' => [
                 'type' => 'string',
                 'format' => 'date-time'
