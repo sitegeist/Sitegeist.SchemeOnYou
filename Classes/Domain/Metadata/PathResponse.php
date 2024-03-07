@@ -7,7 +7,7 @@ namespace Sitegeist\SchemeOnYou\Domain\Metadata;
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
-#[\Attribute]
+#[\Attribute(\Attribute::TARGET_CLASS)]
 final readonly class PathResponse
 {
     public function __construct(

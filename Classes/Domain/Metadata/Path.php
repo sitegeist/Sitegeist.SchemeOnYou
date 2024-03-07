@@ -8,7 +8,7 @@ use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 
 #[Flow\Proxy(false)]
-#[\Attribute]
+#[\Attribute(\Attribute::TARGET_METHOD)]
 final readonly class Path
 {
     public function __construct(

@@ -11,7 +11,7 @@ use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
  * @see https://swagger.io/specification/#parameter-object
  */
 #[Flow\Proxy(false)]
-#[\Attribute]
+#[\Attribute(\Attribute::TARGET_PARAMETER)]
 final readonly class Parameter
 {
     public function __construct(
