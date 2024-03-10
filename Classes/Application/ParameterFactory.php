@@ -6,7 +6,10 @@ namespace Sitegeist\SchemeOnYou\Application;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\ActionRequest;
+use Neos\Flow\ObjectManagement\Proxy\ProxyInterface;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Parameter as ParameterAttribute;
+use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
+use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBodyContentType;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 use Sitegeist\SchemeOnYou\Domain\Path\RequestParameterContract;
 
@@ -19,8 +22,16 @@ final readonly class ParameterFactory
      */
     public static function resolveParameters(string $className, string $methodName, ActionRequest $request): array
     {
+        $reflectionClass = new \ReflectionClass($className);
+        if ($reflectionClass->implementsInterface(ProxyInterface::class)) {
+            $parentClass = $reflectionClass->getParentClass();
+            if (!$parentClass) {
+                throw new \DomainException('Given class is a proxy class but has no original');
+            }
+            $reflectionClass = $parentClass;
+        }
+        $reflectionMethod = $reflectionClass->getMethod($methodName);
         $parameters = [];
-        $reflectionMethod = new \ReflectionMethod($className, $methodName);
         foreach ($reflectionMethod->getParameters() as $parameter) {
             $type = $parameter->getType();
             if (!$type instanceof \ReflectionNamedType) {
@@ -39,12 +50,21 @@ final readonly class ParameterFactory
             }
             /** @var class-string<RequestParameterContract> $parameterClassName */
             $parameters[$parameter->name] = $parameterClassName::fromRequestParameter(
-                match (ParameterAttribute::fromReflectionParameter($parameter)->in) {
+                match (ParameterAttribute::tryFromReflectionParameter($parameter)?->in) {
                     ParameterLocation::LOCATION_PATH => $request->getArgument($parameter->name),
                     ParameterLocation::LOCATION_QUERY => $request->getHttpRequest()->getQueryParams()[$parameter->name],
                     ParameterLocation::LOCATION_HEADER => $request->getHttpRequest()->getHeader($parameter->name),
                     ParameterLocation::LOCATION_COOKIE
                         => $request->getHttpRequest()->getCookieParams()[$parameter->name],
+                    null => match (RequestBody::fromReflectionParameter($parameter)->contentType) {
+                        RequestBodyContentType::CONTENT_TYPE_JSON => \json_decode(
+                            (string)$request->getHttpRequest()->getBody(),
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                        RequestBodyContentType::CONTENT_TYPE_FORM => $request->getArgument($parameter->name)
+                    }
                 }
             );
         }

@@ -12,12 +12,14 @@ use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 final readonly class Path
 {
     public PathDefinition $pathDefinition;
+    public HttpMethod $httpMethod;
 
     public function __construct(
         string|PathDefinition $pathDefinition,
-        public HttpMethod $httpMethod,
+        string|HttpMethod $httpMethod,
     ) {
         $this->pathDefinition = is_string($pathDefinition) ? new PathDefinition($pathDefinition) : $pathDefinition;
+        $this->httpMethod = is_string($httpMethod) ? HttpMethod::from($httpMethod) : $httpMethod;
     }
 
     /**
