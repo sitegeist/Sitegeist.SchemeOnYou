@@ -24,7 +24,7 @@ final readonly class Schema
         $definitionReflections = $reflection->getAttributes(Schema::class);
         if (count($definitionReflections) !== 1) {
             throw new \DomainException(
-                'There must be exactly one definition attribute declared in class ' . $reflection->name
+                'There must be exactly one schema attribute declared in class ' . $reflection->name . ', '
                 . count($definitionReflections) . ' given',
                 1709537723
             );

@@ -30,6 +30,17 @@ final readonly class PathEndpoint
     }
 
     #[OpenApi\Path(
+        pathDefinition: new PathDefinition('/my/request-body-endpoint'),
+        httpMethod: OpenApi\HttpMethod::METHOD_POST
+    )]
+    public function requestBodyAndSingleResponseEndpointMethod(
+        #[OpenApi\RequestBody(OpenApi\RequestBodyContentType::CONTENT_TYPE_JSON)]
+        EndpointQuery $endpointQuery
+    ): EndpointResponse {
+        return new EndpointResponse('Hello world in language ' . $endpointQuery->language);
+    }
+
+    #[OpenApi\Path(
         pathDefinition: new PathDefinition('/my/endpoint/{endpointQuery}'),
         httpMethod: OpenApi\HttpMethod::METHOD_GET
     )]

@@ -39,7 +39,7 @@ abstract class OpenApiController implements ControllerInterface
         $actionName = $request->getControllerActionName() . 'Endpoint';
         if (!method_exists($this, $actionName)) {
             throw new \DomainException(
-                'Missing action "' . $request->getControllerActionName() . '" in ' . static::class,
+                'Missing endpoint "' . $request->getControllerActionName() . '" in ' . static::class,
                 1709678635
             );
         }

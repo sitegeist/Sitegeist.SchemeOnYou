@@ -7,7 +7,9 @@ namespace Sitegeist\SchemeOnYou\Domain\Path;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\ObjectManagement\Proxy\ProxyInterface;
 use Sitegeist\SchemeOnYou\Domain\Metadata\HttpMethod;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Parameter;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Path as PathMetadata;
+use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
 
 /**
  * @see https://swagger.io/specification/#path-item-object
@@ -19,6 +21,7 @@ final readonly class OpenApiPathItem implements \JsonSerializable
         public PathDefinition $pathDefinition,
         public HttpMethod $httpMethod,
         public OpenApiParameterCollection $parameters,
+        public ?OpenApiRequestBody $requestBody,
         public OpenApiResponses $responses,
     ) {
     }
@@ -45,10 +48,53 @@ final readonly class OpenApiPathItem implements \JsonSerializable
     {
         $pathMetadata = PathMetadata::fromReflectionMethod($reflectionMethod);
 
+        $requestBody = null;
+        $parameters = [];
+        foreach ($reflectionMethod->getParameters() as $reflectionParameter) {
+            $parameterProcessed = false;
+            foreach ($reflectionParameter->getAttributes() as $attribute) {
+                if ($attribute->getName() === RequestBody::class) {
+                    if ($parameterProcessed) {
+                        throw new \DomainException(
+                            'Method parameter ' . $reflectionMethod->getDeclaringClass()->name
+                            . '::' . $reflectionMethod->getName() . '::' . $reflectionParameter->name
+                            . ' must be attributed as either OpenAPI Parameter or RequestBody and was already attributed'
+                        );
+                    }
+                    if ($requestBody !== null) {
+                        throw new \DomainException(
+                            'Only one parameter can be resolved via request body',
+                            1710069260
+                        );
+                    }
+                    $requestBody = OpenApiRequestBody::fromReflectionParameter($reflectionParameter);
+                    $parameterProcessed = true;
+                } elseif ($attribute->getName() === Parameter::class) {
+                    if ($parameterProcessed) {
+                        throw new \DomainException(
+                            'Method parameter ' . $reflectionMethod->getDeclaringClass()->name
+                            . '::' . $reflectionMethod->getName() . '::' . $reflectionParameter->name
+                            . ' must be attributed as either OpenAPI Parameter or RequestBody and was already attributed'
+                        );
+                    }
+                    $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
+                    $parameterProcessed = true;
+                }
+            }
+            if (!$parameterProcessed) {
+                throw new \DomainException(
+                    'Method parameter ' . $reflectionMethod->getDeclaringClass()->name
+                    . '::' . $reflectionMethod->getName() . '::' . $reflectionParameter->name
+                    . ' must be attributed as either OpenAPI Parameter or RequestBody but was not attributed at all'
+                );
+            }
+        }
+
         return new self(
             $pathMetadata->pathDefinition,
             $pathMetadata->httpMethod,
-            OpenApiParameterCollection::fromMethodArguments($reflectionMethod),
+            new OpenApiParameterCollection(...$parameters),
+            $requestBody,
             OpenApiResponses::fromReflectionMethod($reflectionMethod),
         );
     }
@@ -58,9 +104,10 @@ final readonly class OpenApiPathItem implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return [
-            'parameters' => $this->parameters,
+        return array_filter([
+            'parameters' => $this->parameters->isEmpty() ? null : $this->parameters,
+            'requestBody' => $this->requestBody,
             'responses' => $this->responses,
-        ];
+        ]);
     }
 }

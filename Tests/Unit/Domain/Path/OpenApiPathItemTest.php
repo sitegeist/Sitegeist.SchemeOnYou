@@ -7,6 +7,9 @@ namespace Sitegeist\SchemeOnYou\Tests\Unit\Domain\Path;
 use Neos\Flow\Annotations as Flow;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
+use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBodyContentType;
+use Sitegeist\SchemeOnYou\Domain\Path\OpenApiRequestBody;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiReference;
@@ -45,6 +48,7 @@ final class OpenApiPathItemTest extends TestCase
                 new PathDefinition('/my/null-endpoint'),
                 HttpMethod::METHOD_GET,
                 new OpenApiParameterCollection(),
+                null,
                 new OpenApiResponses(
                     new OpenApiResponse(
                         statusCode: 200,
@@ -73,6 +77,35 @@ final class OpenApiPathItemTest extends TestCase
                         true,
                         new OpenApiReference('#/components/schemas/EndpointQuery')
                     )
+                ),
+                null,
+                new OpenApiResponses(
+                    new OpenApiResponse(
+                        statusCode: 200,
+                        description: 'the query was successful',
+                        content: [
+                            'application/json' => [
+                                'schema' => new OpenApiReference('#/components/schemas/EndpointResponse')
+                            ]
+                        ]
+                    ),
+                )
+            )
+        ];
+
+        yield 'requestBodyAndSingleResponsePath' => [
+            'className' => PathEndpoint::class,
+            'methodName' => 'requestBodyAndSingleResponseEndpointMethod',
+            'expectedPath' => new OpenApiPathItem(
+                new PathDefinition('/my/request-body-endpoint'),
+                HttpMethod::METHOD_POST,
+                new OpenApiParameterCollection(),
+                new OpenApiRequestBody(
+                    contentType: RequestBodyContentType::CONTENT_TYPE_JSON,
+                    schema: new OpenApiReference(
+                        '#/components/schemas/EndpointQuery'
+                    ),
+                    required: true
                 ),
                 new OpenApiResponses(
                     new OpenApiResponse(
@@ -115,6 +148,7 @@ final class OpenApiPathItemTest extends TestCase
                         style: 'deepObject'
                     )
                 ),
+                null,
                 new OpenApiResponses(
                     new OpenApiResponse(
                         statusCode: 200,
