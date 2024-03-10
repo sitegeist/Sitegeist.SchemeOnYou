@@ -58,7 +58,8 @@ final readonly class OpenApiPathItem implements \JsonSerializable
                         throw new \DomainException(
                             'Method parameter ' . $reflectionMethod->getDeclaringClass()->name
                             . '::' . $reflectionMethod->getName() . '::' . $reflectionParameter->name
-                            . ' must be attributed as either OpenAPI Parameter or RequestBody and was already attributed'
+                            . ' must be attributed as either OpenAPI Parameter or RequestBody'
+                            . ' and was already attributed'
                         );
                     }
                     if ($requestBody !== null) {
@@ -74,7 +75,8 @@ final readonly class OpenApiPathItem implements \JsonSerializable
                         throw new \DomainException(
                             'Method parameter ' . $reflectionMethod->getDeclaringClass()->name
                             . '::' . $reflectionMethod->getName() . '::' . $reflectionParameter->name
-                            . ' must be attributed as either OpenAPI Parameter or RequestBody and was already attributed'
+                            . ' must be attributed as either OpenAPI Parameter or RequestBody'
+                            . ' and was already attributed'
                         );
                     }
                     $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
