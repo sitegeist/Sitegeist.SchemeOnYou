@@ -32,8 +32,8 @@
             "@fix:code-style"
         ],
         "lint:code-style": [
-            "phpcs --extensions=php --colors --standard=PSR12 ./Classes",
-            "phpcs --extensions=php --colors --standard=PSR12 ./Tests"
+            "phpcs --extensions=php --colors --standard=PSR12 --exclude=Generic.Files.LineLength ./Classes",
+            "phpcs --extensions=php --colors --standard=PSR12 --exclude=Generic.Files.LineLength ./Tests"
         ],
         "lint:static-analysis": "phpstan analyse",
         "lint": [

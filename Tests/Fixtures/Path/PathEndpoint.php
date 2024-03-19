@@ -30,6 +30,23 @@ final readonly class PathEndpoint
     }
 
     #[OpenApi\Path(
+        pathDefinition: new PathDefinition('/my/simple-parameter-endpoint'),
+        httpMethod: OpenApi\HttpMethod::METHOD_GET
+    )]
+    public function scalarParametersAndResponseEndpointMethod(
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        string $name,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        int $number,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        float $numberWithDecimals,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        bool $switch,
+    ): EndpointResponse {
+        return new EndpointResponse('Hello world ' . $name . ' (' . $number . ' ' . $numberWithDecimals . ' ' . ($switch ? 'on' : 'off') . ')');
+    }
+
+    #[OpenApi\Path(
         pathDefinition: new PathDefinition('/my/request-body-endpoint'),
         httpMethod: OpenApi\HttpMethod::METHOD_POST
     )]
