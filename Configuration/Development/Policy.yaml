@@ -1,0 +1,7 @@
+roles:
+  'Neos.Flow:Everybody':
+    privileges:
+      -
+        privilegeTarget: 'Sitegeist.SchemeOnYou:OpenApi'
+        permission: GRANT
+

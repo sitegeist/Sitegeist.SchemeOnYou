@@ -1,0 +1,15 @@
+privilegeTargets:
+  'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+    'Sitegeist.SchemeOnYou:OpenApi':
+      matcher: 'method(Sitegeist\SchemeOnYou\Controller\OpenApiController->(document)Action())'
+roles:
+  'Neos.Flow:Everybody':
+    privileges:
+      -
+        privilegeTarget: 'Sitegeist.SchemeOnYou:OpenApi'
+        permission: ABSTAIN
+  'Neos.Neos:Administrator':
+    privileges:
+      -
+        privilegeTarget: 'Sitegeist.SchemeOnYou:OpenApi'
+        permission: GRANT

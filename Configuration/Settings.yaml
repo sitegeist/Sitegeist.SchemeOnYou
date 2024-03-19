@@ -1,7 +1,12 @@
+Neos:
+  Flow:
+    mvc:
+      routes:
+        Sitegeist.SchemeOnYou:
+          position: "before Neos.Neos"
+
 Sitegeist:
   SchemeOnYou:
-    # The target path where to write the schema, relative to FLOW_PATH_ROOT
-    schemaTargetFilePath: 'Web/swagger.json'
     # The OpenApi root object, see https://swagger.io/specification/#openapi-object
     rootObject:
       openapi: '3.1.0'
@@ -13,3 +18,9 @@ Sitegeist:
       security: {}
       tags: {}
       externalDocs: {}
+
+    # the seperate dictionaries that may be rendered
+    # example: {name: string, classes: [string]}
+    documents: []
+
+

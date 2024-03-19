@@ -1,0 +1,10 @@
+##
+# Scheme On You
+-
+  name:  'Scheme On You - API Spec'
+  uriPattern: 'openapi/spec/{name}'
+  defaults:
+    '@package': 'Sitegeist.SchemeOnYou'
+    '@controller': 'OpenApi'
+    '@action': 'document'
+  httpMethods: ['GET']
