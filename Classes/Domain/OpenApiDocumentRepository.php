@@ -52,7 +52,7 @@ final class OpenApiDocumentRepository
             // only include classes that match the $classNamePatterns
             $includeClassName = false;
             foreach ($documentClassNamePatterns as $documentClassNamePattern) {
-                if (fnmatch($documentClassNamePattern, $className, FNM_NOESCAPE)){
+                if (fnmatch($documentClassNamePattern, $className, FNM_NOESCAPE)) {
                     $includeClassName = true;
                     break;
                 }
