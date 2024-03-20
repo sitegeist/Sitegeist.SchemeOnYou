@@ -32,6 +32,11 @@ final readonly class OpenApiPathCollection implements \JsonSerializable
         return new self(...$paths);
     }
 
+    public function merge(OpenApiPathCollection $other): OpenApiPathCollection
+    {
+        return new OpenApiPathCollection(...$this->items, ...$other->items);
+    }
+
     /**
      * @return array<string,array<string,OpenApiPathItem>>
      */

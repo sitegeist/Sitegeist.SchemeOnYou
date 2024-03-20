@@ -42,7 +42,18 @@ final readonly class OpenApiParameter implements \JsonSerializable
                 1709591991
             );
         }
+        $parameterAttribute = ParameterAttribute::fromReflectionParameter($reflectionParameter);
         $type = $reflectionType->getName();
+        if (in_array($type, ['int', 'bool', 'string', 'float', \DateTimeImmutable::class, \DateTime::class])) {
+            $parameterSchema = OpenApiSchema::fromReflectionParameter($reflectionParameter);
+            return new self(
+                name: $reflectionParameter->name,
+                in: $parameterAttribute->in,
+                description: $parameterAttribute->description ?: '',
+                required: !$reflectionParameter->allowsNull(),
+                schema: $parameterSchema->toReference(),
+            );
+        }
         if (!class_exists($type)) {
             throw new \DomainException(
                 'Path parameters can only be resolved from class parameters, ' . $type . ' given for parameter '
@@ -63,7 +74,6 @@ final readonly class OpenApiParameter implements \JsonSerializable
             );
         }
         $schemaAttribute = SchemaAttribute::fromReflectionClass($reflectionClass);
-        $parameterAttribute = ParameterAttribute::fromReflectionParameter($reflectionParameter);
         $parameterSchema = OpenApiSchema::fromReflectionClass($reflectionClass);
 
         return new self(

@@ -10,7 +10,9 @@ use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaMetadata;
 #[Flow\Proxy(false)]
 final readonly class OpenApiSchema implements \JsonSerializable
 {
+
     /**
+     * @param string|null $format
      * @param array<int,int|string>|null $enum
      * @codingStandardsIgnoreStart
      * @param array<string,SchemaType|OpenApiReference|array<string,array<string,SchemaType|OpenApiReference>>> $properties
@@ -20,10 +22,11 @@ final readonly class OpenApiSchema implements \JsonSerializable
     public function __construct(
         public string $name,
         public string $type,
-        public string $description,
+        public ?string $description = null,
         public ?array $enum = null,
         public ?array $properties = null,
         public ?array $required = null,
+        public ?string $format = null,
         public ?OpenApiReference $items = null,
     ) {
     }
@@ -50,8 +53,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 'string',
                 $definitionMetadata->description,
                 array_map(
-                    /** @phpstan-ignore-next-line parameter and return types are enforced before */
-                    fn (\ReflectionEnumBackedCase $case): string => $case->getBackingValue(),
+                /** @phpstan-ignore-next-line parameter and return types are enforced before */
+                    fn(\ReflectionEnumBackedCase $case): string => $case->getBackingValue(),
                     $reflection->getCases()
                 )
             ),
@@ -60,8 +63,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 'int',
                 $definitionMetadata->description,
                 array_map(
-                    /** @phpstan-ignore-next-line parameter and return types are enforced before */
-                    fn (\ReflectionEnumBackedCase $case): int => $case->getBackingValue(),
+                /** @phpstan-ignore-next-line parameter and return types are enforced before */
+                    fn(\ReflectionEnumBackedCase $case): int => $case->getBackingValue(),
                     $reflection->getCases()
                 )
             ),
@@ -70,6 +73,35 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 1709499876
             ),
         };
+    }
+
+    public static function fromReflectionParameter(\ReflectionParameter $reflection): self
+    {
+        $reflectionType = $reflection->getType();
+        if ($reflectionType instanceof \ReflectionNamedType) {
+            $typeName = $reflectionType->getName();
+            if (in_array($typeName, ['int', 'bool', 'string', 'float'])) {
+                return new self(
+                    name: $reflection->getName(),
+                    type: $typeName,
+                );
+            } elseif (in_array($typeName, [\DateTime::class, \DateTimeImmutable::class])) {
+                return new self(
+                    name: $reflection->getName(),
+                    type: 'string',
+                    format: 'date-time',
+                );
+            } elseif (class_exists($typeName)) {
+                return self::fromClassName($typeName);
+            } else {
+                throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
+            }
+        } elseif ($reflectionType instanceof \ReflectionUnionType) {
+            throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
+
+        } else {
+            throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
+        }
     }
 
     /**

@@ -27,6 +27,7 @@ abstract class OpenApiController implements ControllerInterface
         $this->request->setDispatched(true);
         $this->response = $response;
         $this->response->setContentType('application/json');
+        $this->response->addHttpHeader('Access-Control-Allow-Origin', '*');
         $uriBuilder = new UriBuilder();
         $uriBuilder->setRequest($this->request);
         $this->controllerContext = new ControllerContext(
