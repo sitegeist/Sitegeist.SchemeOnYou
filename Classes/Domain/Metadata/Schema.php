@@ -22,18 +22,22 @@ final readonly class Schema
     public static function fromReflectionClass(\ReflectionClass $reflection): self
     {
         $definitionReflections = $reflection->getAttributes(Schema::class);
-        if (count($definitionReflections) !== 1) {
-            throw new \DomainException(
-                'There must be exactly one schema attribute declared in class ' . $reflection->name . ', '
-                . count($definitionReflections) . ' given',
-                1709537723
+        if (count($definitionReflections) === 0) {
+            return new self(
+                '',
+                $reflection->getShortName(),
+            );
+        } elseif (count($definitionReflections) === 1) {
+            $arguments = $definitionReflections[0]->getArguments();
+            return new self(
+                $arguments['description'] ?? $arguments[0],
+                $arguments['name'] ?? $arguments[1] ?? $reflection->getShortName(),
             );
         }
-        $arguments = $definitionReflections[0]->getArguments();
-
-        return new self(
-            $arguments['description'] ?? $arguments[0],
-            $arguments['name'] ?? $arguments[1] ?? $reflection->getShortName(),
+        throw new \DomainException(
+            'There must be exactly one schema attribute declared in class ' . $reflection->name . ', '
+            . count($definitionReflections) . ' given',
+            1709537723
         );
     }
 }

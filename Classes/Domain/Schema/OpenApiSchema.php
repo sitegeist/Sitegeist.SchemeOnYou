@@ -77,48 +77,12 @@ final readonly class OpenApiSchema implements \JsonSerializable
      */
     public static function fromReflectionClass(\ReflectionClass $reflection): self
     {
-        if (!in_array('JsonSerializable', $reflection->getInterfaceNames())) {
-            throw new \DomainException(
-                'Given class ' . $reflection->name . ' does not implement the required \JsonSerializable interface',
-                1709503193
-            );
+        if (IsCollection::isSatisfiedByReflectionClass($reflection)) {
+            return self::fromCollectionReflectionClass($reflection);
+        } elseif (IsValueObject::isSatisfiedByReflectionClass($reflection)) {
+            return self::fromObjectReflectionClass($reflection);
         }
-
-        $jsonSerializeReturnType = $reflection->getMethod('jsonSerialize')->getReturnType();
-        $returnType = $jsonSerializeReturnType instanceof \ReflectionNamedType
-            ? $jsonSerializeReturnType->getName()
-            : null;
-        $allowedReturnTypes = ['string', 'int', 'float', 'array'];
-        if (!in_array($returnType, $allowedReturnTypes)) {
-            throw new \DomainException(
-                'Given class ' . $reflection->name . ' has invalid return type for jsonSerializable, must be one of "'
-                . implode('","', $allowedReturnTypes) . '"',
-                1709503874
-            );
-        }
-
-        if ($returnType === 'array') {
-            if (IsCollection::isSatisfiedByReflectionClass($reflection)) {
-                return self::fromCollectionReflectionClass($reflection);
-            } else {
-                return self::fromObjectReflectionClass($reflection);
-            }
-        }
-        $schemaMetadata = SchemaMetadata::fromReflectionClass($reflection);
-
-        return new self(
-            name: $schemaMetadata->name ?: $reflection->getShortName(),
-            type: match ($returnType) {
-                'string' => 'string',
-                'int' => 'int',
-                'float' => 'number',
-                default => throw new \DomainException(
-                    'Cannot resolve definition type for type ' . $returnType,
-                    1709567351
-                )
-            },
-            description: $schemaMetadata->description,
-        );
+        throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
     }
 
     /**

@@ -29,6 +29,7 @@
             "phpcbf --extensions=php --colors --standard=PSR12 ./Tests"
         ],
         "fix": [
+            "@install",
             "@fix:code-style"
         ],
         "lint:code-style": [
