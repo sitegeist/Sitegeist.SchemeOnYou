@@ -20,6 +20,7 @@ class OpenApiController extends ActionController
     {
         $schema = $this->documentRepository->findDocumentByName($name);
         $this->response->setContentType('application\json');
+        $this->response->addHttpHeader('Access-Control-Allow-Origin', '*');
         return \json_encode(
             $schema,
             JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
