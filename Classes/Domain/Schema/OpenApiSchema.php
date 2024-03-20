@@ -12,7 +12,6 @@ final readonly class OpenApiSchema implements \JsonSerializable
 {
 
     /**
-     * @param string|null $format
      * @param array<int,int|string>|null $enum
      * @codingStandardsIgnoreStart
      * @param array<string,SchemaType|OpenApiReference|array<string,array<string,SchemaType|OpenApiReference>>> $properties
@@ -90,6 +89,12 @@ final readonly class OpenApiSchema implements \JsonSerializable
                     name: $reflection->getName(),
                     type: 'string',
                     format: 'date-time',
+                );
+            } elseif ($typeName === \DateInterval::class) {
+                return new self(
+                    name: $reflection->getName(),
+                    type: 'string',
+                    format: 'duration',
                 );
             } elseif (class_exists($typeName)) {
                 return self::fromClassName($typeName);

@@ -44,7 +44,7 @@ final readonly class OpenApiParameter implements \JsonSerializable
         }
         $parameterAttribute = ParameterAttribute::fromReflectionParameter($reflectionParameter);
         $type = $reflectionType->getName();
-        if (in_array($type, ['int', 'bool', 'string', 'float', \DateTimeImmutable::class, \DateTime::class])) {
+        if (in_array($type, ['int', 'bool', 'string', 'float', \DateTimeImmutable::class, \DateTime::class, \DateInterval::class])) {
             $parameterSchema = OpenApiSchema::fromReflectionParameter($reflectionParameter);
             return new self(
                 name: $reflectionParameter->name,
