@@ -1,14 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Reflection\ClassReflection;
-use function Symfony\Component\String\s;
 
-class SchemaDeSerializer
+class SchemaDenormalizer
 {
-    public static function deSerializeValue(null|int|bool|string|float|array $value, string $targetType): object|array|int|bool|string|float|null
+    public static function denormalizeValue(null|int|bool|string|float|array $value, string $targetType): object|array|int|bool|string|float|null
     {
         return self::convertValue($value, $targetType);
     }

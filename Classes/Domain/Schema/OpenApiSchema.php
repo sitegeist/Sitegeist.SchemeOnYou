@@ -10,7 +10,6 @@ use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaMetadata;
 #[Flow\Proxy(false)]
 final readonly class OpenApiSchema implements \JsonSerializable
 {
-
     /**
      * @param array<int,int|string>|null $enum
      * @codingStandardsIgnoreStart
@@ -103,7 +102,6 @@ final readonly class OpenApiSchema implements \JsonSerializable
             }
         } elseif ($reflectionType instanceof \ReflectionUnionType) {
             throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
-
         } else {
             throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
         }

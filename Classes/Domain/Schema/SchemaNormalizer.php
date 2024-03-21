@@ -1,13 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
-class SchemaSerializer
+class SchemaNormalizer
 {
-    public static function serializeValue(null|int|bool|string|float|object $value): string
+    public static function normalizeValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
     {
-        return json_encode(self::convertValue($value), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+        return self::convertValue($value);
     }
 
     private static function convertValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
@@ -66,19 +67,35 @@ class SchemaSerializer
      */
     private static function convertDateInterval(\DateInterval $value): string
     {
-        $date = NULL;
-        if ($value->y) $date .= $value->y . 'Y';
-        if ($value->m) $date .= $value->m . 'M';
-        if ($value->d) $date .= $value->d . 'D';
+        $date = null;
+        if ($value->y) {
+            $date .= $value->y . 'Y';
+        }
+        if ($value->m) {
+            $date .= $value->m . 'M';
+        }
+        if ($value->d) {
+            $date .= $value->d . 'D';
+        }
 
-        $time = NULL;
-        if ($value->h) $time .= $value->h . 'H';
-        if ($value->i) $time .= $value->i . 'M';
-        if ($value->s) $time .= $value->s . 'S';
-        if ($time) $time = 'T' . $time;
+        $time = null;
+        if ($value->h) {
+            $time .= $value->h . 'H';
+        }
+        if ($value->i) {
+            $time .= $value->i . 'M';
+        }
+        if ($value->s) {
+            $time .= $value->s . 'S';
+        }
+        if ($time) {
+            $time = 'T' . $time;
+        }
 
-        $text ='P' . $date . $time;
-        if ($text === 'P') return 'PT0S';
+        $text = 'P' . $date . $time;
+        if ($text === 'P') {
+            return 'PT0S';
+        }
         return $text;
     }
 }

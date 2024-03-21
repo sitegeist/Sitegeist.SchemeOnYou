@@ -6,49 +6,62 @@ namespace Sitegeist\SchemeOnYou\Tests\Unit\Domain\Schema;
 
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDeSerializer;
-use Sitegeist\SchemeOnYou\Domain\Schema\SchemaSerializer;
+use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
+use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
 use Sitegeist\SchemeOnYou\Tests\Fixtures;
 
-class SchemaDeSerializerTest extends TestCase
+class SchemaNormalizerTest extends TestCase
 {
     /**
-     * @dataProvider valueSerializationPairs
+     * @dataProvider valueNormalizationPairs
      * @test
      */
-    public function deserializesValue(
-        mixed  $value,
-        string $targetType,
-        mixed  $serialization
+    public function normalizeValue(
+        string $type,
+        mixed $value,
+        mixed $normalized
     ): void
     {
-        Assert::assertEquals($value, SchemaDeSerializer::deSerializeValue($serialization, $targetType));
+        Assert::assertEquals($normalized, SchemaNormalizer::normalizeValue($value));
+    }
+
+    /**
+     * @dataProvider valueNormalizationPairs
+     * @test
+     */
+    public function denormalizeValue(
+        string $type,
+        mixed $value,
+        mixed $normalized
+    ): void
+    {
+        Assert::assertEquals($value, SchemaDenormalizer::denormalizeValue($normalized, $type));
     }
 
     /**
      * @return iterable<string,mixed>
      */
-    public static function valueSerializationPairs(): iterable
+    public static function valueNormalizationPairs(): iterable
     {
-        yield 'string stays a string' => ['hello world', 'string', 'hello world'];
-        yield 'number stays a number' => [123, 'int', '123'];
+        yield 'string stays a string' => ['string', 'hello world', 'hello world'];
+        yield 'number stays a number' => ['int', 123, '123'];
         yield 'NumberObject is converted' => [
-            new Fixtures\Number(value: 123.456),
             Fixtures\Number::class,
+            new Fixtures\Number(value: 123.456),
             ["value" => 123.456]
         ];
-        yield 'DateTime is converted' => [new \DateTime('2010-01-28T15:00:00+02:00'), \DateTime::class, '2010-01-28T15:00:00+02:00'];
-        yield 'DateTimeImmutable is converted' => [new \DateTimeImmutable('2010-01-28T15:00:00+02:00'), \DateTimeImmutable::class, '2010-01-28T15:00:00+02:00'];
-        yield 'Int backed Enum is converted' => [Fixtures\ImportantNumber::NUMBER_42, Fixtures\ImportantNumber::class, 42];
-        yield 'String backed Enum is converted' => [Fixtures\DayOfWeek::DAY_FRIDAY, Fixtures\DayOfWeek::class, 'https://schema.org/Friday'];
+        yield 'DateTime is converted' => [\DateTime::class, new \DateTime('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
+        yield 'DateTimeImmutable is converted' => [\DateTimeImmutable::class, new \DateTimeImmutable('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
+        yield 'Int backed Enum is converted' => [Fixtures\ImportantNumber::class, Fixtures\ImportantNumber::NUMBER_42, 42];
+        yield 'String backed Enum is converted' => [Fixtures\DayOfWeek::class, Fixtures\DayOfWeek::DAY_FRIDAY, 'https://schema.org/Friday'];
         yield 'ValueObject is converted' => [
+            Fixtures\PostalAddress::class,
             new Fixtures\PostalAddress(
                 streetAddress: 'Sesame Street 123',
                 addressRegion: 'Manhatten',
                 addressCountry: 'USA',
                 postOfficeBoxNumber: '12345',
             ),
-            Fixtures\PostalAddress::class,
             [
                 'streetAddress' => 'Sesame Street 123',
                 'addressRegion' => 'Manhatten',
@@ -57,6 +70,7 @@ class SchemaDeSerializerTest extends TestCase
             ]
         ];
         yield 'Collection is converted' => [
+            Fixtures\PostalAddressCollection::class,
             new Fixtures\PostalAddressCollection(
                 new Fixtures\PostalAddress(
                     streetAddress: 'Sesame Street 123',
@@ -71,7 +85,6 @@ class SchemaDeSerializerTest extends TestCase
                     postOfficeBoxNumber: '67890',
                 )
             ),
-            Fixtures\PostalAddressCollection::class,
             [
                 [
                     'streetAddress' => 'Sesame Street 123',
@@ -88,6 +101,7 @@ class SchemaDeSerializerTest extends TestCase
             ]
         ];
         yield 'WeirdThing is converted' => [
+            Fixtures\WeirdThing::class,
             new Fixtures\WeirdThing(
                 if: false,
                 what: "dis",
@@ -96,7 +110,6 @@ class SchemaDeSerializerTest extends TestCase
                 when: new \DateTimeImmutable('2010-01-28T15:00:00+02:00'),
                 howLong: new \DateInterval('P1Y'),
             ),
-            Fixtures\WeirdThing::class,
             [
                 "if" => false,
                 "what" => "dis",

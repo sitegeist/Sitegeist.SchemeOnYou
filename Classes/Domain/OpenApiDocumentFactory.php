@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Domain;
@@ -47,7 +48,6 @@ class OpenApiDocumentFactory
         $pathes = new OpenApiPathCollection();
 
         foreach ($openApiControllers as $className) {
-
             // only include classes that match the $classNamePatterns
             $includeClassName = false;
             foreach ($documentClassNamePatterns as $documentClassNamePattern) {
@@ -62,7 +62,7 @@ class OpenApiDocumentFactory
 
             $classReflection = new ClassReflection($className);
             foreach ($classReflection->getMethods() as $methodReflection) {
-                if (!str_ends_with($methodReflection->getName(), 'Action' )) {
+                if (!str_ends_with($methodReflection->getName(), 'Action')) {
                     continue;
                 }
                 $methodReturnType = $methodReflection->getReturnType();
@@ -248,7 +248,6 @@ class OpenApiDocumentFactory
                             }
                         } else {
                             throw new \DomainException(sprintf('Parameter %s has unsupported type %s in class %s', $constructorParameter->getName(), $parameterTypeName, $className));
-
                         }
                     }
                 } elseif ($parameterType instanceof \ReflectionIntersectionType) {
