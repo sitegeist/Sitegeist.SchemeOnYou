@@ -11,7 +11,7 @@ use Neos\Flow\Mvc\Controller\Arguments;
 use Neos\Flow\Mvc\Controller\ControllerContext;
 use Neos\Flow\Mvc\Controller\ControllerInterface;
 use Neos\Flow\Mvc\Routing\UriBuilder;
-use Sitegeist\SchemeOnYou\Domain\Schema\ResponseSerializer;
+use Sitegeist\SchemeOnYou\Domain\Schema\SchemaSerializer;
 
 #[Flow\Scope('singleton')]
 abstract class OpenApiController implements ControllerInterface
@@ -50,6 +50,6 @@ abstract class OpenApiController implements ControllerInterface
 
         $result = $this->$actionName(...$parameters);
 
-        $this->response->setContent(ResponseSerializer::serializeResponse($result));
+        $this->response->setContent(SchemaSerializer::serializeValue($result));
     }
 }
