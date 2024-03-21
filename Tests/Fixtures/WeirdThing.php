@@ -22,8 +22,8 @@ final readonly class WeirdThing implements \JsonSerializable
         public float $howMuchPrecisely,
         public \DateTimeImmutable $when,
         public \DateInterval $howLong,
-        public UriInterface $where,
-        public UuidInterface $identifier,
+#        public UriInterface $where,
+#        public UuidInterface $identifier,
     ) {
     }
 

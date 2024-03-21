@@ -218,7 +218,7 @@ class OpenApiDocumentFactory
         while (count($classesToCheckStack) > 0) {
             $className = array_shift($classesToCheckStack);
             $classReflection = new ClassReflection($className);
-            $constructorReflection = $classReflection->getMethod('__construct');
+            $constructorReflection = $classReflection->getConstructor();
             foreach ($constructorReflection->getParameters() as $constructorParameter) {
                 $parameterType = $constructorParameter->getType();
                 if ($parameterType instanceof \ReflectionNamedType) {

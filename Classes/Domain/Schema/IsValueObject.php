@@ -31,7 +31,7 @@ final class IsValueObject
         foreach ($parameters as $parameter) {
             $parameterType = $parameter->getType();
             if ($parameterType instanceof \ReflectionNamedType) {
-                if (in_array($parameterType->getName(), ['int', 'float', 'string', 'bool', \DateTime::class, \DateTimeImmutable::class])) {
+                if (in_array($parameterType->getName(), ['int', 'float', 'string', 'bool', \DateTime::class, \DateTimeImmutable::class, \DateInterval::class])) {
                     continue;
                 }
                 if (IsValueObject::isSatisfiedByClassName($parameterType->getName()) || IsCollection::isSatisfiedByClassName($parameterType->getName())) {
