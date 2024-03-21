@@ -6,6 +6,9 @@ namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 class SchemaNormalizer
 {
+
+
+
     public static function normalizeValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
     {
         return self::convertValue($value);

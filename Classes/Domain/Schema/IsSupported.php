@@ -11,13 +11,19 @@ final class IsSupported
 {
     public static function isSatisfiedByClassName(string $className): bool
     {
-        $reflection = new \ReflectionClass($className);
-        return self::isSatisfiedByReflectionClass($reflection);
+        if (class_exists($className)) {
+            $reflection = new \ReflectionClass($className);
+            return self::isSatisfiedByReflectionClass($reflection);
+        }
+        return false;
     }
 
     public static function isSatisfiedByReflectionType(\ReflectionType $reflection): bool
     {
         if ($reflection instanceof \ReflectionNamedType) {
+            if (in_array($reflection->getName(), ['string', 'bool', 'int', 'float'])) {
+                return true;
+            }
             return self::isSatisfiedByClassName($reflection->getName());
         }
         return false;
@@ -28,10 +34,10 @@ final class IsSupported
      */
     public static function isSatisfiedByReflectionClass(\ReflectionClass $reflection): bool
     {
-        if ($reflection instanceof \ReflectionEnum) {
+        if (in_array($reflection->getName(), [\DateTimeInterface::class, \DateTimeImmutable::class, \DateTime::class])) {
             return true;
         }
-        if (in_array($reflection->getName(), [\DateTimeInterface::class, \DateTimeImmutable::class, \DateTime::class])) {
+        if ($reflection instanceof \ReflectionEnum && is_a($reflection->getName(), \BackedEnum::class, true)) {
             return true;
         }
         if (IsValueObject::isSatisfiedByReflectionClass($reflection)) {

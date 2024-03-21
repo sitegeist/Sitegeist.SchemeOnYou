@@ -24,12 +24,20 @@ final class IsCollection
         if (count($parameters) !== 1) {
             return false;
         }
-        if ($parameters[0]->isVariadic() === false) {
-            return false;
-        }
         if ($reflection->isReadOnly() === false) {
             return false;
         }
-        return true;
+        $collectionParameter = $parameters[0];
+        if ($collectionParameter->isVariadic() === false) {
+            return false;
+        }
+        $collectionParameterType = $collectionParameter->getType();
+        if ($collectionParameterType instanceof \ReflectionNamedType) {
+            if (IsSupported::isSatisfiedByReflectionType($collectionParameterType)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
