@@ -34,6 +34,9 @@ final class IsValueObject
                 if (in_array($parameterType->getName(), ['int', 'float', 'string', 'bool', \DateTime::class, \DateTimeImmutable::class, \DateInterval::class])) {
                     continue;
                 }
+                if (is_a($parameterType->getName(), \BackedEnum::class, true)) {
+                    continue;
+                }
                 if (IsValueObject::isSatisfiedByClassName($parameterType->getName()) || IsCollection::isSatisfiedByClassName($parameterType->getName())) {
                     continue;
                 }

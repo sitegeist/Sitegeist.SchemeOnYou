@@ -13,7 +13,11 @@ class SchemaNormalizer
 
     private static function convertValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
     {
-        if (is_object($value)) {
+        if ($value === null) {
+            return null;
+        } elseif (is_scalar($value)) {
+            return $value;
+        } elseif (is_object($value)) {
             if ($value instanceof \DateTimeInterface) {
                 return $value->format(\DateTimeInterface::RFC3339);
             } elseif ($value instanceof \DateInterval) {
@@ -24,13 +28,10 @@ class SchemaNormalizer
                 return self::convertCollection($value);
             } elseif (IsValueObject::isSatisfiedByClassName(get_class($value))) {
                 return self::convertValueObject($value);
-            } else {
-                throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
             }
         }
 
-        // scalar values need no transformation
-        return $value;
+        throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
     }
 
     /**

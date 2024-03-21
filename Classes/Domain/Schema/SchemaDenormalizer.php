@@ -17,8 +17,7 @@ class SchemaDenormalizer
     {
         if ($value === null) {
             return null;
-        }
-        if ($targetType === 'string') {
+        } elseif ($targetType === 'string') {
             return (string) $value;
         } elseif ($targetType === 'int') {
             return (int) $value;
@@ -39,6 +38,7 @@ class SchemaDenormalizer
         } elseif (is_array($value) && IsValueObject::isSatisfiedByClassName($targetType)) {
             return  self::convertValueObject($value, $targetType);
         }
+
         throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
     }
 

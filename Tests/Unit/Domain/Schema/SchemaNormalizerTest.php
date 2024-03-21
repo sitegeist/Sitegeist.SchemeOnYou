@@ -43,18 +43,22 @@ class SchemaNormalizerTest extends TestCase
      */
     public static function valueNormalizationPairs(): iterable
     {
-        yield 'string stays a string' => ['string', 'hello world', 'hello world'];
-        yield 'number stays a number' => ['int', 123, '123'];
+        yield 'string' => ['string', 'hello world', 'hello world'];
+        yield 'number' => ['int', 123, '123'];
+        yield 'float' => ['float', 123.456, '123.456'];
+        yield 'bool true' => ['bool', true, true];
+        yield 'bool false' => ['bool', false, false];
         yield 'NumberObject is converted' => [
             Fixtures\Number::class,
             new Fixtures\Number(value: 123.456),
             ["value" => 123.456]
         ];
-        yield 'DateTime is converted' => [\DateTime::class, new \DateTime('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
-        yield 'DateTimeImmutable is converted' => [\DateTimeImmutable::class, new \DateTimeImmutable('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
-        yield 'Int backed Enum is converted' => [Fixtures\ImportantNumber::class, Fixtures\ImportantNumber::NUMBER_42, 42];
-        yield 'String backed Enum is converted' => [Fixtures\DayOfWeek::class, Fixtures\DayOfWeek::DAY_FRIDAY, 'https://schema.org/Friday'];
-        yield 'ValueObject is converted' => [
+        yield 'DateTime' => [\DateTime::class, new \DateTime('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
+        yield 'DateTimeImmutable' => [\DateTimeImmutable::class, new \DateTimeImmutable('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
+        yield 'DateInterval' => [\DateInterval::class, new \DateInterval('P1Y'), 'P1Y'];
+        yield 'Int backed Enum' => [Fixtures\ImportantNumber::class, Fixtures\ImportantNumber::NUMBER_42, 42];
+        yield 'String backed Enum' => [Fixtures\DayOfWeek::class, Fixtures\DayOfWeek::DAY_FRIDAY, 'https://schema.org/Friday'];
+        yield 'PostalAddress' => [
             Fixtures\PostalAddress::class,
             new Fixtures\PostalAddress(
                 streetAddress: 'Sesame Street 123',
@@ -69,7 +73,7 @@ class SchemaNormalizerTest extends TestCase
                 'postOfficeBoxNumber' => '12345',
             ]
         ];
-        yield 'Collection is converted' => [
+        yield 'PostalAddressCollection' => [
             Fixtures\PostalAddressCollection::class,
             new Fixtures\PostalAddressCollection(
                 new Fixtures\PostalAddress(
@@ -100,7 +104,7 @@ class SchemaNormalizerTest extends TestCase
                 ]
             ]
         ];
-        yield 'WeirdThing is converted' => [
+        yield 'WeirdThing' => [
             Fixtures\WeirdThing::class,
             new Fixtures\WeirdThing(
                 if: false,
@@ -117,6 +121,79 @@ class SchemaNormalizerTest extends TestCase
                 "howMuchPrecisely" => 23.42,
                 "when" => "2010-01-28T15:00:00+02:00",
                 "howLong" => "P1Y"
+            ]
+        ];
+        yield 'Composition' => [
+            Fixtures\Composition::class,
+            new Fixtures\Composition(
+                dayOfWeek: Fixtures\DayOfWeek::DAY_MONDAY,
+                identifier: Fixtures\Identifier::fromString('suppe'),
+                importantNumber: Fixtures\ImportantNumber::NUMBER_23,
+                number: Fixtures\Number::fromFloat(23.42),
+                postalAddress: new Fixtures\PostalAddress(
+                    streetAddress: 'Sesame Street 123',
+                    addressRegion: 'Manhatten',
+                    addressCountry: 'USA',
+                    postOfficeBoxNumber: '12345',
+                ),
+                postalAddressCollection: new Fixtures\PostalAddressCollection(
+                    new Fixtures\PostalAddress(
+                        streetAddress: 'Sesame Street 123',
+                        addressRegion: 'Manhatten',
+                        addressCountry: 'USA',
+                        postOfficeBoxNumber: '12345',
+                    ),
+                    new Fixtures\PostalAddress(
+                        streetAddress: 'Poßmoorweg 2',
+                        addressRegion: 'Hamburg',
+                        addressCountry: 'DE',
+                        postOfficeBoxNumber: '67890',
+                    )
+                ),
+                quantitativeValue: new Fixtures\QuantitativeValue(666),
+                weirdThing: new Fixtures\WeirdThing(
+                    if: false,
+                    what: "dis",
+                    howMuch: 23,
+                    howMuchPrecisely: 23.42,
+                    when: new \DateTimeImmutable('2010-01-28T15:00:00+02:00'),
+                    howLong: new \DateInterval('P1Y'),
+                )
+            ),
+            [
+                'dayOfWeek' => 'https://schema.org/Monday',
+                'identifier' => ['value' => 'suppe'],
+                'importantNumber' => 23,
+                'number' => ['value' => 23.42],
+                'postalAddress' => [
+                    'streetAddress' => 'Sesame Street 123',
+                    'addressRegion' => 'Manhatten',
+                    'addressCountry' => 'USA',
+                    'postOfficeBoxNumber' => '12345',
+                ],
+                'postalAddressCollection' => [
+                    [
+                        'streetAddress' => 'Sesame Street 123',
+                        'addressRegion' => 'Manhatten',
+                        'addressCountry' => 'USA',
+                        'postOfficeBoxNumber' => '12345',
+                    ],
+                    [
+                        'streetAddress' => 'Poßmoorweg 2',
+                        'addressRegion' => 'Hamburg',
+                        'addressCountry' => 'DE',
+                        'postOfficeBoxNumber' => '67890',
+                    ]
+                ],
+                'quantitativeValue' => ['value' => 666],
+                'weirdThing' => [
+                    "if" => false,
+                    "what" => "dis",
+                    "howMuch" => 23,
+                    "howMuchPrecisely" => 23.42,
+                    "when" => "2010-01-28T15:00:00+02:00",
+                    "howLong" => "P1Y"
+                ]
             ]
         ];
     }
