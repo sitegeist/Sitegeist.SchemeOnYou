@@ -30,7 +30,7 @@ final class IsValueObject
         $parameters = $reflection->getConstructor()?->getParameters() ?: [];
         foreach ($parameters as $parameter) {
             $parameterType = $parameter->getType();
-            if (IsSupported::isSatisfiedByReflectionType($parameterType)) {
+            if ($parameterType instanceof \ReflectionType && IsSupported::isSatisfiedByReflectionType($parameterType)) {
                 continue;
             }
             return false;

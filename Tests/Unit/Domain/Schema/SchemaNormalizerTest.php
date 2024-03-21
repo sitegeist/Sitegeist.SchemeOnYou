@@ -20,8 +20,7 @@ class SchemaNormalizerTest extends TestCase
         string $type,
         mixed $value,
         mixed $normalized
-    ): void
-    {
+    ): void {
         Assert::assertEquals($normalized, SchemaNormalizer::normalizeValue($value));
     }
 
@@ -33,8 +32,7 @@ class SchemaNormalizerTest extends TestCase
         string $type,
         mixed $value,
         mixed $normalized
-    ): void
-    {
+    ): void {
         Assert::assertEquals($value, SchemaDenormalizer::denormalizeValue($normalized, $type));
     }
 
@@ -44,8 +42,8 @@ class SchemaNormalizerTest extends TestCase
     public static function valueNormalizationPairs(): iterable
     {
         yield 'string' => ['string', 'hello world', 'hello world'];
-        yield 'number' => ['int', 123, '123'];
-        yield 'float' => ['float', 123.456, '123.456'];
+        yield 'number' => ['int', 123, 123];
+        yield 'float' => ['float', 123.456, 123.456];
         yield 'bool true' => ['bool', true, true];
         yield 'bool false' => ['bool', false, false];
         yield 'NumberObject is converted' => [

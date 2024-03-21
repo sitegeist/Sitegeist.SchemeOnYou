@@ -6,8 +6,7 @@ namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 class SchemaNormalizer
 {
-
-
+    use IsTrait;
 
     public static function normalizeValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
     {
@@ -27,15 +26,16 @@ class SchemaNormalizer
                 return self::convertDateInterval($value);
             } elseif ($value instanceof \BackedEnum) {
                 return $value->value;
-            } elseif (IsCollection::isSatisfiedByClassName(get_class($value))) {
+            } elseif (self::isCollectionClassName(get_class($value))) {
                 return self::convertCollection($value);
-            } elseif (IsValueObject::isSatisfiedByClassName(get_class($value))) {
+            } elseif (self::isValueObjectClassName(get_class($value))) {
                 return self::convertValueObject($value);
             }
         }
 
         throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
     }
+
 
     /**
      * @param object $value

@@ -34,16 +34,13 @@ final class IsSupported
      */
     public static function isSatisfiedByReflectionClass(\ReflectionClass $reflection): bool
     {
-        if (in_array($reflection->getName(), [\DateTimeInterface::class, \DateTimeImmutable::class, \DateTime::class])) {
+        if (in_array($reflection->getName(), [\DateInterval::class, \DateTimeImmutable::class, \DateTime::class])) {
             return true;
-        }
-        if ($reflection instanceof \ReflectionEnum && is_a($reflection->getName(), \BackedEnum::class, true)) {
+        } elseif (is_a($reflection->getName(), \BackedEnum::class, true)) {
             return true;
-        }
-        if (IsValueObject::isSatisfiedByReflectionClass($reflection)) {
+        } elseif (IsValueObject::isSatisfiedByReflectionClass($reflection)) {
             return true;
-        }
-        if (IsCollection::isSatisfiedByReflectionClass($reflection)) {
+        } elseif (IsCollection::isSatisfiedByReflectionClass($reflection)) {
             return true;
         }
         return false;

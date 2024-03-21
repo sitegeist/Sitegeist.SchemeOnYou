@@ -8,6 +8,8 @@ use Neos\Flow\Reflection\ClassReflection;
 
 class SchemaDenormalizer
 {
+    use IsTrait;
+
     public static function denormalizeValue(null|int|bool|string|float|array $value, string $targetType): object|array|int|bool|string|float|null
     {
         return self::convertValue($value, $targetType);
@@ -33,10 +35,10 @@ class SchemaDenormalizer
             return new \DateInterval($value);
         } elseif (is_a($targetType, \BackedEnum::class, true)) {
             return $targetType::from($value);
-        } elseif (is_array($value) && IsCollection::isSatisfiedByClassName($targetType)) {
+        } elseif (is_array($value) && self::isCollectionClassName($targetType)) {
             return self::convertCollection($value, $targetType);
-        } elseif (is_array($value) && IsValueObject::isSatisfiedByClassName($targetType)) {
-            return  self::convertValueObject($value, $targetType);
+        } elseif (is_array($value) && self::isValueObjectClassName($targetType)) {
+            return self::convertValueObject($value, $targetType);
         }
 
         throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
