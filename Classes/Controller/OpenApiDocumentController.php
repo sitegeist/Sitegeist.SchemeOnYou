@@ -9,14 +9,14 @@ use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\Mvc\View\JsonView;
 use Sitegeist\SchemeOnYou\Domain\OpenApiDocumentRepository;
 
-class OpenApiController extends ActionController
+class OpenApiDocumentController extends ActionController
 {
     protected $defaultViewObjectName = JsonView::class;
 
     #[Flow\Inject]
     protected OpenApiDocumentRepository $documentRepository;
 
-    public function documentAction(string $name): string
+    public function renderAction(string $name): string
     {
         $schema = $this->documentRepository->findDocumentByName($name);
         $this->response->setContentType('application\json');

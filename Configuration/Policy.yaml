@@ -1,7 +1,7 @@
 privilegeTargets:
   'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
     'Sitegeist.SchemeOnYou:OpenApi':
-      matcher: 'method(Sitegeist\SchemeOnYou\Controller\OpenApiController->(document)Action())'
+      matcher: 'method(Sitegeist\SchemeOnYou\Controller\OpenApiDocumentController->(render)Action())'
 roles:
   'Neos.Flow:Everybody':
     privileges:

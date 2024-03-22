@@ -9,7 +9,7 @@ use Neos\Flow\Cli\CommandController;
 use Sitegeist\SchemeOnYou\Domain\OpenApiDocumentRepository;
 
 #[Flow\Scope('singleton')]
-final class OpenApiCommandController extends CommandController
+final class OpenApiDocumentCommandController extends CommandController
 {
     #[Flow\Inject]
     protected OpenApiDocumentRepository $documentRepository;
@@ -17,7 +17,7 @@ final class OpenApiCommandController extends CommandController
     /**
      * @param string $name the name of the api document to render
      */
-    public function documentCommand(string $name): void
+    public function renderCommand(string $name): void
     {
         $schema = $this->documentRepository->findDocumentByName($name);
         $this->output->output(
