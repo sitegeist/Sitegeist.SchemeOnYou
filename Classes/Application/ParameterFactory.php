@@ -11,7 +11,6 @@ use Sitegeist\SchemeOnYou\Domain\Metadata\Parameter as ParameterAttribute;
 use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
 use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBodyContentType;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
-use Sitegeist\SchemeOnYou\Domain\Path\RequestParameterContract;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 
 #[Flow\Scope('singleton')]
@@ -24,7 +23,7 @@ class ParameterFactory
 
     /**
      * @param class-string $className
-     * @return array<string,RequestParameterContract|bool|int|string|float>
+     * @return array<string,object|bool|int|string|float|null>
      */
     public function resolveParameters(string $className, string $methodName, ActionRequest $request): array
     {
