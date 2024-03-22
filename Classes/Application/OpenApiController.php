@@ -11,7 +11,6 @@ use Neos\Flow\Mvc\Controller\Arguments;
 use Neos\Flow\Mvc\Controller\ControllerContext;
 use Neos\Flow\Mvc\Controller\ControllerInterface;
 use Neos\Flow\Mvc\Routing\UriBuilder;
-use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
 
 abstract class OpenApiController implements ControllerInterface
@@ -24,7 +23,7 @@ abstract class OpenApiController implements ControllerInterface
 
     public function __construct(
         private readonly SchemaNormalizer $schemaNormalizer,
-        private readonly SchemaDenormalizer $schemaDenormalizer
+        private readonly ParameterFactory $parameterFactory,
     ) {
     }
 
@@ -52,7 +51,7 @@ abstract class OpenApiController implements ControllerInterface
             );
         }
 
-        $parameters = ParameterFactory::resolveParameters(get_class($this), $actionName, $this->request);
+        $parameters = $this->parameterFactory->resolveParameters(get_class($this), $actionName, $this->request);
 
         $result = $this->$actionName(...$parameters);
 

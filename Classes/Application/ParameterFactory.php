@@ -12,15 +12,21 @@ use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
 use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBodyContentType;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 use Sitegeist\SchemeOnYou\Domain\Path\RequestParameterContract;
+use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 
-#[Flow\Proxy(false)]
-final readonly class ParameterFactory
+#[Flow\Scope('singleton')]
+class ParameterFactory
 {
+    public function __construct(
+        private readonly SchemaDenormalizer $denormalizer
+    ) {
+    }
+
     /**
      * @param class-string $className
      * @return array<string,RequestParameterContract|bool|int|string|float>
      */
-    public static function resolveParameters(string $className, string $methodName, ActionRequest $request): array
+    public function resolveParameters(string $className, string $methodName, ActionRequest $request): array
     {
         $reflectionClass = new \ReflectionClass($className);
         if ($reflectionClass->implementsInterface(ProxyInterface::class)) {
@@ -58,25 +64,7 @@ final readonly class ParameterFactory
                 }
             };
 
-            if (class_exists($parameterTypeName)) {
-                $parameterReflectionClass = new \ReflectionClass($parameterTypeName);
-                if (!$parameterReflectionClass->implementsInterface(RequestParameterContract::class)) {
-                    throw new \DomainException(
-                        'Can only resolve parameters of type ' . RequestParameterContract::class,
-                        1709722058
-                    );
-                }
-                /** @var class-string<RequestParameterContract> $parameterTypeName */
-                $parameters[$parameter->name] = $parameterTypeName::fromRequestParameter($parameterValueFromRequest);
-            } else {
-                $parameters[$parameter->name] = match ($parameterTypeName) {
-                    'string' => (string) $parameterValueFromRequest,
-                    'int' => (int) $parameterValueFromRequest,
-                    'float' => (float) $parameterValueFromRequest,
-                    'bool' => (bool) $parameterValueFromRequest,
-                    default => throw new \DomainException(sprintf('Cannot resolve parameters of type %s', $parameterTypeName), 1709721783)
-                };
-            }
+            $parameters[$parameter->name] = $this->denormalizer->denormalizeValue($parameterValueFromRequest, $parameterTypeName);
         }
 
         return $parameters;
