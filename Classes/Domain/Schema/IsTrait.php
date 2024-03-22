@@ -7,7 +7,7 @@ trait IsTrait
     private static array $isCollectionResults = [];
     private static array $isValueObjectResults = [];
 
-    protected static function isCollectionClassName(string $className): bool
+    protected function isCollectionClassName(string $className): bool
     {
         if (array_key_exists($className, self::$isCollectionResults)) {
             return self::$isCollectionResults[$className];
@@ -16,7 +16,7 @@ trait IsTrait
         return self::$isCollectionResults[$className];
     }
 
-    protected static function isValueObjectClassName(string $className): bool
+    protected function isValueObjectClassName(string $className): bool
     {
         if (array_key_exists($className, self::$isValueObjectResults)) {
             return self::$isValueObjectResults[$className];

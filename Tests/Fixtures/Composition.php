@@ -9,7 +9,7 @@ use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 
 #[OpenApi\Schema('a composition of types')]
 #[Flow\Proxy(false)]
-final readonly class Composition implements \JsonSerializable
+final readonly class Composition
 {
     public function __construct(
         public DayOfWeek $dayOfWeek,
@@ -21,33 +21,5 @@ final readonly class Composition implements \JsonSerializable
         public QuantitativeValue $quantitativeValue,
         public WeirdThing $weirdThing,
     ) {
-    }
-
-    /**
-     * @param array<string,mixed> $values
-     */
-    public static function fromArray(array $values): self
-    {
-        return new self(
-            DayOfWeek::from($values['dayOfWeek']),
-            Identifier::fromString($values['identifier']),
-            ImportantNumber::from($values['importantNumber']),
-            Number::fromFloat($values['number']),
-            PostalAddress::fromArray($values['postalAddress']),
-            new PostalAddressCollection(...array_map(
-                fn (array $item): PostalAddress => PostalAddress::fromArray($item),
-                $values['postalAddressCollection']
-            )),
-            QuantitativeValue::fromInt($values['quantitativeValue']),
-            WeirdThing::fromArray($values['weirdThing'])
-        );
-    }
-
-    /**
-     * @return array<string,mixed>
-     */
-    public function jsonSerialize(): array
-    {
-        return get_object_vars($this);
     }
 }

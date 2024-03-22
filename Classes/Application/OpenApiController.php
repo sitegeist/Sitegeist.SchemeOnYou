@@ -11,9 +11,9 @@ use Neos\Flow\Mvc\Controller\Arguments;
 use Neos\Flow\Mvc\Controller\ControllerContext;
 use Neos\Flow\Mvc\Controller\ControllerInterface;
 use Neos\Flow\Mvc\Routing\UriBuilder;
+use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
 
-#[Flow\Scope('singleton')]
 abstract class OpenApiController implements ControllerInterface
 {
     protected ActionRequest $request;
@@ -21,6 +21,12 @@ abstract class OpenApiController implements ControllerInterface
     protected ActionResponse $response;
 
     protected ControllerContext $controllerContext;
+
+    public function __construct(
+        private readonly SchemaNormalizer $schemaNormalizer,
+        private readonly SchemaDenormalizer $schemaDenormalizer
+    ) {
+    }
 
     final public function processRequest(ActionRequest $request, ActionResponse $response): void
     {
@@ -50,6 +56,6 @@ abstract class OpenApiController implements ControllerInterface
 
         $result = $this->$actionName(...$parameters);
 
-        $this->response->setContent(json_encode(SchemaNormalizer::normalizeValue($result), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        $this->response->setContent(json_encode($this->schemaNormalizer->normalizeValue($result), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
     }
 }

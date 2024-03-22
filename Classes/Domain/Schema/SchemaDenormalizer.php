@@ -4,18 +4,27 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
+use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Reflection\ClassReflection;
+use Psr\Http\Message\UriFactoryInterface;
+use Psr\Http\Message\UriInterface;
 
+#[Flow\Scope('singleton')]
 class SchemaDenormalizer
 {
     use IsTrait;
 
-    public static function denormalizeValue(null|int|bool|string|float|array $value, string $targetType): object|array|int|bool|string|float|null
-    {
-        return self::convertValue($value, $targetType);
+    public function __construct(
+        private readonly UriFactoryInterface $uriFactory
+    ) {
     }
 
-    private static function convertValue(null|int|bool|string|float|array $value, string $targetType): object|array|int|bool|string|float|null
+    public function denormalizeValue(null|int|bool|string|float|array $value, string $targetType): object|array|int|bool|string|float|null
+    {
+        return $this->convertValue($value, $targetType);
+    }
+
+    private function convertValue(null|int|bool|string|float|array $value, string $targetType): object|array|int|bool|string|float|null
     {
         if ($value === null) {
             return null;
@@ -33,18 +42,20 @@ class SchemaDenormalizer
             return new \DateTimeImmutable($value);
         } elseif ($targetType === \DateInterval::class) {
             return new \DateInterval($value);
+        } elseif ($targetType === UriInterface::class) {
+            return $this->uriFactory->createUri($value);
         } elseif (is_a($targetType, \BackedEnum::class, true)) {
             return $targetType::from($value);
-        } elseif (is_array($value) && self::isCollectionClassName($targetType)) {
-            return self::convertCollection($value, $targetType);
-        } elseif (is_array($value) && self::isValueObjectClassName($targetType)) {
-            return self::convertValueObject($value, $targetType);
+        } elseif (is_array($value) && $this->isCollectionClassName($targetType)) {
+            return $this->convertCollection($value, $targetType);
+        } elseif (is_array($value) && $this->isValueObjectClassName($targetType)) {
+            return $this->convertValueObject($value, $targetType);
         }
 
         throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
     }
 
-    private static function convertCollection(array $value, string $targetType): object
+    private function convertCollection(array $value, string $targetType): object
     {
         $reflection = new ClassReflection($targetType);
         $parameterReflection = $reflection->getConstructor()?->getParameters()[0];
@@ -54,18 +65,18 @@ class SchemaDenormalizer
         }
         return new $targetType(
             ...array_map(
-                fn($item) => self::convertValue($item, $parameterType->getName()),
+                fn($item) => $this->convertValue($item, $parameterType->getName()),
                 $value
             )
         );
     }
 
-    private static function convertValueObject(array $value, string $targetType): object
+    private function convertValueObject(array $value, string $targetType): object
     {
         $reflection = new ClassReflection($targetType);
         $parameterReflections = $reflection->getConstructor()?->getParameters();
         $convertedArguments = array_map(
-            fn($parameter) => self::convertValue($value[$parameter->getName()], $parameter->getType()->getName()),
+            fn($parameter) => $this->convertValue($value[$parameter->getName()], $parameter->getType()->getName()),
             $parameterReflections
         );
 

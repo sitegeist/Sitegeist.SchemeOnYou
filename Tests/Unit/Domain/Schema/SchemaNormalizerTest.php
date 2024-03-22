@@ -4,14 +4,28 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Tests\Unit\Domain\Schema;
 
+use Neos\Http\Factories\UriFactory;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\UriInterface;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
 use Sitegeist\SchemeOnYou\Tests\Fixtures;
 
-class SchemaNormalizerTest extends TestCase
+final class SchemaNormalizerTest extends TestCase
 {
+    public SchemaNormalizer $schemaNormalizer;
+    public SchemaDenormalizer $schemaDenormalizer;
+    public UriFactory $uriFactory;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->uriFactory = new UriFactory();
+        $this->schemaNormalizer = new SchemaNormalizer();
+        $this->schemaDenormalizer = new SchemaDenormalizer($this->uriFactory);
+    }
+
     /**
      * @dataProvider valueNormalizationPairs
      * @test
@@ -21,7 +35,7 @@ class SchemaNormalizerTest extends TestCase
         mixed $value,
         mixed $normalized
     ): void {
-        Assert::assertEquals($normalized, SchemaNormalizer::normalizeValue($value));
+        Assert::assertEquals($normalized, $this->schemaNormalizer->normalizeValue($value));
     }
 
     /**
@@ -33,7 +47,7 @@ class SchemaNormalizerTest extends TestCase
         mixed $value,
         mixed $normalized
     ): void {
-        Assert::assertEquals($value, SchemaDenormalizer::denormalizeValue($normalized, $type));
+        Assert::assertEquals($value, $this->schemaDenormalizer->denormalizeValue($normalized, $type));
     }
 
     /**
@@ -41,6 +55,9 @@ class SchemaNormalizerTest extends TestCase
      */
     public static function valueNormalizationPairs(): iterable
     {
+        // done seperately as dataproviders run before setUp
+        $uriFactory = new UriFactory();
+
         yield 'string' => ['string', 'hello world', 'hello world'];
         yield 'number' => ['int', 123, 123];
         yield 'float' => ['float', 123.456, 123.456];
@@ -54,6 +71,7 @@ class SchemaNormalizerTest extends TestCase
         yield 'DateTime' => [\DateTime::class, new \DateTime('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
         yield 'DateTimeImmutable' => [\DateTimeImmutable::class, new \DateTimeImmutable('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
         yield 'DateInterval' => [\DateInterval::class, new \DateInterval('P1Y'), 'P1Y'];
+        yield 'UriInterface' => [UriInterface::class, $uriFactory->createUri('https://example.com/path?query=foo'), 'https://example.com/path?query=foo'];
         yield 'Int backed Enum' => [Fixtures\ImportantNumber::class, Fixtures\ImportantNumber::NUMBER_42, 42];
         yield 'String backed Enum' => [Fixtures\DayOfWeek::class, Fixtures\DayOfWeek::DAY_FRIDAY, 'https://schema.org/Friday'];
         yield 'PostalAddress' => [
@@ -111,6 +129,7 @@ class SchemaNormalizerTest extends TestCase
                 howMuchPrecisely: 23.42,
                 when: new \DateTimeImmutable('2010-01-28T15:00:00+02:00'),
                 howLong: new \DateInterval('P1Y'),
+                where: $uriFactory->createUri('https://www.example.com/path/?query=parameter')
             ),
             [
                 "if" => false,
@@ -118,16 +137,17 @@ class SchemaNormalizerTest extends TestCase
                 "howMuch" => 23,
                 "howMuchPrecisely" => 23.42,
                 "when" => "2010-01-28T15:00:00+02:00",
-                "howLong" => "P1Y"
+                "howLong" => "P1Y",
+                "where" => "https://www.example.com/path/?query=parameter"
             ]
         ];
         yield 'Composition' => [
             Fixtures\Composition::class,
             new Fixtures\Composition(
                 dayOfWeek: Fixtures\DayOfWeek::DAY_MONDAY,
-                identifier: Fixtures\Identifier::fromString('suppe'),
+                identifier: new Fixtures\Identifier('suppe'),
                 importantNumber: Fixtures\ImportantNumber::NUMBER_23,
-                number: Fixtures\Number::fromFloat(23.42),
+                number: new Fixtures\Number(23.42),
                 postalAddress: new Fixtures\PostalAddress(
                     streetAddress: 'Sesame Street 123',
                     addressRegion: 'Manhatten',
@@ -156,6 +176,7 @@ class SchemaNormalizerTest extends TestCase
                     howMuchPrecisely: 23.42,
                     when: new \DateTimeImmutable('2010-01-28T15:00:00+02:00'),
                     howLong: new \DateInterval('P1Y'),
+                    where: $uriFactory->createUri('https://www.example.com/path/?query=parameter')
                 )
             ),
             [
@@ -190,7 +211,8 @@ class SchemaNormalizerTest extends TestCase
                     "howMuch" => 23,
                     "howMuchPrecisely" => 23.42,
                     "when" => "2010-01-28T15:00:00+02:00",
-                    "howLong" => "P1Y"
+                    "howLong" => "P1Y",
+                    "where" => "https://www.example.com/path/?query=parameter"
                 ]
             ]
         ];

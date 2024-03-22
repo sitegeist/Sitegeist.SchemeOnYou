@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
+use Psr\Http\Message\UriInterface;
 
 #[Flow\Proxy(false)]
 final class IsSupported
 {
     public static function isSatisfiedByClassName(string $className): bool
     {
-        if (class_exists($className)) {
+        if (class_exists($className) || interface_exists($className)) {
             $reflection = new \ReflectionClass($className);
             return self::isSatisfiedByReflectionClass($reflection);
         }
@@ -34,7 +35,9 @@ final class IsSupported
      */
     public static function isSatisfiedByReflectionClass(\ReflectionClass $reflection): bool
     {
-        if (in_array($reflection->getName(), [\DateInterval::class, \DateTimeImmutable::class, \DateTime::class])) {
+        if (in_array($reflection->getName(), [\DateInterval::class, \DateTimeImmutable::class, \DateTime::class, UriInterface::class])) {
+            return true;
+        } elseif (is_a($reflection->getName(), UriInterface::class, true)) {
             return true;
         } elseif (is_a($reflection->getName(), \BackedEnum::class, true)) {
             return true;

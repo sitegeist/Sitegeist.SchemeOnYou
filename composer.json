@@ -5,7 +5,8 @@
     "license": "LGPL-3.0",
     "require": {
         "php": "^8.2",
-        "neos/flow": "^8.0 || ^9.0"
+        "neos/flow": "^8.0 || ^9.0",
+        "neos/http-factories": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0",

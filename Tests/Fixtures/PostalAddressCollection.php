@@ -9,7 +9,7 @@ use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 
 #[OpenApi\Schema(description: 'a collection of postal addresses, see https://schema.org/PostalAddress')]
 #[Flow\Proxy(false)]
-final readonly class PostalAddressCollection implements \JsonSerializable
+final readonly class PostalAddressCollection
 {
     /**
      * @var array<PostalAddress>
@@ -20,13 +20,5 @@ final readonly class PostalAddressCollection implements \JsonSerializable
         PostalAddress ...$items
     ) {
         $this->items = $items;
-    }
-
-    /**
-     * @return array<PostalAddress>
-     */
-    public function jsonSerialize(): array
-    {
-        return $this->items;
     }
 }

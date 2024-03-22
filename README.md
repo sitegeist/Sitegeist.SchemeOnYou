@@ -37,11 +37,43 @@ or via url-path `/openapi/document/{name}`.
 
 ## Supported Types
 
+The following property types are supported by this package. You will notice the absence of arrays here but ValueObjets
+and Collections allow much finer control about property conversion.
 
 ### Scalar Values
 
+Values of type `string`, `int`, `float`, and `bool` are allowed. 
+
+!!! `null` is not allowed as a single type. However nullable values are allowed !!!
+
+### Class Exceptions
+
+Objects of type `\DateTime`, `\DateTimeImmutable`, `\DateInterval`, `\Psr\Http\Message\UriInterface` 
+are allowed as exceptions.
+
+### Backed Enums 
+
+Value backed enums are supported by converting to and from the underlying value.
+
 ### Value Objects
+
+A supported value object has to adhere to the following rules:  
+
+- The class is `readonly`
+- The class has a public constructor
+- All parameters in the constructor are `public`, `promoted` and of a supported type
+- The number of properties equals the number of constructor arguments
+
 ### Collection Objects
+
+A supported collection object has to adhere to the following rules:
+
+- The class is `readonly`
+- The class has a public constructor
+- The constructor has a single variadic parameter of a supported type 
+- The class has a single `public`, `readonly` property
+
+!!! There is a small chance the arguments passed to the constructor are not stored in the class property that we have to accept until variadic arguments can be promoted. !!!
 
 ## Installation
 
