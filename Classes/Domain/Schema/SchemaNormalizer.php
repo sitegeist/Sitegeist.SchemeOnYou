@@ -12,11 +12,17 @@ class SchemaNormalizer
 {
     use IsTrait;
 
+    /**
+     * @return array<mixed>|int|bool|string|float|null
+     */
     public function normalizeValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
     {
         return $this->convertValue($value);
     }
 
+    /**
+     * @return array<mixed>|int|bool|string|float|null
+     */
     private function convertValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
     {
         if ($value === null) {
@@ -39,14 +45,14 @@ class SchemaNormalizer
             }
             throw new \DomainException('Unsupported object ' . get_class($value));
         }
-
+        /** @phpstan-ignore-next-line not too sure we always terminate before here */
         throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
     }
 
 
     /**
      * @param object $value
-     * @return array<integer,int,bool,float,string,array>
+     * @return array<integer,int|bool|float|string|array<mixed>|null>
      */
     private function convertCollection(object $value): array
     {
@@ -62,7 +68,7 @@ class SchemaNormalizer
 
     /**
      * @param object $value
-     * @return array<string,int,bool,float,string,array>
+     * @return array<string,int|bool|float|string|array<mixed>|null>
      */
     private function convertValueObject(object $value): array
     {

@@ -26,7 +26,7 @@ final class OpenApiDocumentRepository
     protected array $rootObjectConfiguration;
 
     /**
-     * @var array<string,array{name:string, classNames: string[]}>
+     * @var array<string,array{name:string, classNames: class-string[]}>
      */
     #[Flow\InjectConfiguration(path: 'documents')]
     protected array $documentConfiguration;
@@ -45,6 +45,10 @@ final class OpenApiDocumentRepository
         $documentName = $this->documentConfiguration[$name]['name'] ?? '';
         $documentClassNamePatterns = $this->documentConfiguration[$name]['classNames'];
 
-        return $this->documentFactory->createOpenApiDocumentFromNameAncClassNamePattern($documentName, $documentClassNamePatterns, $this->rootObjectConfiguration);
+        return $this->documentFactory->createOpenApiDocumentFromNameAndClassNamePattern(
+            $documentName,
+            $documentClassNamePatterns,
+            $this->rootObjectConfiguration
+        );
     }
 }

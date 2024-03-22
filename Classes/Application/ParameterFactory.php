@@ -14,16 +14,16 @@ use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 
 #[Flow\Scope('singleton')]
-class ParameterFactory
+readonly class ParameterFactory
 {
     public function __construct(
-        private readonly SchemaDenormalizer $denormalizer
+        private SchemaDenormalizer $denormalizer
     ) {
     }
 
     /**
      * @param class-string $className
-     * @return array<string,object|bool|int|string|float|null>
+     * @return array<string,array<mixed>|object|bool|int|string|float|null>
      */
     public function resolveParameters(string $className, string $methodName, ActionRequest $request): array
     {

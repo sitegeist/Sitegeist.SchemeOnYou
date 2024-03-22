@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain;
 
 use Neos\Flow\Mvc\Routing\Dto\ResolveContext;
-use Neos\Flow\Mvc\Routing\Dto\RouteContext;
 use Neos\Flow\Mvc\Routing\Dto\RouteParameters;
 use Neos\Flow\ObjectManagement\ObjectManager;
 use Neos\Flow\Reflection\ClassReflection;
 use Neos\Flow\Reflection\MethodReflection;
 use Neos\Flow\Reflection\ReflectionService;
-use Neos\Http\Factories\UriFactory;
 use Neos\Utility\Arrays;
 use Psr\Http\Message\UriFactoryInterface;
 use Sitegeist\SchemeOnYou\Application\OpenApiController;
@@ -23,29 +21,35 @@ use Sitegeist\SchemeOnYou\Domain\Path\OpenApiParameterCollection;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathCollection;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathItem;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiRequestBody;
-use Sitegeist\SchemeOnYou\Domain\Path\OpenApiResponse;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiResponses;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 use Sitegeist\SchemeOnYou\Domain\Schema\IsSupported;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
 use Neos\Flow\Mvc\Routing\Router;
 
-class OpenApiDocumentFactory
+readonly class OpenApiDocumentFactory
 {
     public function __construct(
-        private readonly ReflectionService $reflectionService,
-        private readonly Router $router,
-        private readonly ObjectManager $objectManager,
-        private readonly UriFactoryInterface $uriFactory,
+        private ReflectionService $reflectionService,
+        private Router $router,
+        private ObjectManager $objectManager,
+        private UriFactoryInterface $uriFactory,
     ) {
     }
 
-    public function createOpenApiDocumentFromNameAncClassNamePattern(string $documentName, array $documentClassNamePatterns, array $rootObjectConfiguration): OpenApiDocument
-    {
+    /**
+     * @param array<class-string> $documentClassNamePatterns
+     * @param array<mixed> $rootObjectConfiguration
+     */
+    public function createOpenApiDocumentFromNameAndClassNamePattern(
+        string $documentName,
+        array $documentClassNamePatterns,
+        array $rootObjectConfiguration
+    ): OpenApiDocument {
         $requiredSchemaClasses = [];
         $openApiControllers = $this->reflectionService->getAllSubClassNamesForClass(OpenApiController::class);
 
-        $pathes = new OpenApiPathCollection();
+        $paths = new OpenApiPathCollection();
 
         foreach ($openApiControllers as $className) {
             // only include classes that match the $classNamePatterns
@@ -66,7 +70,7 @@ class OpenApiDocumentFactory
                     continue;
                 }
                 $methodReturnType = $methodReflection->getReturnType();
-                if ($methodReturnType instanceof \ReflectionNamedType && IsSupported::isSatisfiedByReflectionType($methodReturnType)) {
+                if ($methodReturnType instanceof \ReflectionNamedType && class_exists($methodReturnType->getName()) && IsSupported::isSatisfiedByReflectionType($methodReturnType)) {
                     $requiredSchemaClasses[] = $methodReturnType->getName();
                 }
                 foreach ($methodReflection->getParameters() as $parameterReflection) {
@@ -74,12 +78,12 @@ class OpenApiDocumentFactory
                     if ($parameterType instanceof \ReflectionNamedType) {
                         if (in_array($parameterType->getName(), ['int', 'bool', 'string', 'float', \DateTime::class, \DateTimeInterface::class, \DateInterval::class])) {
                             continue;
-                        } elseif (IsSupported::isSatisfiedByReflectionType($parameterType)) {
+                        } elseif (class_exists($parameterType->getName()) && IsSupported::isSatisfiedByReflectionType($parameterType)) {
                             $requiredSchemaClasses[] = $parameterType->getName();
                         }
                     }
                 }
-                $pathes = $pathes->merge($this->createPathesFromPathAndMethodReflection($classReflection, $methodReflection));
+                $paths = $paths->merge($this->createPathsFromPathAndMethodReflection($classReflection, $methodReflection));
             }
 
             $requiredSchemaClasses = $this->addConstructorArgumentTypesToRequiredSchemaClasses($requiredSchemaClasses);
@@ -93,24 +97,27 @@ class OpenApiDocumentFactory
 
         return OpenApiDocument::createFromConfiguration(
             $rootObjectConfiguration,
-            $pathes,
+            $paths,
             new OpenApiComponents(
                 OpenApiSchemaCollection::fromClassNames($requiredSchemaClasses)
             )
         );
     }
 
-    private function createPathesFromPathAndMethodReflection(ClassReflection $classReflection, MethodReflection $methodReflection): OpenApiPathCollection
+    private function createPathsFromPathAndMethodReflection(ClassReflection $classReflection, MethodReflection $methodReflection): OpenApiPathCollection
     {
         /**
-         * @var OpenApiPathItem[] $pathes
+         * @var OpenApiPathItem[] $paths
          */
-        $pathes = [];
+        $paths = [];
 
         $className = $classReflection->getName();
         $methodName = $methodReflection->getName();
 
         $controllerObjectName = $this->objectManager->getCaseSensitiveObjectName($className);
+        if (!$controllerObjectName) {
+            throw new \DomainException('Class ' . $className . ' is unknown to the objet manager and thus cannot be processed');
+        }
         $controllerPackageKey = $this->objectManager->getPackageKeyByObjectName($controllerObjectName);
         $controllerPackageNamespace = str_replace('.', '\\', $controllerPackageKey);
         if (!str_ends_with($className, 'Controller')) {
@@ -195,7 +202,7 @@ class OpenApiDocumentFactory
         foreach ($this->router->getRoutes() as $route) {
             if ($route->resolves($resolveContext)) {
                 foreach ($route->getHttpMethods() as $httpMethod) {
-                    $pathes[] = new OpenApiPathItem(
+                    $paths[] = new OpenApiPathItem(
                         new PathDefinition('/' . $route->getUriPattern()),
                         HttpMethod::from(strtolower($httpMethod)),
                         new OpenApiParameterCollection(...$parameters),
@@ -206,11 +213,14 @@ class OpenApiDocumentFactory
             }
         }
 
-        return new OpenApiPathCollection(...$pathes);
+        return new OpenApiPathCollection(...$paths);
     }
 
     /**
      * Find all classes that are used in constructor arguments and add those to the required schemas
+     *
+     * @param array<class-string> $requiredSchemaClasses
+     * @return array<class-string>
      */
     private function addConstructorArgumentTypesToRequiredSchemaClasses(array $requiredSchemaClasses): array
     {
@@ -242,12 +252,12 @@ class OpenApiDocumentFactory
                             if (in_array($parameterSubtypeName, $requiredSchemaClasses)) {
                                 continue;  // already checked
                             }
-                            if (class_exists($parameterSubtypeName) && IsSupported::isSatisfiedByReflectionType($parameterSubtypeName)) {
+                            if (class_exists($parameterSubtypeName) && IsSupported::isSatisfiedByReflectionType($parameterSubType)) {
                                 $requiredSchemaClasses[] = $parameterSubtypeName;
                                 $classesToCheckStack[] = $parameterSubtypeName;
                             }
                         } else {
-                            throw new \DomainException(sprintf('Parameter %s has unsupported type %s in class %s', $constructorParameter->getName(), $parameterTypeName, $className));
+                            throw new \DomainException(sprintf('Parameter %s has unsupported type %s in class %s', $constructorParameter->getName(), $parameterSubType, $className));
                         }
                     }
                 } elseif ($parameterType instanceof \ReflectionIntersectionType) {

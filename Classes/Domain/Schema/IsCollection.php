@@ -9,6 +9,9 @@ use Neos\Flow\Annotations as Flow;
 #[Flow\Proxy(false)]
 final class IsCollection
 {
+    /**
+     * @param class-string $className
+     */
     public static function isSatisfiedByClassName(string $className): bool
     {
         $reflection = new \ReflectionClass($className);

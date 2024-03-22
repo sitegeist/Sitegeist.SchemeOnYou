@@ -1,27 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 trait IsTrait
 {
+    /**
+     * @var array<class-string,bool>
+     */
     private static array $isCollectionResults = [];
+
+    /**
+     * @var array<class-string,bool>
+     */
     private static array $isValueObjectResults = [];
 
+    /**
+     * @param class-string $className
+     */
     protected function isCollectionClassName(string $className): bool
     {
-        if (array_key_exists($className, self::$isCollectionResults)) {
-            return self::$isCollectionResults[$className];
-        }
-        self::$isCollectionResults[$className] = IsCollection::isSatisfiedByClassName($className);
-        return self::$isCollectionResults[$className];
+        return self::$isCollectionResults[$className] ??= IsCollection::isSatisfiedByClassName($className);
     }
 
+    /**
+     * @param class-string $className
+     */
     protected function isValueObjectClassName(string $className): bool
     {
-        if (array_key_exists($className, self::$isValueObjectResults)) {
-            return self::$isValueObjectResults[$className];
-        }
-        self::$isValueObjectResults[$className] = IsValueObject::isSatisfiedByClassName($className);
-        return self::$isValueObjectResults[$className];
+        return self::$isValueObjectResults[$className] ??= IsValueObject::isSatisfiedByClassName($className);
     }
 }

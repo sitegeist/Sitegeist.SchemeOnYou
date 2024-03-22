@@ -7,10 +7,12 @@ namespace Sitegeist\SchemeOnYou\Tests\Unit\Application;
 use GuzzleHttp\Psr7\ServerRequest;
 use GuzzleHttp\Psr7\Uri;
 use Neos\Flow\Mvc\ActionRequest;
+use Neos\Http\Factories\UriFactory;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Application\ParameterFactory;
 use Sitegeist\SchemeOnYou\Domain\Metadata\HttpMethod;
+use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\AnotherEndpointQuery;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\EndpointQuery;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\PathEndpoint;
@@ -28,9 +30,10 @@ final class ParameterFactoryTest extends TestCase
         string $methodName,
         array $expectedParameters
     ): void {
+        $subject = new ParameterFactory(new SchemaDenormalizer(new UriFactory()));
         Assert::assertEquals(
             $expectedParameters,
-            ParameterFactory::resolveParameters($className, $methodName, $request)
+            $subject->resolveParameters($className, $methodName, $request)
         );
     }
 
