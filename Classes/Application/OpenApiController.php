@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Application;
 
-use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\ActionResponse;
 use Neos\Flow\Mvc\Controller\Arguments;
 use Neos\Flow\Mvc\Controller\ControllerContext;
 use Neos\Flow\Mvc\Controller\ControllerInterface;
 use Neos\Flow\Mvc\Routing\UriBuilder;
+use Sitegeist\SchemeOnYou\Domain\Metadata\PathResponse;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
 
 abstract class OpenApiController implements ControllerInterface
@@ -54,6 +54,9 @@ abstract class OpenApiController implements ControllerInterface
         $parameters = $this->parameterFactory->resolveParameters(get_class($this), $actionName, $this->request);
 
         $result = $this->$actionName(...$parameters);
+
+        $responseMetadata = PathResponse::fromReflectionClass(new \ReflectionClass($result));
+        $this->response->setStatusCode($responseMetadata->statusCode);
 
         $this->response->setContent(json_encode($this->schemaNormalizer->normalizeValue($result), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
     }
