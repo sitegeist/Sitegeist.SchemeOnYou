@@ -31,9 +31,11 @@ enum ParameterStyle: string implements \JsonSerializable
     }
 
     /**
-     * @return object|array<mixed>|int|bool|string|float|null
+     * @todo really?
+     * @param array<mixed>|int|bool|string|float|null $parameterValue
+     * @return array<mixed>|int|bool|string|float|null
      */
-    public function decodeParameterValue(object|array|int|bool|string|float|null $parameterValue): object|array|int|bool|string|float|null
+    public function decodeParameterValue(array|int|bool|string|float|null $parameterValue): array|int|bool|string|float|null
     {
         return match ($this) {
             self::STYLE_DEEP_OBJECT => match (true) {

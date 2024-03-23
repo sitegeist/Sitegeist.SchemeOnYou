@@ -45,12 +45,12 @@ readonly class ParameterFactory
             $parameterAttribute = ParameterAttribute::tryFromReflectionParameter($parameter);
             if ($parameterAttribute) {
                 $parameterValueFromRequest = $parameterAttribute->in->resolveParameterFromRequest($request, $parameter->name);
+                $parameterValueFromRequest = $parameterAttribute->style->decodeParameterValue($parameterValueFromRequest);
             } else {
                 $requestBodyAttribute = RequestBody::fromReflectionParameter($parameter);
                 $parameterValueFromRequest = $requestBodyAttribute->contentType->resolveParameterFromRequest($request, $parameter->name);
+                $parameterValueFromRequest = $requestBodyAttribute->contentType->decodeParameterValue($parameterValueFromRequest);
             }
-
-            $parameterValueFromRequest = $parameterAttribute->style->decodeParameterValue($parameterValueFromRequest);
 
             $parameters[$parameter->name] = $this->denormalizer->denormalizeValue($parameterValueFromRequest, $type->getName());
         }

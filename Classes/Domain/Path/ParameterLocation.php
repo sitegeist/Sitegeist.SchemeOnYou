@@ -15,9 +15,9 @@ enum ParameterLocation: string implements \JsonSerializable
 
     /**
      * @todo really?
-     * @return object|array<mixed>|int|bool|string|float|null
+     * @return array<mixed>|int|bool|string|float|null
      */
-    public function resolveParameterFromRequest(ActionRequest $request, string $parameterName): object|array|int|bool|string|float|null
+    public function resolveParameterFromRequest(ActionRequest $request, string $parameterName): array|int|bool|string|float|null
     {
         return match ($this) {
             ParameterLocation::LOCATION_PATH => $request->getArgument($parameterName),

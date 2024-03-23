@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
+use Psr\Http\Message\UriInterface;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaMetadata;
 
 #[Flow\Proxy(false)]
@@ -150,11 +151,29 @@ final readonly class OpenApiSchema implements \JsonSerializable
         $constructorParameters = $reflectionClass->getConstructor()?->getParameters() ?: [];
         if (count($constructorParameters) === 1) {
             $singleConstructorParameter = $constructorParameters[array_key_first($constructorParameters)];
-            if ($singleConstructorParameter->name === 'value') {
+            if (
+                $singleConstructorParameter->getType() instanceof \ReflectionNamedType
+                && $singleConstructorParameter->name === 'value'
+            ) {
                 return new self(
                     name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
-                    type: SchemaType::selfOrReferenceFromReflectionNamedType($singleConstructorParameter->getType())->typeDeclaration['type'],
+                    type: match ($singleConstructorParameter->getType()->getName()) {
+                        'string', 'DateTimeImmutable', 'DateTime', 'DateInterval', UriInterface::class => 'string',
+                        'int' => 'integer',
+                        'float' => 'number',
+                        default => throw new \DomainException(
+                            'Unsupported type ' . $singleConstructorParameter->getType()->getName()
+                            . ' for single constructor parameter "' . $singleConstructorParameter->name . '"'
+                            . ' of class ' . $reflectionClass->name
+                        )
+                    },
                     description: $schemaMetadata->description,
+                    format: match ($singleConstructorParameter->getType()->getName()) {
+                        'DateTimeImmutable' => 'date-time',
+                        'DateInterval' => 'duration',
+                        UriInterface::class => 'uri',
+                        default => null
+                    },
                 );
             }
         }
