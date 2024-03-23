@@ -51,7 +51,7 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 'string',
                 $definitionMetadata->description,
                 array_map(
-                /** @phpstan-ignore-next-line parameter and return types are enforced before */
+                    /** @phpstan-ignore-next-line parameter and return types are enforced before */
                     fn(\ReflectionEnumBackedCase $case): string => $case->getBackingValue(),
                     $reflection->getCases()
                 )
@@ -61,7 +61,7 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 'int',
                 $definitionMetadata->description,
                 array_map(
-                /** @phpstan-ignore-next-line parameter and return types are enforced before */
+                    /** @phpstan-ignore-next-line parameter and return types are enforced before */
                     fn(\ReflectionEnumBackedCase $case): int => $case->getBackingValue(),
                     $reflection->getCases()
                 )
