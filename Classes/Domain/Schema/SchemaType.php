@@ -6,7 +6,6 @@ namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
 use Psr\Http\Message\UriInterface;
-use Ramsey\Uuid\UuidInterface;
 
 #[Flow\Proxy(false)]
 final readonly class SchemaType implements \JsonSerializable
@@ -71,10 +70,6 @@ final readonly class SchemaType implements \JsonSerializable
             UriInterface::class => [
                 'type' => 'string',
                 'format' => 'uri'
-            ],
-            UuidInterface::class => [
-                'type' => 'string',
-                'format' => 'uuid'
             ],
             default => match (true) {
                 class_exists($reflectionType->getName()), enum_exists($reflectionType->getName())
