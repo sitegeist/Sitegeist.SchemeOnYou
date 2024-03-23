@@ -19,8 +19,8 @@ Sitegeist:
       tags: {}
       externalDocs: {}
 
-    # the seperate dictionaries that may be rendered
-    # example: {name: string, classes: [string]}
+    # the separate dictionaries that may be rendered
+    # example: {name: string, classNames: [string]}
     documents: []
 
 
