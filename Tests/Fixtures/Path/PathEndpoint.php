@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Tests\Fixtures\Path;
 
-use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
+use Sitegeist\SchemeOnYou\Domain\Path\ParameterStyle;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 
-#[Flow\Proxy(false)]
 final readonly class PathEndpoint
 {
     #[OpenApi\Path(pathDefinition: new PathDefinition('/my/null-endpoint'), httpMethod: OpenApi\HttpMethod::METHOD_GET)]
-    public function nullEndpointMethod(): NullResponse
+    public function nullEndpointMethod(): EndpointResponse
     {
-        return new NullResponse();
+        return new EndpointResponse('acknowledged');
     }
 
     #[OpenApi\Path(
@@ -64,7 +63,7 @@ final readonly class PathEndpoint
     public function multipleParametersAndResponsesEndpointMethod(
         #[OpenApi\Parameter(ParameterLocation::LOCATION_PATH)]
         EndpointQuery $endpointQuery,
-        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY, ParameterStyle::STYLE_DEEP_OBJECT)]
         AnotherEndpointQuery $anotherEndpointQuery
     ): EndpointResponse|EndpointQueryFailed {
         return $anotherEndpointQuery->pleaseFail

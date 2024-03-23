@@ -11,6 +11,7 @@ use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
 use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBodyContentType;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiRequestBody;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
+use Sitegeist\SchemeOnYou\Domain\Path\ParameterStyle;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiReference;
 use Sitegeist\SchemeOnYou\Domain\Metadata\HttpMethod;
@@ -52,10 +53,10 @@ final class OpenApiPathItemTest extends TestCase
                 new OpenApiResponses(
                     new OpenApiResponse(
                         statusCode: 200,
-                        description: 'the query resulted in null',
+                        description: 'the query was successful',
                         content: [
                             'application/json' => [
-                                'schema' => new OpenApiReference('#/components/schemas/NullResponse')
+                                'schema' => new OpenApiReference('#/components/schemas/EndpointResponse')
                             ]
                         ]
                     )
@@ -71,11 +72,13 @@ final class OpenApiPathItemTest extends TestCase
                 HttpMethod::METHOD_GET,
                 new OpenApiParameterCollection(
                     new OpenApiParameter(
-                        'endpointQuery',
-                        ParameterLocation::LOCATION_QUERY,
-                        'the endpoint query',
-                        true,
-                        new OpenApiReference('#/components/schemas/EndpointQuery')
+                        name: 'endpointQuery',
+                        in: ParameterLocation::LOCATION_QUERY,
+                        description: 'the endpoint query',
+                        required: true,
+                        schema: new OpenApiReference('#/components/schemas/EndpointQuery'),
+                        content: null,
+                        style: ParameterStyle::STYLE_FORM,
                     )
                 ),
                 null,
@@ -133,19 +136,21 @@ final class OpenApiPathItemTest extends TestCase
                         in: ParameterLocation::LOCATION_PATH,
                         description: 'the endpoint query',
                         required: true,
-                        schema: new OpenApiReference('#/components/schemas/EndpointQuery')
+                        schema: new OpenApiReference('#/components/schemas/EndpointQuery'),
+                        style: ParameterStyle::STYLE_SIMPLE,
                     ),
                     new OpenApiParameter(
                         name: 'anotherEndpointQuery',
                         in: ParameterLocation::LOCATION_QUERY,
                         description: 'another endpoint query',
                         required: true,
+                        schema: new OpenApiReference('#/components/schemas/AnotherEndpointQuery'),
                         content: [
                             'application/json' => [
                                 'schema' => new OpenApiReference('#/components/schemas/AnotherEndpointQuery')
                             ]
                         ],
-                        style: 'deepObject'
+                        style: ParameterStyle::STYLE_DEEP_OBJECT,
                     )
                 ),
                 null,

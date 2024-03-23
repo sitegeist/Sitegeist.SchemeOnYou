@@ -60,7 +60,9 @@ final class ParameterFactoryTest extends TestCase
                     HttpMethod::METHOD_GET->value,
                     new Uri('https://acme.site/?endpointQuery=de')
                 ))->withQueryParams([
-                    'endpointQuery' => 'de'
+                    'endpointQuery' => [
+                        'language' => 'de'
+                    ]
                 ])
             ),
             'className' => PathEndpoint::class,
@@ -101,7 +103,7 @@ final class ParameterFactoryTest extends TestCase
                 'anotherEndpointQuery' => '{"pleaseFail": true}'
             ])
         );
-        $multipleParametersRequest->setArgument('endpointQuery', 'de');
+        $multipleParametersRequest->setArgument('endpointQuery', ['language' => 'de']);
 
         yield 'withMultipleParameters' => [
             'request' => $multipleParametersRequest,

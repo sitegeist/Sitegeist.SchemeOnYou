@@ -176,10 +176,6 @@ final class OpenApiSchemaTest extends TestCase
                         'type' => 'string',
                         'format' => 'uri'
                     ]),
-                    'identifier' => new SchemaType([
-                        'type' => 'string',
-                        'format' => 'uuid'
-                    ]),
                 ],
                 required: [
                     'if',
@@ -189,7 +185,6 @@ final class OpenApiSchemaTest extends TestCase
                     'when',
                     'howLong',
                     'where',
-                    'identifier',
                 ]
             ),
         ];

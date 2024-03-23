@@ -6,6 +6,7 @@ namespace Sitegeist\SchemeOnYou\Domain\Metadata;
 
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
+use Sitegeist\SchemeOnYou\Domain\Path\ParameterStyle;
 
 /**
  * @see https://swagger.io/specification/#parameter-object
@@ -14,10 +15,14 @@ use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 #[\Attribute(\Attribute::TARGET_PARAMETER)]
 final readonly class Parameter
 {
+    public ParameterStyle $style;
+
     public function __construct(
         public ParameterLocation $in,
+        ?ParameterStyle $style = null,
         public ?string $description = null,
     ) {
+        $this->style = $style ?: ParameterStyle::createDefaultForParameterLocation($this->in);
     }
 
     public static function tryFromReflectionParameter(\ReflectionParameter $reflectionParameter): ?self

@@ -28,7 +28,7 @@ final readonly class OpenApiParameter implements \JsonSerializable
         ?bool $required = null,
         public OpenApiSchema|OpenApiReference|null $schema = null,
         public ?array $content = null,
-        public ?string $style = null,
+        public ?ParameterStyle $style = null,
     ) {
         $this->required = $in === ParameterLocation::LOCATION_PATH ? true : $required;
     }
@@ -52,6 +52,7 @@ final readonly class OpenApiParameter implements \JsonSerializable
                 description: $parameterAttribute->description ?: '',
                 required: !$reflectionParameter->allowsNull(),
                 schema: $parameterSchema->toReference(),
+                style: $parameterAttribute->style
             );
         }
         if (!class_exists($type)) {
@@ -81,15 +82,15 @@ final readonly class OpenApiParameter implements \JsonSerializable
             in: $parameterAttribute->in,
             description: $parameterAttribute->description ?: $schemaAttribute->description,
             required: !$reflectionParameter->isDefaultValueAvailable(),
-            schema: $parameterSchema->type === 'object' ? null : $parameterSchema->toReference(),
-            content: $parameterSchema->type === 'object'
+            schema: $parameterSchema->type === 'object' ? $parameterSchema->toReference() : null,
+            content: $parameterAttribute->style === ParameterStyle::STYLE_DEEP_OBJECT
                 ? [
                     'application/json' => [
                         'schema' => $parameterSchema->toReference()
                     ]
                 ]
                 : null,
-            style: $parameterSchema->type === 'object' ? 'deepObject' : null
+            style: $parameterAttribute->style
         );
     }
 
