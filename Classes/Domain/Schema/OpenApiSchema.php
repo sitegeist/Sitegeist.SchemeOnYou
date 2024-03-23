@@ -145,7 +145,19 @@ final readonly class OpenApiSchema implements \JsonSerializable
      */
     private static function fromObjectReflectionClass(\ReflectionClass $reflectionClass): self
     {
-        $definitionMetadata = SchemaMetadata::fromReflectionClass($reflectionClass);
+        $schemaMetadata = SchemaMetadata::fromReflectionClass($reflectionClass);
+
+        $constructorParameters = $reflectionClass->getConstructor()?->getParameters() ?: [];
+        if (count($constructorParameters) === 1) {
+            $singleConstructorParameter = $constructorParameters[array_key_first($constructorParameters)];
+            if ($singleConstructorParameter->name === 'value') {
+                return new self(
+                    name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
+                    type: SchemaType::selfOrReferenceFromReflectionNamedType($singleConstructorParameter->getType())->typeDeclaration['type'],
+                    description: $schemaMetadata->description,
+                );
+            }
+        }
 
         $properties = [];
         $required = [];
@@ -199,9 +211,9 @@ final readonly class OpenApiSchema implements \JsonSerializable
         }
 
         return new self(
-            name: $definitionMetadata->name ?: $reflectionClass->getShortName(),
+            name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
             type: 'object',
-            description: $definitionMetadata->description,
+            description: $schemaMetadata->description,
             properties: $properties,
             required: $required
         );
