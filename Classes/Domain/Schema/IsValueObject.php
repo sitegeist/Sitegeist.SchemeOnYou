@@ -27,7 +27,11 @@ final class IsValueObject
             return true;
         }
         if ($reflection->isReadOnly() === false) {
-            return false;
+            foreach ($reflection->getProperties() as $property) {
+                if (!$property->isReadOnly()) {
+                    return false;
+                }
+            }
         }
 
         $parameters = $reflection->getConstructor()?->getParameters() ?: [];
