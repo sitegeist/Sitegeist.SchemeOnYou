@@ -61,7 +61,7 @@ final class OpenApiSchemaTest extends TestCase
             'className' => ImportantNumber::class,
             'expectedDefinition' => new OpenApiSchema(
                 'ImportantNumber',
-                'int',
+                'integer',
                 'important numbers only',
                 [
                     23,
@@ -83,7 +83,7 @@ final class OpenApiSchemaTest extends TestCase
             'className' => QuantitativeValue::class,
             'expectedDefinition' => new OpenApiSchema(
                 'QuantitativeValue',
-                'int',
+                'integer',
                 'see https://schema.org/QuantitativeValue',
             ),
         ];

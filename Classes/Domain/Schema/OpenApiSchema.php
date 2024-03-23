@@ -58,7 +58,7 @@ final readonly class OpenApiSchema implements \JsonSerializable
             ),
             'int' => new self(
                 $definitionMetadata->name ?: $reflection->getShortName(),
-                'int',
+                'integer',
                 $definitionMetadata->description,
                 array_map(
                     /** @phpstan-ignore-next-line parameter and return types are enforced before */
