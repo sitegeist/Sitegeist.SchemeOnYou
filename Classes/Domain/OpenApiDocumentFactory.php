@@ -165,8 +165,9 @@ class OpenApiDocumentFactory
         $parameters = [];
         foreach ($methodReflection->getParameters() as $reflectionParameter) {
             $parameterProcessed = false;
-            foreach ($reflectionParameter->getAttributes() as $attribute) {
-                if ($attribute->getName() === RequestBody::class) {
+
+            if ($bodyAttributes = $reflectionParameter->getAttributes(RequestBody::class)) {
+                foreach ($bodyAttributes as $attribute) {
                     if ($parameterProcessed) {
                         throw new \DomainException(
                             'Method parameter ' . $methodReflection->getDeclaringClass()->name
@@ -183,7 +184,9 @@ class OpenApiDocumentFactory
                     }
                     $requestBody = OpenApiRequestBody::fromReflectionParameter($reflectionParameter);
                     $parameterProcessed = true;
-                } elseif ($attribute->getName() === Parameter::class) {
+                }
+            } elseif ($parameterAttributes = $reflectionParameter->getAttributes(Parameter::class)) {
+                foreach ($parameterAttributes as $attribute) {
                     if ($parameterProcessed) {
                         throw new \DomainException(
                             'Method parameter ' . $methodReflection->getDeclaringClass()->name
@@ -195,13 +198,8 @@ class OpenApiDocumentFactory
                     $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
                     $parameterProcessed = true;
                 }
-            }
-            if (!$parameterProcessed) {
-                throw new \DomainException(
-                    'Method parameter ' . $methodReflection->getDeclaringClass()->name
-                    . '::' . $methodReflection->getName() . '::' . $reflectionParameter->name
-                    . ' must be attributed as either OpenAPI Parameter or RequestBody but was not attributed at all'
-                );
+            } else {
+                $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
             }
         }
 
