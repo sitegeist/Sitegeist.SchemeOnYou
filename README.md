@@ -14,10 +14,29 @@ by our employer http://www.sitegeist.de.*
 
 ## Build APIs 
 
-### OpenApi Controllers 
+### Configure OpenAPI Documents
+
+The package allows to specify multiple OpenApi documents. Each class that extends `\Sitegeist\SchemeOnYou\Application\OpenApiController`
+and matches one of the configured `classNames` patterns will be included into the api document.
+
+```yaml
+Sitegeist:
+  SchemeOnYou:
+    documents:
+      example:
+        name: "Example OpenApi document"
+        classNames:
+          - 'Vendor\Example\Controller\*'
+```
+
+The configured OpenApi Documents spec can than be rendered via cli `./flow openapidocument:render {name}`
+or via url-path `/openapi/document/{name}`.
+
+### Create OpenApi Controllers 
 
 OpenApi endpoints that are included in the generated documents are all `*Action` methods inside controllers that
-extends the `Sitegeist\SchemeOnYou\Application\OpenApiController` and are reachable via Routing.
+extends the `Sitegeist\SchemeOnYou\Application\OpenApiController` and are reachable via Routing. 
+Controllers must specify the type of each parameter and also the return type. 
 
 _!!! For now union-types are only allowed in return values of Action methods. !!!_
 
@@ -33,7 +52,7 @@ use Vendor\Example\Dto;
 
 class ExampleOpenApiController extends OpenApiController
 {
-    public function indexAction(Query $query): Dto\AddressCollection|Dto\NotFoundResponse {
+    public function indexAction(Query $query, string $language = 'de'): Dto\AddressCollection|Dto\NotFoundResponse {
         ... 
     }
 }
@@ -50,24 +69,7 @@ The following PHP Attributes allow to specify the details of the parameter and s
   - `\Sitegeist\SchemeOnYou\Domain\Metadata\Response` the response Attribute allows to mark a dto with a status-code other than 200.
   - `\Sitegeist\SchemeOnYou\Domain\Metadata\Schema` the schema Attribute specifies a name and description for a DTO if that is not to be derived from the PHP name.
 
-## Render OpenAPI Documents
 
-The package allows to specify multiple OpenApi documents. Each class that extends `\Sitegeist\SchemeOnYou\Application\OpenApiController`
-and matches one of the configured `classNames` patterns will be included into the api spec.
-
-```yaml
-Sitegeist:
-  SchemeOnYou:
-    documents:
-      example:
-        name: "Example OpenApi document"
-        classNames:
-          - 'Vendor\Site\Controller\*'
-          - 'Vendor\Package\Controller\OpenApiController' 
-```
- 
-The configured OpenApi Documents spec can than be rendered via cli `./flow openapidocument:render {name}` 
-or via url-path `/openapi/document/{name}`.
 
 ## Supported Types
 
