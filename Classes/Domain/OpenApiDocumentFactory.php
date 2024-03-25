@@ -72,6 +72,12 @@ class OpenApiDocumentFactory
                 $methodReturnType = $methodReflection->getReturnType();
                 if ($methodReturnType instanceof \ReflectionNamedType && class_exists($methodReturnType->getName()) && IsSupported::isSatisfiedByReflectionType($methodReturnType)) {
                     $requiredSchemaClasses[] = $methodReturnType->getName();
+                } elseif ($methodReturnType instanceof \ReflectionUnionType) {
+                    foreach ($methodReturnType->getTypes() as $subtype) {
+                        if ($subtype instanceof \ReflectionNamedType && class_exists($subtype->getName()) && IsSupported::isSatisfiedByReflectionType($subtype)) {
+                            $requiredSchemaClasses[] = $subtype->getName();
+                        }
+                    }
                 }
                 foreach ($methodReflection->getParameters() as $parameterReflection) {
                     $parameterType = $parameterReflection->getType();

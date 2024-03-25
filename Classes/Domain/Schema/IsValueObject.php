@@ -38,6 +38,7 @@ final class IsValueObject
             }
             return false;
         }
+
         return true;
     }
 }
