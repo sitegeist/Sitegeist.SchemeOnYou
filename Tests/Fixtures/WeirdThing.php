@@ -19,7 +19,6 @@ final readonly class WeirdThing
         public float $howMuchPrecisely,
         public \DateTimeImmutable $when,
         public \DateInterval $howLong,
-        public UriInterface $where,
     ) {
     }
 }

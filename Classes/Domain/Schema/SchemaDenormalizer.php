@@ -6,18 +6,11 @@ namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Reflection\ClassReflection;
-use Psr\Http\Message\UriFactoryInterface;
-use Psr\Http\Message\UriInterface;
 
 #[Flow\Scope('singleton')]
 class SchemaDenormalizer
 {
     use IsTrait;
-
-    public function __construct(
-        private readonly UriFactoryInterface $uriFactory
-    ) {
-    }
 
     /**
      * @param int|bool|string|float|array<mixed>|null $value
@@ -61,11 +54,6 @@ class SchemaDenormalizer
             return match (true) {
                 is_string($value) => new \DateInterval($value),
                 default => throw new \DomainException('Can only denormalize \DateInterval from string')
-            };
-        } elseif ($targetType === UriInterface::class) {
-            return match (true) {
-                is_string($value) => $this->uriFactory->createUri($value),
-                default => throw new \DomainException('Can only denormalize UriInterface from string')
             };
         } elseif (
             // Enums are final, so is_a suffices

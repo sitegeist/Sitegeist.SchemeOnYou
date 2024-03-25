@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
-use Psr\Http\Message\UriInterface;
 
 #[Flow\Proxy(false)]
 final readonly class SchemaType implements \JsonSerializable
@@ -66,10 +65,6 @@ final readonly class SchemaType implements \JsonSerializable
             'DateInterval' => [
                 'type' => 'string',
                 'format' => 'duration'
-            ],
-            UriInterface::class => [
-                'type' => 'string',
-                'format' => 'uri'
             ],
             default => match (true) {
                 class_exists($reflectionType->getName()), enum_exists($reflectionType->getName())

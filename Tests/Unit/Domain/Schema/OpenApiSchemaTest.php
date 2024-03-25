@@ -172,10 +172,6 @@ final class OpenApiSchemaTest extends TestCase
                         'type' => 'string',
                         'format' => 'duration'
                     ]),
-                    'where' => new SchemaType([
-                        'type' => 'string',
-                        'format' => 'uri'
-                    ]),
                 ],
                 required: [
                     'if',
@@ -184,7 +180,6 @@ final class OpenApiSchemaTest extends TestCase
                     'howMuchPrecisely',
                     'when',
                     'howLong',
-                    'where',
                 ]
             ),
         ];

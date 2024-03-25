@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
-use Psr\Http\Message\UriInterface;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaMetadata;
 
 #[Flow\Proxy(false)]
@@ -158,7 +157,7 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 return new self(
                     name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
                     type: match ($singleConstructorParameter->getType()->getName()) {
-                        'string', 'DateTimeImmutable', 'DateTime', 'DateInterval', UriInterface::class => 'string',
+                        'string', 'DateTimeImmutable', 'DateTime', 'DateInterval' => 'string',
                         'int' => 'integer',
                         'float' => 'number',
                         default => throw new \DomainException(
@@ -171,7 +170,6 @@ final readonly class OpenApiSchema implements \JsonSerializable
                     format: match ($singleConstructorParameter->getType()->getName()) {
                         'DateTimeImmutable' => 'date-time',
                         'DateInterval' => 'duration',
-                        UriInterface::class => 'uri',
                         default => null
                     },
                 );

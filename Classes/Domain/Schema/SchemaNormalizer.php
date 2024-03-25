@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
-use Psr\Http\Message\UriInterface;
 
 #[Flow\Scope('singleton')]
 class SchemaNormalizer
@@ -34,8 +33,6 @@ class SchemaNormalizer
                 return $value->format(\DateTimeInterface::RFC3339);
             } elseif ($value instanceof \DateInterval) {
                 return $this->convertDateInterval($value);
-            } elseif ($value instanceof UriInterface) {
-                return (string) $value;
             } elseif ($value instanceof \BackedEnum) {
                 return $value->value;
             } elseif ($this->isCollectionClassName(get_class($value))) {
