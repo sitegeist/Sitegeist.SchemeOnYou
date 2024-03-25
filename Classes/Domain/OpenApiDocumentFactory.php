@@ -206,10 +206,15 @@ class OpenApiDocumentFactory
         }
 
         foreach ($this->router->getRoutes() as $route) {
+            $path = str_replace(
+                ['{@package}', '{@subpackage}', '{@controller}', '{@action}'],
+                [$controllerPackageKey, $subPackage, $controller, $action],
+                $route->getUriPattern()
+            );
             if ($route->resolves($resolveContext)) {
                 foreach ($route->getHttpMethods() as $httpMethod) {
                     $paths[] = new OpenApiPathItem(
-                        new PathDefinition('/' . $route->getUriPattern()),
+                        new PathDefinition('/' . $path),
                         HttpMethod::from(strtolower($httpMethod)),
                         new OpenApiParameterCollection(...$parameters),
                         $requestBody,
