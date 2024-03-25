@@ -37,14 +37,14 @@ class ParameterFactory
                 throw new \DomainException('Nullable types are not supported yet', 1709721755);
             }
 
-            $parameterAttribute = ParameterAttribute::tryFromReflectionParameter($parameter);
-            if ($parameterAttribute) {
-                $parameterValueFromRequest = $parameterAttribute->in->resolveParameterFromRequest($request, $parameter->name);
-                $parameterValueFromRequest = $parameterAttribute->style->decodeParameterValue($parameterValueFromRequest);
-            } else {
-                $requestBodyAttribute = RequestBody::fromReflectionParameter($parameter);
+            $requestBodyAttribute = RequestBody::tryFromReflectionParameter($parameter);
+            if ($requestBodyAttribute) {
                 $parameterValueFromRequest = $requestBodyAttribute->contentType->resolveParameterFromRequest($request, $parameter->name);
                 $parameterValueFromRequest = $requestBodyAttribute->contentType->decodeParameterValue($parameterValueFromRequest);
+            } else {
+                $parameterAttribute = ParameterAttribute::fromReflectionParameter($parameter);
+                $parameterValueFromRequest = $parameterAttribute->in->resolveParameterFromRequest($request, $parameter->name);
+                $parameterValueFromRequest = $parameterAttribute->style->decodeParameterValue($parameterValueFromRequest);
             }
 
             $parameters[$parameter->name] = SchemaDenormalizer::denormalizeValue($parameterValueFromRequest, $type->getName());
