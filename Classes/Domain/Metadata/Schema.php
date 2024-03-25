@@ -25,13 +25,13 @@ final readonly class Schema
         if (count($definitionReflections) === 0) {
             return new self(
                 '',
-                $reflection->getShortName(),
+                str_replace('\\', '_', $reflection->getName()),
             );
         } elseif (count($definitionReflections) === 1) {
             $arguments = $definitionReflections[0]->getArguments();
             return new self(
                 $arguments['description'] ?? $arguments[0],
-                $arguments['name'] ?? $arguments[1] ?? $reflection->getShortName(),
+                $arguments['name'] ?? $arguments[1] ?? str_replace('\\', '_', $reflection->getName()),
             );
         }
         throw new \DomainException(

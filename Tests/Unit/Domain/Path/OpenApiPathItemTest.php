@@ -56,7 +56,7 @@ final class OpenApiPathItemTest extends TestCase
                         description: 'the query was successful',
                         content: [
                             'application/json' => [
-                                'schema' => new OpenApiReference('#/components/schemas/EndpointResponse')
+                                'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointResponse')
                             ]
                         ]
                     )
@@ -76,7 +76,7 @@ final class OpenApiPathItemTest extends TestCase
                         in: ParameterLocation::LOCATION_QUERY,
                         description: 'the endpoint query',
                         required: true,
-                        schema: new OpenApiReference('#/components/schemas/EndpointQuery'),
+                        schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQuery'),
                         content: null,
                         style: ParameterStyle::STYLE_FORM,
                     )
@@ -88,7 +88,7 @@ final class OpenApiPathItemTest extends TestCase
                         description: 'the query was successful',
                         content: [
                             'application/json' => [
-                                'schema' => new OpenApiReference('#/components/schemas/EndpointResponse')
+                                'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointResponse')
                             ]
                         ]
                     ),
@@ -106,7 +106,7 @@ final class OpenApiPathItemTest extends TestCase
                 new OpenApiRequestBody(
                     contentType: RequestBodyContentType::CONTENT_TYPE_JSON,
                     schema: new OpenApiReference(
-                        '#/components/schemas/EndpointQuery'
+                        '#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQuery'
                     ),
                     required: true
                 ),
@@ -116,7 +116,7 @@ final class OpenApiPathItemTest extends TestCase
                         description: 'the query was successful',
                         content: [
                             'application/json' => [
-                                'schema' => new OpenApiReference('#/components/schemas/EndpointResponse')
+                                'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointResponse')
                             ]
                         ]
                     ),
@@ -136,7 +136,7 @@ final class OpenApiPathItemTest extends TestCase
                         in: ParameterLocation::LOCATION_PATH,
                         description: 'the endpoint query',
                         required: true,
-                        schema: new OpenApiReference('#/components/schemas/EndpointQuery'),
+                        schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQuery'),
                         style: ParameterStyle::STYLE_SIMPLE,
                     ),
                     new OpenApiParameter(
@@ -144,10 +144,10 @@ final class OpenApiPathItemTest extends TestCase
                         in: ParameterLocation::LOCATION_QUERY,
                         description: 'another endpoint query',
                         required: true,
-                        schema: new OpenApiReference('#/components/schemas/AnotherEndpointQuery'),
+                        schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_AnotherEndpointQuery'),
                         content: [
                             'application/json' => [
-                                'schema' => new OpenApiReference('#/components/schemas/AnotherEndpointQuery')
+                                'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_AnotherEndpointQuery')
                             ]
                         ],
                         style: ParameterStyle::STYLE_DEEP_OBJECT,
@@ -160,7 +160,7 @@ final class OpenApiPathItemTest extends TestCase
                         description: 'the query was successful',
                         content: [
                             'application/json' => [
-                                'schema' => new OpenApiReference('#/components/schemas/EndpointResponse')
+                                'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointResponse')
                             ]
                         ]
                     ),
@@ -169,7 +169,7 @@ final class OpenApiPathItemTest extends TestCase
                         description: 'the query failed',
                         content: [
                             'application/json' => [
-                                'schema' => new OpenApiReference('#/components/schemas/EndpointQueryFailed')
+                                'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQueryFailed')
                             ]
                         ]
                     )
