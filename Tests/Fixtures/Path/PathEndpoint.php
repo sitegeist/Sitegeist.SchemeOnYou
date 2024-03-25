@@ -45,6 +45,47 @@ final readonly class PathEndpoint
         return new EndpointResponse('Hello world ' . $name . ' (' . $number . ' ' . $numberWithDecimals . ' ' . ($switch ? 'on' : 'off') . ')');
     }
 
+    #[OpenApi\Path(pathDefinition: new PathDefinition('/my/scalar-parameter-endpoint'), httpMethod: OpenApi\HttpMethod::METHOD_GET)]
+    public function scalarParameterEndpointMethod(
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        string $message,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        int $number,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        float $weight,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        bool $switch,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        \DateTime $dateTime,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        \DateTime $dateTimeImmutable,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        \DateInterval $dateInterval,
+    ): EndpointResponse {
+        return new EndpointResponse('acknowledged');
+    }
+
+    #[OpenApi\Path(pathDefinition: new PathDefinition('/my/scalar-nullable-parameter-endpoint'), httpMethod: OpenApi\HttpMethod::METHOD_GET)]
+    public function scalarNullableParameterEndpointMethod(
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?string $message = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?int $number = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?float $weight = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?bool $switch = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?\DateTime $dateTime = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?\DateTime $dateTimeImmutable = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?\DateInterval $dateInterval = null,
+    ): EndpointResponse {
+        return new EndpointResponse('acknowledged');
+    }
+
+
     #[OpenApi\Path(
         pathDefinition: new PathDefinition('/my/request-body-endpoint'),
         httpMethod: OpenApi\HttpMethod::METHOD_POST
