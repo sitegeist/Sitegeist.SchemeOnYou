@@ -14,7 +14,41 @@ by our employer http://www.sitegeist.de.*
 
 ## Build APIs 
 
-... to be written ...
+### OpenApi Controllers 
+
+OpenApi endpoints that are included in the generated documents are all `*Action` methods inside controllers that
+extends the `Sitegeist\SchemeOnYou\Application\OpenApiController` and are reachable via Routing.
+
+_!!! For now union-types are only allowed in return values of Action methods. !!!_
+
+
+```php
+<?php
+declare(strict_types=1);
+namespace Vendor\Example\Controller;
+
+use Neos\Flow\Annotations as Flow;
+use Sitegeist\SchemeOnYou\Application\OpenApiController;
+use Vendor\Example\Dto;
+
+class ExampleOpenApiController extends OpenApiController
+{
+    public function indexAction(Query $query): Dto\AddressCollection|Dto\NotFoundResponse {
+        ... 
+    }
+}
+```
+
+### PHP-Attributes
+
+The following PHP Attributes allow to specify the details of the parameter and schema handling.
+
+- ControllerAction Parameters
+  - `\Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody` a single method parameter can be marked a being the request body
+  - `\Sitegeist\SchemeOnYou\Domain\Metadata\Parameter` all other parameters can be marked as beeing transferred via `query`, `path`, `header` or `cookie`. If a parameter has no attributes it is handled as `query` parameter. 
+- DTO Classes 
+  - `\Sitegeist\SchemeOnYou\Domain\Metadata\Response` the response Attribute allows to mark a dto with a status-code other than 200.
+  - `\Sitegeist\SchemeOnYou\Domain\Metadata\Schema` the schema Attribute specifies a name and description for a DTO if that is not to be derived from the PHP name.
 
 ## Render OpenAPI Documents
 
@@ -37,28 +71,86 @@ or via url-path `/openapi/document/{name}`.
 
 ## Supported Types
 
-The following property types are supported by this package. You will notice the absence of arrays here but ValueObjets
-and Collections allow much finer control about property conversion.
+The following property types are supported by this package. You will notice the absence of arrays here but Data-Transfer-Objects (DTO)
+and Collections which allow much finer control about property conversion.
 
-- **Scalar Values**: Values of type `string`, `int`, `float`, and `bool` are allowed. 
+### Scalar Values
 
-  _!!! `null` is not allowed as a single type. However, nullable values are allowed !!!_
-- **Objects with Class Exceptions**: Objects of type `\DateTime`, `\DateTimeImmutable`, `\DateInterval`, `\Psr\Http\Message\UriInterface` 
-  are allowed as exceptions.
-- **Backed Enums**: Value backed enums are supported by converting to and from the underlying value.
-- **Value Objects**: A supported value object has to adhere to the following rules:
-  - The class is `readonly`
-  - The class has a public constructor
-  - All parameters in the constructor are `public`, `promoted` and of a supported type
-  - The number of properties equals the number of constructor arguments
-- **Collection Objects**: A supported collection object has to adhere to the following rules:
-  - The class is `readonly`
-  - The class has a public constructor
-  - The constructor has a single variadic parameter of a supported type 
-  - The class has a single `public`, `readonly` property
-  
-    _!!! There is a small chance the arguments passed to the constructor are not stored in the class property. 
-    We have to accept until variadic arguments can be promoted. !!!_
+Values of type `string`, `int`, `float`, and `bool` are allowed directly by OpenApi and need no transformation.
+
+_!!! `null` is not allowed as a single type. However, nullable values are allowed !!!_
+
+### PHP Date Objects
+
+Objects of type `\DateTime`, `\DateTimeImmutable`, `\DateInterval` are allowed as exceptions. 
+The values are serialized as string with a predefined.
+
+### Backed Enums
+
+Value backed enums are supported by converting to and from the underlying value.
+
+### Data Transfer Objects (DTO)
+
+A supported transfer object has to adhere to the following rules:
+- The class is `readonly`
+- The class has a public constructor
+- All parameters in the constructor are `public`, `promoted` and of a supported type
+- The number of properties equals the number of constructor arguments
+
+```php
+#[Flow\Proxy(false)]
+final readonly class Address
+{
+    public function __construct(
+        public string $streetAddress,
+        public ?string $addressRegion,
+        public ?string $addressCountry = 'DE',
+        public ?string $postOfficeBoxNumber = null
+    ) {
+    }
+}
+```
+
+If the DTO has a single property of name `value` it is serialized as that single value. 
+In all other cases the DTO is serialized as an array of all constructor properties.
+
+
+```php
+#[Flow\Proxy(false)]
+final readonly class Identifier
+{
+    public function __construct(
+        public string $value,
+    ) {
+    }
+}
+```
+
+#### Collection Objects
+
+A supported collection object has to adhere to the following rules:
+- The class is `readonly`
+- The class has a public constructor
+- The constructor has a single variadic parameter of a supported type 
+- The class has a single `public`, `readonly` property
+
+```php
+#[Flow\Proxy(false)]
+final readonly class AddressCollection
+{
+    /**
+     * @var Holiday[]
+     */
+    public array $items;
+
+    public function __construct(Address ...$items)
+    {
+        $this->items = array_values($items);
+    }
+}
+```
+
+_!!! There is a small chance the arguments passed to the constructor are not stored in the class property. We have to accept that until variadic arguments can be promoted. !!!_
   
 ## Installation
 
