@@ -4,21 +4,17 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Application;
 
-use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\ObjectManagement\Proxy\ProxyInterface;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Parameter as ParameterAttribute;
 use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
-use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBodyContentType;
-use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
-use Sitegeist\SchemeOnYou\Domain\Path\RequestParameterContract;
+use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 
-#[Flow\Proxy(false)]
-final readonly class ParameterFactory
+class ParameterFactory
 {
     /**
      * @param class-string $className
-     * @return array<string,RequestParameterContract>
+     * @return array<string,array<mixed>|object|bool|int|string|float|null>
      */
     public static function resolveParameters(string $className, string $methodName, ActionRequest $request): array
     {
@@ -37,36 +33,21 @@ final readonly class ParameterFactory
             if (!$type instanceof \ReflectionNamedType) {
                 throw new \DomainException('Can only resolve named parameters with single type', 1709721743);
             }
-            $parameterClassName = $type->getName();
-            if (!class_exists($parameterClassName)) {
-                throw new \DomainException('Can only resolve parameters of type class', 1709721783);
+            if ($type->allowsNull()) {
+                throw new \DomainException('Nullable types are not supported yet', 1709721755);
             }
-            $parameterReflectionClass = new \ReflectionClass($parameterClassName);
-            if (!$parameterReflectionClass->implementsInterface(RequestParameterContract::class)) {
-                throw new \DomainException(
-                    'Can only resolve parameters of type ' . RequestParameterContract::class,
-                    1709722058
-                );
+
+            $parameterAttribute = ParameterAttribute::tryFromReflectionParameter($parameter);
+            if ($parameterAttribute) {
+                $parameterValueFromRequest = $parameterAttribute->in->resolveParameterFromRequest($request, $parameter->name);
+                $parameterValueFromRequest = $parameterAttribute->style->decodeParameterValue($parameterValueFromRequest);
+            } else {
+                $requestBodyAttribute = RequestBody::fromReflectionParameter($parameter);
+                $parameterValueFromRequest = $requestBodyAttribute->contentType->resolveParameterFromRequest($request, $parameter->name);
+                $parameterValueFromRequest = $requestBodyAttribute->contentType->decodeParameterValue($parameterValueFromRequest);
             }
-            /** @var class-string<RequestParameterContract> $parameterClassName */
-            $parameters[$parameter->name] = $parameterClassName::fromRequestParameter(
-                match (ParameterAttribute::tryFromReflectionParameter($parameter)?->in) {
-                    ParameterLocation::LOCATION_PATH => $request->getArgument($parameter->name),
-                    ParameterLocation::LOCATION_QUERY => $request->getHttpRequest()->getQueryParams()[$parameter->name],
-                    ParameterLocation::LOCATION_HEADER => $request->getHttpRequest()->getHeader($parameter->name),
-                    ParameterLocation::LOCATION_COOKIE
-                        => $request->getHttpRequest()->getCookieParams()[$parameter->name],
-                    null => match (RequestBody::fromReflectionParameter($parameter)->contentType) {
-                        RequestBodyContentType::CONTENT_TYPE_JSON => \json_decode(
-                            (string)$request->getHttpRequest()->getBody(),
-                            true,
-                            512,
-                            JSON_THROW_ON_ERROR
-                        ),
-                        RequestBodyContentType::CONTENT_TYPE_FORM => $request->getArgument($parameter->name)
-                    }
-                }
-            );
+
+            $parameters[$parameter->name] = SchemaDenormalizer::denormalizeValue($parameterValueFromRequest, $type->getName());
         }
 
         return $parameters;

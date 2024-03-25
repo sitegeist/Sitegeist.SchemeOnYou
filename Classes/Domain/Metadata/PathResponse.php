@@ -22,18 +22,21 @@ final readonly class PathResponse
     public static function fromReflectionClass(\ReflectionClass $reflection): self
     {
         $pathResponseAttributes = $reflection->getAttributes(self::class);
-        if (count($pathResponseAttributes) !== 1) {
-            throw new \DomainException(
-                'There must be exactly one path response attribute declared in class '
-                . $reflection->name . ', ' . count($pathResponseAttributes) . ' given',
-                1709587611
-            );
+        switch (count($pathResponseAttributes)) {
+            case 0:
+                return new self(200, '');
+            case 1:
+                $arguments = $pathResponseAttributes[0]->getArguments();
+                return new self(
+                    $arguments['statusCode'] ?? $arguments[0],
+                    $arguments['description'] ?? $arguments[1],
+                );
+            default:
+                throw new \DomainException(
+                    'There must be no or exactly one path response attribute declared in class '
+                    . $reflection->name . ', ' . count($pathResponseAttributes) . ' given',
+                    1709587611
+                );
         }
-        $arguments = $pathResponseAttributes[0]->getArguments();
-
-        return new self(
-            $arguments['statusCode'] ?? $arguments[0],
-            $arguments['description'] ?? $arguments[1],
-        );
     }
 }

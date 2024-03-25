@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Application;
 
-use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\ActionResponse;
 use Neos\Flow\Mvc\Controller\Arguments;
 use Neos\Flow\Mvc\Controller\ControllerContext;
 use Neos\Flow\Mvc\Controller\ControllerInterface;
 use Neos\Flow\Mvc\Routing\UriBuilder;
+use Sitegeist\SchemeOnYou\Domain\Metadata\PathResponse;
+use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
 
-#[Flow\Scope('singleton')]
 abstract class OpenApiController implements ControllerInterface
 {
     protected ActionRequest $request;
@@ -27,6 +27,7 @@ abstract class OpenApiController implements ControllerInterface
         $this->request->setDispatched(true);
         $this->response = $response;
         $this->response->setContentType('application/json');
+        $this->response->addHttpHeader('Access-Control-Allow-Origin', '*');
         $uriBuilder = new UriBuilder();
         $uriBuilder->setRequest($this->request);
         $this->controllerContext = new ControllerContext(
@@ -36,7 +37,7 @@ abstract class OpenApiController implements ControllerInterface
             $uriBuilder
         );
 
-        $actionName = $request->getControllerActionName() . 'Endpoint';
+        $actionName = $request->getControllerActionName() . 'Action';
         if (!method_exists($this, $actionName)) {
             throw new \DomainException(
                 'Missing endpoint "' . $request->getControllerActionName() . '" in ' . static::class,
@@ -48,6 +49,9 @@ abstract class OpenApiController implements ControllerInterface
 
         $result = $this->$actionName(...$parameters);
 
-        $this->response->setContent(\json_encode($result, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        $responseMetadata = PathResponse::fromReflectionClass(new \ReflectionClass($result));
+        $this->response->setStatusCode($responseMetadata->statusCode);
+
+        $this->response->setContent(json_encode(SchemaNormalizer::normalizeValue($result), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
     }
 }

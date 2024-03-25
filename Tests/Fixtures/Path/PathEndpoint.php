@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Tests\Fixtures\Path;
 
-use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
+use Sitegeist\SchemeOnYou\Domain\Path\ParameterStyle;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 
-#[Flow\Proxy(false)]
 final readonly class PathEndpoint
 {
     #[OpenApi\Path(pathDefinition: new PathDefinition('/my/null-endpoint'), httpMethod: OpenApi\HttpMethod::METHOD_GET)]
-    public function nullEndpointMethod(): NullResponse
+    public function nullEndpointMethod(): EndpointResponse
     {
-        return new NullResponse();
+        return new EndpointResponse('acknowledged');
     }
 
     #[OpenApi\Path(
@@ -28,6 +27,64 @@ final readonly class PathEndpoint
     ): EndpointResponse {
         return new EndpointResponse('Hello world in language ' . $endpointQuery->language);
     }
+
+    #[OpenApi\Path(
+        pathDefinition: new PathDefinition('/my/simple-parameter-endpoint'),
+        httpMethod: OpenApi\HttpMethod::METHOD_GET
+    )]
+    public function scalarParametersAndResponseEndpointMethod(
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        string $name,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        int $number,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        float $numberWithDecimals,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        bool $switch,
+    ): EndpointResponse {
+        return new EndpointResponse('Hello world ' . $name . ' (' . $number . ' ' . $numberWithDecimals . ' ' . ($switch ? 'on' : 'off') . ')');
+    }
+
+    #[OpenApi\Path(pathDefinition: new PathDefinition('/my/scalar-parameter-endpoint'), httpMethod: OpenApi\HttpMethod::METHOD_GET)]
+    public function scalarParameterEndpointMethod(
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        string $message,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        int $number,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        float $weight,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        bool $switch,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        \DateTime $dateTime,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        \DateTime $dateTimeImmutable,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        \DateInterval $dateInterval,
+    ): EndpointResponse {
+        return new EndpointResponse('acknowledged');
+    }
+
+    #[OpenApi\Path(pathDefinition: new PathDefinition('/my/scalar-nullable-parameter-endpoint'), httpMethod: OpenApi\HttpMethod::METHOD_GET)]
+    public function scalarNullableParameterEndpointMethod(
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?string $message = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?int $number = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?float $weight = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?bool $switch = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?\DateTime $dateTime = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?\DateTime $dateTimeImmutable = null,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?\DateInterval $dateInterval = null,
+    ): EndpointResponse {
+        return new EndpointResponse('acknowledged');
+    }
+
 
     #[OpenApi\Path(
         pathDefinition: new PathDefinition('/my/request-body-endpoint'),
@@ -47,7 +104,7 @@ final readonly class PathEndpoint
     public function multipleParametersAndResponsesEndpointMethod(
         #[OpenApi\Parameter(ParameterLocation::LOCATION_PATH)]
         EndpointQuery $endpointQuery,
-        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY, ParameterStyle::STYLE_DEEP_OBJECT)]
         AnotherEndpointQuery $anotherEndpointQuery
     ): EndpointResponse|EndpointQueryFailed {
         return $anotherEndpointQuery->pleaseFail

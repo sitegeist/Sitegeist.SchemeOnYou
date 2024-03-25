@@ -7,7 +7,7 @@ namespace Sitegeist\SchemeOnYou\Domain\Schema;
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
-final class IsCollection
+final class IsValueObject
 {
     /**
      * @param class-string $className
@@ -23,24 +23,22 @@ final class IsCollection
      */
     public static function isSatisfiedByReflectionClass(\ReflectionClass $reflection): bool
     {
-        $parameters = $reflection->getConstructor()?->getParameters() ?: [];
-        if (count($parameters) !== 1) {
-            return false;
+        if ($reflection instanceof \ReflectionEnum) {
+            return true;
         }
         if ($reflection->isReadOnly() === false) {
             return false;
         }
-        $collectionParameter = $parameters[0];
-        if ($collectionParameter->isVariadic() === false) {
+
+        $parameters = $reflection->getConstructor()?->getParameters() ?: [];
+        foreach ($parameters as $parameter) {
+            $parameterType = $parameter->getType();
+            if ($parameterType instanceof \ReflectionType && $parameter->isPromoted() && IsSupported::isSatisfiedByReflectionType($parameterType)) {
+                continue;
+            }
             return false;
         }
-        $collectionParameterType = $collectionParameter->getType();
-        if ($collectionParameterType instanceof \ReflectionNamedType) {
-            if (IsSupported::isSatisfiedByReflectionType($collectionParameterType)) {
-                return true;
-            }
-        }
 
-        return false;
+        return true;
     }
 }

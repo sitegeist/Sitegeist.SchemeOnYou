@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
-use Psr\Http\Message\UriInterface;
-use Ramsey\Uuid\UuidInterface;
 
 #[Flow\Proxy(false)]
 final readonly class SchemaType implements \JsonSerializable
@@ -68,19 +66,9 @@ final readonly class SchemaType implements \JsonSerializable
                 'type' => 'string',
                 'format' => 'duration'
             ],
-            UriInterface::class => [
-                'type' => 'string',
-                'format' => 'uri'
-            ],
-            UuidInterface::class => [
-                'type' => 'string',
-                'format' => 'uuid'
-            ],
             default => match (true) {
                 class_exists($reflectionType->getName()), enum_exists($reflectionType->getName())
-                    => OpenApiSchema::fromReflectionClass(
-                        new \ReflectionClass($reflectionType->getName())
-                    )->toReference(),
+                    => OpenApiSchema::fromClassName($reflectionType->getName())->toReference(),
                 default => throw new \DomainException(
                     'Cannot resolve schema type for type ' . $reflectionType->getName(),
                     1709560846

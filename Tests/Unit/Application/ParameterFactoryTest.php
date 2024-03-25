@@ -57,13 +57,38 @@ final class ParameterFactoryTest extends TestCase
                     HttpMethod::METHOD_GET->value,
                     new Uri('https://acme.site/?endpointQuery=de')
                 ))->withQueryParams([
-                    'endpointQuery' => 'de'
+                    'endpointQuery' => [
+                        'language' => 'de'
+                    ]
                 ])
             ),
             'className' => PathEndpoint::class,
             'methodName' => 'singleParameterAndResponseEndpointMethod',
             'expectedParameters' => [
                 'endpointQuery' => new EndpointQuery('de')
+            ]
+        ];
+
+        yield 'withScalarParameters' => [
+            'request' => ActionRequest::fromHttpRequest(
+                (new ServerRequest(
+                    HttpMethod::METHOD_GET->value,
+                    new Uri('https://acme.site/')
+                ))->withQueryParams([
+                    'name' => 'foo',
+                    'number' => 12,
+                    'numberWithDecimals' => 33.33,
+                    'switch' => 1,
+                    'other' => 'suppe'
+                ])
+            ),
+            'className' => PathEndpoint::class,
+            'methodName' => 'scalarParametersAndResponseEndpointMethod',
+            'expectedParameters' => [
+                'name' => 'foo',
+                'number' => 12,
+                'numberWithDecimals' => 33.33,
+                'switch' => true
             ]
         ];
 
@@ -75,7 +100,8 @@ final class ParameterFactoryTest extends TestCase
                 'anotherEndpointQuery' => '{"pleaseFail": true}'
             ])
         );
-        $multipleParametersRequest->setArgument('endpointQuery', 'de');
+        $multipleParametersRequest->setArgument('endpointQuery', ['language' => 'de']);
+
         yield 'withMultipleParameters' => [
             'request' => $multipleParametersRequest,
             'className' => PathEndpoint::class,

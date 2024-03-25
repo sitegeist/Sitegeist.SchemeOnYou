@@ -49,16 +49,8 @@ final readonly class OpenApiRequestBody implements \JsonSerializable
         }
 
         $reflectionClass = new \ReflectionClass($type);
-        if (!$reflectionClass->implementsInterface(RequestParameterContract::class)) {
-            throw new \DomainException(
-                'Classes used as request bodies must implement the ' . RequestParameterContract::class . ' interface, '
-                . $type . ' given for parameter ' . $reflectionParameter->getDeclaringClass()?->name
-                . '::' . $reflectionParameter->getDeclaringFunction()->name
-                . '::' . $reflectionParameter->name . ' does not',
-                1709720053
-            );
-        }
         $parameterSchema = OpenApiSchema::fromReflectionClass($reflectionClass);
+
         return new self(
             $requestBodyAttribute->contentType,
             $parameterSchema->toReference(),

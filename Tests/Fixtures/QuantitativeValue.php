@@ -9,20 +9,10 @@ use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 
 #[OpenApi\Schema('see https://schema.org/QuantitativeValue')]
 #[Flow\Proxy(false)]
-final readonly class QuantitativeValue implements \JsonSerializable
+final readonly class QuantitativeValue
 {
     public function __construct(
         public int $value,
     ) {
-    }
-
-    public static function fromInt(int $value): self
-    {
-        return new self($value);
-    }
-
-    public function jsonSerialize(): int
-    {
-        return $this->value;
     }
 }
