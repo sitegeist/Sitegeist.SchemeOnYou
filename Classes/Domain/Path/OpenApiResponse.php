@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Path;
 
 use Neos\Flow\Annotations as Flow;
-use Sitegeist\SchemeOnYou\Domain\Metadata\PathResponse as PathResponseAttribute;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Response as PathResponseAttribute;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchema;
 
 /**

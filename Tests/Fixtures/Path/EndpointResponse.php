@@ -8,7 +8,7 @@ use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 
 #[OpenApi\Schema('the endpoint response')]
-#[OpenApi\PathResponse(statusCode: 200, description: 'the query was successful')]
+#[OpenApi\Response(statusCode: 200, description: 'the query was successful')]
 #[Flow\Proxy(false)]
 final readonly class EndpointResponse implements \JsonSerializable
 {

@@ -8,7 +8,7 @@ use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 
 #[OpenApi\Schema('the endpoint query failure response')]
-#[OpenApi\PathResponse(statusCode: 400, description: 'the query failed')]
+#[OpenApi\Response(statusCode: 400, description: 'the query failed')]
 #[Flow\Proxy(false)]
 final readonly class EndpointQueryFailed implements \JsonSerializable
 {

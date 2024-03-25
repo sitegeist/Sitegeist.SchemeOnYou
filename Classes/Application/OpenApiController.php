@@ -10,7 +10,7 @@ use Neos\Flow\Mvc\Controller\Arguments;
 use Neos\Flow\Mvc\Controller\ControllerContext;
 use Neos\Flow\Mvc\Controller\ControllerInterface;
 use Neos\Flow\Mvc\Routing\UriBuilder;
-use Sitegeist\SchemeOnYou\Domain\Metadata\PathResponse;
+use Sitegeist\SchemeOnYou\Domain\Metadata\Response;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
 
 abstract class OpenApiController implements ControllerInterface
@@ -49,7 +49,7 @@ abstract class OpenApiController implements ControllerInterface
 
         $result = $this->$actionName(...$parameters);
 
-        $responseMetadata = PathResponse::fromReflectionClass(new \ReflectionClass($result));
+        $responseMetadata = Response::fromReflectionClass(new \ReflectionClass($result));
         $this->response->setStatusCode($responseMetadata->statusCode);
 
         $this->response->setContent(json_encode(SchemaNormalizer::normalizeValue($result), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));

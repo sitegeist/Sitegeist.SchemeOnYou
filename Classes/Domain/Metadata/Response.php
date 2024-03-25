@@ -8,7 +8,7 @@ use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
 #[\Attribute(\Attribute::TARGET_CLASS)]
-final readonly class PathResponse
+final readonly class Response
 {
     public function __construct(
         public int $statusCode,
