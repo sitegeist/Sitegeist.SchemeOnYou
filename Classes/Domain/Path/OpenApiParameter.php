@@ -69,15 +69,6 @@ final readonly class OpenApiParameter implements \JsonSerializable
             );
         }
         $reflectionClass = new \ReflectionClass($type);
-        if (!$reflectionClass->implementsInterface(RequestParameterContract::class)) {
-            throw new \DomainException(
-                'Classes used as path parameters must implement the ' . RequestParameterContract::class . ' interface, '
-                . $type . ' given for parameter ' . $reflectionParameter->getDeclaringClass()?->name
-                . '::' . $reflectionParameter->getDeclaringFunction()->name
-                . '::' . $reflectionParameter->name . ' does not',
-                1709720053
-            );
-        }
         $schemaAttribute = SchemaAttribute::fromReflectionClass($reflectionClass);
         $parameterSchema = OpenApiSchema::fromReflectionClass($reflectionClass);
 
