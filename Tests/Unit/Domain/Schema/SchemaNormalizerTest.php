@@ -13,14 +13,9 @@ use Sitegeist\SchemeOnYou\Tests\Fixtures;
 
 final class SchemaNormalizerTest extends TestCase
 {
-    public SchemaNormalizer $schemaNormalizer;
-    public SchemaDenormalizer $schemaDenormalizer;
-
     protected function setUp(): void
     {
         parent::setUp();
-        $this->schemaNormalizer = new SchemaNormalizer();
-        $this->schemaDenormalizer = new SchemaDenormalizer($this->uriFactory);
     }
 
     /**
@@ -32,7 +27,7 @@ final class SchemaNormalizerTest extends TestCase
         mixed $value,
         mixed $normalized
     ): void {
-        Assert::assertEquals($normalized, $this->schemaNormalizer->normalizeValue($value));
+        Assert::assertEquals($normalized, SchemaNormalizer::normalizeValue($value));
     }
 
     /**
@@ -44,7 +39,7 @@ final class SchemaNormalizerTest extends TestCase
         mixed $value,
         mixed $normalized
     ): void {
-        Assert::assertEquals($value, $this->schemaDenormalizer->denormalizeValue($normalized, $type));
+        Assert::assertEquals($value, SchemaDenormalizer::denormalizeValue($normalized, $type));
     }
 
     /**

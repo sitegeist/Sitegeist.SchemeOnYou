@@ -21,12 +21,6 @@ abstract class OpenApiController implements ControllerInterface
 
     protected ControllerContext $controllerContext;
 
-    public function __construct(
-        private readonly SchemaNormalizer $schemaNormalizer,
-        private readonly ParameterFactory $parameterFactory,
-    ) {
-    }
-
     final public function processRequest(ActionRequest $request, ActionResponse $response): void
     {
         $this->request = $request;
@@ -51,13 +45,13 @@ abstract class OpenApiController implements ControllerInterface
             );
         }
 
-        $parameters = $this->parameterFactory->resolveParameters(get_class($this), $actionName, $this->request);
+        $parameters = ParameterFactory::resolveParameters(get_class($this), $actionName, $this->request);
 
         $result = $this->$actionName(...$parameters);
 
         $responseMetadata = PathResponse::fromReflectionClass(new \ReflectionClass($result));
         $this->response->setStatusCode($responseMetadata->statusCode);
 
-        $this->response->setContent(json_encode($this->schemaNormalizer->normalizeValue($result), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        $this->response->setContent(json_encode(SchemaNormalizer::normalizeValue($result), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
     }
 }

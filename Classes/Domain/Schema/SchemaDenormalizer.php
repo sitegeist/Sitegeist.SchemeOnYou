@@ -14,18 +14,18 @@ class SchemaDenormalizer
 
     /**
      * @param int|bool|string|float|array<mixed>|null $value
-     * @return object|array<mixed>|int|bool|string|float|null
+     * @return object|int|bool|string|float|null
      */
-    public function denormalizeValue(null|int|bool|string|float|array $value, string $targetType): object|array|int|bool|string|float|null
+    public static function denormalizeValue(null|int|bool|string|float|array $value, string $targetType): object|int|bool|string|float|null
     {
-        return $this->convertValue($value, $targetType);
+        return self::convertValue($value, $targetType);
     }
 
     /**
      * @param null|int|bool|string|float|array<mixed> $value
-     * @return object|array<mixed>|int|bool|string|float|null
+     * @return object|int|bool|string|float|null
      */
-    private function convertValue(null|int|bool|string|float|array $value, string $targetType): object|array|int|bool|string|float|null
+    private static function convertValue(null|int|bool|string|float|array $value, string $targetType): object|int|bool|string|float|null
     {
         if ($value === null) {
             return null;
@@ -63,10 +63,10 @@ class SchemaDenormalizer
                 is_int($value) || is_string($value) => $targetType::from($value),
                 default => throw new \DomainException('Can only denormalize enums from int or string')
             };
-        } elseif (is_array($value) && class_exists($targetType) && $this->isCollectionClassName($targetType)) {
-            return $this->convertCollection($value, $targetType);
-        } elseif (is_array($value) && class_exists($targetType) && $this->isValueObjectClassName($targetType)) {
-            return $this->convertValueObject($value, $targetType);
+        } elseif (is_array($value) && class_exists($targetType) && self::isCollectionClassName($targetType)) {
+            return self::convertCollection($value, $targetType);
+        } elseif (is_array($value) && class_exists($targetType) && self::isValueObjectClassName($targetType)) {
+            return self::convertValueObject($value, $targetType);
         }
 
         throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
@@ -75,7 +75,7 @@ class SchemaDenormalizer
     /**
      * @param array<mixed> $value
      */
-    private function convertCollection(array $value, string $targetType): object
+    private static function convertCollection(array $value, string $targetType): object
     {
         $reflection = new ClassReflection($targetType);
         $parameterReflection = $reflection->getConstructor()->getParameters()[0];
@@ -85,7 +85,7 @@ class SchemaDenormalizer
         }
         return new $targetType(
             ...array_map(
-                fn($item) => $this->convertValue($item, $parameterType->getName()),
+                fn($item) => self::convertValue($item, $parameterType->getName()),
                 $value
             )
         );
@@ -94,7 +94,7 @@ class SchemaDenormalizer
     /**
      * @param array<string,mixed> $value
      */
-    private function convertValueObject(array $value, string $targetType): object
+    private static function convertValueObject(array $value, string $targetType): object
     {
         $reflection = new ClassReflection($targetType);
         $parameterReflections = $reflection->getConstructor()->getParameters();
@@ -103,7 +103,7 @@ class SchemaDenormalizer
             $type = $parameter->getType();
             $convertedArguments[$name] = match (true) {
                 $type === null => throw new \DomainException('Cannot convert untyped property ' . $parameter->getName()),
-                $type instanceof \ReflectionNamedType => $this->convertValue($value[$parameter->getName()], $type->getName()),
+                $type instanceof \ReflectionNamedType => self::convertValue($value[$parameter->getName()], $type->getName()),
                 default => throw new \DomainException('Cannot convert ' . get_class($type) . ' yet'),
             };
         }

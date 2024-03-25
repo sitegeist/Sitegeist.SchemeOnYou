@@ -19,7 +19,7 @@ trait IsTrait
     /**
      * @param class-string $className
      */
-    protected function isCollectionClassName(string $className): bool
+    protected static function isCollectionClassName(string $className): bool
     {
         return self::$isCollectionResults[$className] ??= IsCollection::isSatisfiedByClassName($className);
     }
@@ -27,7 +27,7 @@ trait IsTrait
     /**
      * @param class-string $className
      */
-    protected function isValueObjectClassName(string $className): bool
+    protected static function isValueObjectClassName(string $className): bool
     {
         return self::$isValueObjectResults[$className] ??= IsValueObject::isSatisfiedByClassName($className);
     }

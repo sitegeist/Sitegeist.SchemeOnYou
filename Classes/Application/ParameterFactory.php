@@ -12,16 +12,11 @@ use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 
 class ParameterFactory
 {
-    public function __construct(
-        private readonly SchemaDenormalizer $denormalizer
-    ) {
-    }
-
     /**
      * @param class-string $className
      * @return array<string,array<mixed>|object|bool|int|string|float|null>
      */
-    public function resolveParameters(string $className, string $methodName, ActionRequest $request): array
+    public static function resolveParameters(string $className, string $methodName, ActionRequest $request): array
     {
         $reflectionClass = new \ReflectionClass($className);
         if ($reflectionClass->implementsInterface(ProxyInterface::class)) {
@@ -52,7 +47,7 @@ class ParameterFactory
                 $parameterValueFromRequest = $requestBodyAttribute->contentType->decodeParameterValue($parameterValueFromRequest);
             }
 
-            $parameters[$parameter->name] = $this->denormalizer->denormalizeValue($parameterValueFromRequest, $type->getName());
+            $parameters[$parameter->name] = SchemaDenormalizer::denormalizeValue($parameterValueFromRequest, $type->getName());
         }
 
         return $parameters;

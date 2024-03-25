@@ -14,15 +14,15 @@ class SchemaNormalizer
     /**
      * @return array<mixed>|int|bool|string|float|null
      */
-    public function normalizeValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
+    public static function normalizeValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
     {
-        return $this->convertValue($value);
+        return self::convertValue($value);
     }
 
     /**
      * @return array<mixed>|int|bool|string|float|null
      */
-    private function convertValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
+    private static function convertValue(null|int|bool|string|float|object $value): array|int|bool|string|float|null
     {
         if ($value === null) {
             return null;
@@ -32,13 +32,13 @@ class SchemaNormalizer
             if ($value instanceof \DateTimeInterface) {
                 return $value->format(\DateTimeInterface::RFC3339);
             } elseif ($value instanceof \DateInterval) {
-                return $this->convertDateInterval($value);
+                return self::convertDateInterval($value);
             } elseif ($value instanceof \BackedEnum) {
                 return $value->value;
-            } elseif ($this->isCollectionClassName(get_class($value))) {
-                return $this->convertCollection($value);
-            } elseif ($this->isValueObjectClassName(get_class($value))) {
-                return $this->convertValueObject($value);
+            } elseif (self::isCollectionClassName(get_class($value))) {
+                return self::convertCollection($value);
+            } elseif (self::isValueObjectClassName(get_class($value))) {
+                return self::convertValueObject($value);
             }
             throw new \DomainException('Unsupported object ' . get_class($value));
         }
@@ -51,12 +51,12 @@ class SchemaNormalizer
      * @param object $value
      * @return array<integer,int|bool|float|string|array<mixed>|null>
      */
-    private function convertCollection(object $value): array
+    private static function convertCollection(object $value): array
     {
         $values = array_values(get_object_vars($value));
         if (count($values) === 1 && is_array($values[0])) {
             return array_map(
-                fn($subvalue) => $this->convertValue($subvalue),
+                fn($subvalue) => self::convertValue($subvalue),
                 $values[0]
             );
         }
@@ -67,10 +67,10 @@ class SchemaNormalizer
      * @param object $value
      * @return array<string,int|bool|float|string|array<mixed>|null>
      */
-    private function convertValueObject(object $value): array
+    private static function convertValueObject(object $value): array
     {
         return array_map(
-            fn($subvalue) => $this->convertValue($subvalue),
+            fn($subvalue) => self::convertValue($subvalue),
             get_object_vars($value)
         );
     }
@@ -78,7 +78,7 @@ class SchemaNormalizer
     /**
      * @see https://www.php.net/manual/en/dateinterval.construct.php#119260
      */
-    private function convertDateInterval(\DateInterval $value): string
+    private static function convertDateInterval(\DateInterval $value): string
     {
         $date = null;
         if ($value->y) {
