@@ -27,13 +27,13 @@ use Sitegeist\SchemeOnYou\Domain\Schema\IsSupported;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
 use Neos\Flow\Mvc\Routing\Router;
 
-readonly class OpenApiDocumentFactory
+class OpenApiDocumentFactory
 {
     public function __construct(
-        private ReflectionService $reflectionService,
-        private Router $router,
-        private ObjectManager $objectManager,
-        private UriFactoryInterface $uriFactory,
+        private readonly ReflectionService $reflectionService,
+        private readonly Router $router,
+        private readonly ObjectManager $objectManager,
+        private readonly UriFactoryInterface $uriFactory,
     ) {
     }
 

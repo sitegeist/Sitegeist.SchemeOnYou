@@ -10,10 +10,10 @@ use Sitegeist\SchemeOnYou\Domain\Metadata\Parameter as ParameterAttribute;
 use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 
-readonly class ParameterFactory
+class ParameterFactory
 {
     public function __construct(
-        private SchemaDenormalizer $denormalizer
+        private readonly SchemaDenormalizer $denormalizer
     ) {
     }
 
