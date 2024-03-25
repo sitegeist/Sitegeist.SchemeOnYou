@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Tests\Unit\Domain\Schema;
 
-use Neos\Http\Factories\UriFactory;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
@@ -55,7 +54,7 @@ final class SchemaNormalizerTest extends TestCase
         yield 'NumberObject is converted' => [
             Fixtures\Number::class,
             new Fixtures\Number(value: 123.456),
-            ["value" => 123.456]
+            123.456
         ];
         yield 'DateTime' => [\DateTime::class, new \DateTime('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
         yield 'DateTimeImmutable' => [\DateTimeImmutable::class, new \DateTimeImmutable('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
@@ -166,9 +165,9 @@ final class SchemaNormalizerTest extends TestCase
             ),
             [
                 'dayOfWeek' => 'https://schema.org/Monday',
-                'identifier' => ['value' => 'suppe'],
+                'identifier' => 'suppe',
                 'importantNumber' => 23,
-                'number' => ['value' => 23.42],
+                'number' => 23.42,
                 'postalAddress' => [
                     'streetAddress' => 'Sesame Street 123',
                     'addressRegion' => 'Manhatten',
@@ -189,7 +188,7 @@ final class SchemaNormalizerTest extends TestCase
                         'postOfficeBoxNumber' => '67890',
                     ]
                 ],
-                'quantitativeValue' => ['value' => 666],
+                'quantitativeValue' => 666,
                 'weirdThing' => [
                     "if" => false,
                     "what" => "dis",

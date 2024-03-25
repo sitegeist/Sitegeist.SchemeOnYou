@@ -65,7 +65,7 @@ class SchemaDenormalizer
             };
         } elseif (is_array($value) && class_exists($targetType) && self::isCollectionClassName($targetType)) {
             return self::convertCollection($value, $targetType);
-        } elseif (is_array($value) && class_exists($targetType) && self::isValueObjectClassName($targetType)) {
+        } elseif (class_exists($targetType) && self::isValueObjectClassName($targetType)) {
             return self::convertValueObject($value, $targetType);
         }
 
@@ -92,22 +92,27 @@ class SchemaDenormalizer
     }
 
     /**
-     * @param array<string,mixed> $value
+     * @param array<string,mixed>|int|float|string|bool $value
      */
-    private static function convertValueObject(array $value, string $targetType): object
+    private static function convertValueObject(array|int|float|string|bool $value, string $targetType): object
     {
         $reflection = new ClassReflection($targetType);
         $parameterReflections = $reflection->getConstructor()->getParameters();
         $convertedArguments = [];
-        foreach ($parameterReflections as $name => $parameter) {
-            $type = $parameter->getType();
-            $convertedArguments[$name] = match (true) {
-                $type === null => throw new \DomainException('Cannot convert untyped property ' . $parameter->getName()),
-                $type instanceof \ReflectionNamedType => self::convertValue($value[$parameter->getName()], $type->getName()),
-                default => throw new \DomainException('Cannot convert ' . get_class($type) . ' yet'),
-            };
+        if (is_array($value)) {
+            foreach ($parameterReflections as $name => $parameter) {
+                $type = $parameter->getType();
+                $convertedArguments[$name] = match (true) {
+                    $type === null => throw new \DomainException('Cannot convert untyped property ' . $parameter->getName()),
+                    $type instanceof \ReflectionNamedType => self::convertValue($value[$parameter->getName()], $type->getName()),
+                    default => throw new \DomainException('Cannot convert ' . get_class($type) . ' yet'),
+                };
+            }
+            return new $targetType(...$convertedArguments);
+        } elseif (count($parameterReflections) === 1 && $parameterReflections[0]->getName() === 'value' && $parameterReflections[0]->getType() instanceof \ReflectionNamedType) {
+            $convertedValue = self::convertValue($value, $parameterReflections[0]->getType()->getName());
+            return new $targetType(value: $convertedValue);
         }
-
-        return new $targetType(...$convertedArguments);
+        throw new \DomainException('Only single value objects can be serialized as single value');
     }
 }

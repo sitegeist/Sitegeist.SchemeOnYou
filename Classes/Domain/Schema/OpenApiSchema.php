@@ -160,6 +160,7 @@ final readonly class OpenApiSchema implements \JsonSerializable
                         'string', 'DateTimeImmutable', 'DateTime', 'DateInterval' => 'string',
                         'int' => 'integer',
                         'float' => 'number',
+                        'bool' => 'boolean',
                         default => throw new \DomainException(
                             'Unsupported type ' . $singleConstructorParameter->getType()->getName()
                             . ' for single constructor parameter "' . $singleConstructorParameter->name . '"'

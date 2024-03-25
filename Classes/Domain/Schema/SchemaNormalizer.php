@@ -65,10 +65,14 @@ class SchemaNormalizer
 
     /**
      * @param object $value
-     * @return array<string,int|bool|float|string|array<mixed>|null>
+     * @return array<string,int|bool|float|string|array<mixed>|null>|int|float|string
      */
-    private static function convertValueObject(object $value): array
+    private static function convertValueObject(object $value): array|int|float|string
     {
+        $properties = get_object_vars($value);
+        if (array_keys($properties) === ['value']) {
+            return $properties['value'];
+        }
         return array_map(
             fn($subvalue) => self::convertValue($subvalue),
             get_object_vars($value)
