@@ -57,7 +57,7 @@ final class IsDataTransferObjectCollection
         }
         $collectionParameterType = $collectionParameter->getType();
         if ($collectionParameterType instanceof \ReflectionNamedType) {
-            if (IsSupported::isSatisfiedByReflectionType($collectionParameterType)) {
+            if (IsSupportedInSchema::isSatisfiedByReflectionType($collectionParameterType)) {
                 return true;
             }
         }

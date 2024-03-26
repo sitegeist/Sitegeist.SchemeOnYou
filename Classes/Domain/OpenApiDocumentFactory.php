@@ -23,7 +23,7 @@ use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathItem;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiRequestBody;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiResponses;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
-use Sitegeist\SchemeOnYou\Domain\Schema\IsSupported;
+use Sitegeist\SchemeOnYou\Domain\Schema\IsSupportedInSchema;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
 use Neos\Flow\Mvc\Routing\Router;
 
@@ -70,12 +70,12 @@ class OpenApiDocumentFactory
                     continue;
                 }
                 $methodReturnType = $methodReflection->getReturnType();
-                if ($methodReturnType instanceof \ReflectionNamedType && class_exists($methodReturnType->getName()) && IsSupported::isSatisfiedByReflectionType($methodReturnType)) {
-                    $requiredSchemaClasses[] = $methodReturnType->getName();
+                if ($methodReturnType instanceof \ReflectionNamedType && class_exists($methodReturnType->getName()) && IsSupportedInSchema::isSatisfiedByReflectionType($methodReturnType)) {
+                    $requiredSchemaClasses[$methodReturnType->getName()] = $methodReturnType->getName();
                 } elseif ($methodReturnType instanceof \ReflectionUnionType) {
                     foreach ($methodReturnType->getTypes() as $subtype) {
-                        if ($subtype instanceof \ReflectionNamedType && class_exists($subtype->getName()) && IsSupported::isSatisfiedByReflectionType($subtype)) {
-                            $requiredSchemaClasses[] = $subtype->getName();
+                        if ($subtype instanceof \ReflectionNamedType && class_exists($subtype->getName()) && IsSupportedInSchema::isSatisfiedByReflectionType($subtype)) {
+                            $requiredSchemaClasses[$subtype->getName()] = $subtype->getName();
                         }
                     }
                 }
@@ -84,8 +84,8 @@ class OpenApiDocumentFactory
                     if ($parameterType instanceof \ReflectionNamedType) {
                         if (in_array($parameterType->getName(), ['int', 'bool', 'string', 'float', \DateTime::class, \DateTimeInterface::class, \DateInterval::class])) {
                             continue;
-                        } elseif (class_exists($parameterType->getName()) && IsSupported::isSatisfiedByReflectionType($parameterType)) {
-                            $requiredSchemaClasses[] = $parameterType->getName();
+                        } elseif (class_exists($parameterType->getName()) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterType)) {
+                            $requiredSchemaClasses[$parameterType->getName()] = $parameterType->getName();
                         }
                     }
                 }
@@ -94,6 +94,7 @@ class OpenApiDocumentFactory
 
             $requiredSchemaClasses = $this->addConstructorArgumentTypesToRequiredSchemaClasses($requiredSchemaClasses);
         }
+        $requiredSchemaClasses = array_values($requiredSchemaClasses);
 
         $rootObjectConfiguration = Arrays::arrayMergeRecursiveOverrule($rootObjectConfiguration, [
             'info' => [
@@ -138,7 +139,7 @@ class OpenApiDocumentFactory
         } elseif (str_contains($localClassName, '\\Controller\\')) {
             list($subPackage, $controllerName) = explode('\\Controller\\', $localClassName);
         } else {
-            throw new \DomainException('Unknown controller pattern');
+            throw new \DomainException('Unknown controller pattern ' . $localClassName);
         }
 
         if (!str_ends_with($methodName, 'Action')) {
@@ -204,12 +205,12 @@ class OpenApiDocumentFactory
         }
 
         foreach ($this->router->getRoutes() as $route) {
-            $path = str_replace(
-                ['{@package}', '{@subpackage}', '{@controller}', '{@action}'],
-                [$controllerPackageKey, $subPackage, $controller, $action],
-                $route->getUriPattern()
-            );
             if ($route->resolves($resolveContext)) {
+                $path = str_replace(
+                    ['{@package}', '{@subpackage}', '{@controller}', '{@action}'],
+                    [$controllerPackageKey, $subPackage, $controller, $action],
+                    $route->getUriPattern()
+                );
                 foreach ($route->getHttpMethods() as $httpMethod) {
                     $paths[] = new OpenApiPathItem(
                         new PathDefinition('/' . $path),
@@ -248,8 +249,8 @@ class OpenApiDocumentFactory
                     if (in_array($parameterTypeName, $requiredSchemaClasses)) {
                         continue;
                     }
-                    if (class_exists($parameterTypeName) && IsSupported::isSatisfiedByReflectionType($parameterType)) {
-                        $requiredSchemaClasses[] = $parameterTypeName;
+                    if (class_exists($parameterTypeName) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterType)) {
+                        $requiredSchemaClasses[$parameterTypeName] = $parameterTypeName;
                         $classesToCheckStack[] = $parameterTypeName;
                     } else {
                         throw new \DomainException(sprintf('Parameter %s has unsupported type %s in class %s', $constructorParameter->getName(), $parameterTypeName, $className));
@@ -261,8 +262,8 @@ class OpenApiDocumentFactory
                             if (in_array($parameterSubtypeName, $requiredSchemaClasses)) {
                                 continue;  // already checked
                             }
-                            if (class_exists($parameterSubtypeName) && IsSupported::isSatisfiedByReflectionType($parameterSubType)) {
-                                $requiredSchemaClasses[] = $parameterSubtypeName;
+                            if (class_exists($parameterSubtypeName) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterSubType)) {
+                                $requiredSchemaClasses[$parameterSubtypeName] = $parameterSubtypeName;
                                 $classesToCheckStack[] = $parameterSubtypeName;
                             }
                         } else {

@@ -7,13 +7,12 @@ namespace Sitegeist\SchemeOnYou\Domain\Schema;
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
-final class IsSupported
+final class IsSupportedInSchema
 {
     public static function isSatisfiedByClassName(string $className): bool
     {
         if (class_exists($className) || interface_exists($className)) {
-            $reflection = new \ReflectionClass($className);
-            return self::isSatisfiedByReflectionClass($reflection);
+            return self::isSatisfiedByReflectionClass(new \ReflectionClass($className));
         }
         return false;
     }

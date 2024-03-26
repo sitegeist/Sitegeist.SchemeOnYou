@@ -20,7 +20,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Sitegeist\\SchemeOnYou\\Tests\\": "Tests/"
+            "Sitegeist\\SchemeOnYou\\Tests\\": "Tests/",
+            "Sitegeist\\SchemeOnYou\\Tests\\Controller\\": "Tests/Fixtures/Controller"
         }
     },
     "scripts": {

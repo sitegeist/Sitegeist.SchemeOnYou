@@ -53,7 +53,7 @@ final class IsDataTransferObject
         $parameters = $reflectionClass->getConstructor()?->getParameters() ?: [];
         foreach ($parameters as $reflectionParameter) {
             $parameterType = $reflectionParameter->getType();
-            if ($parameterType instanceof \ReflectionType && $reflectionParameter->isPromoted() && IsSupported::isSatisfiedByReflectionType($parameterType)) {
+            if ($parameterType instanceof \ReflectionType && $reflectionParameter->isPromoted() && IsSupportedInSchema::isSatisfiedByReflectionType($parameterType)) {
                 continue;
             }
             return false;
