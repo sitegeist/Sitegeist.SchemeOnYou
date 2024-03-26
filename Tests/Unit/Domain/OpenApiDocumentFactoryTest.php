@@ -15,7 +15,6 @@ use Neos\Http\Factories\UriFactory;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Application\OpenApiController;
-use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
 use Sitegeist\SchemeOnYou\Domain\OpenApiComponents;
 use Sitegeist\SchemeOnYou\Domain\OpenApiDocument;
 use Sitegeist\SchemeOnYou\Domain\OpenApiDocumentFactory;
@@ -42,6 +41,9 @@ final class OpenApiDocumentFactoryTest extends TestCase
 {
     private ?OpenApiDocumentFactory $subject = null;
 
+    /**
+     * @var array<string,mixed>
+     */
     private array $rootObjectConfiguration = [
         'openapi' => '3.1.0',
         'info' => [],
@@ -155,6 +157,7 @@ final class OpenApiDocumentFactoryTest extends TestCase
 
     public function testFromClassNameCreatesDefinitionsForValidClasses(): void
     {
+        Assert::assertInstanceOf(OpenApiDocumentFactory::class, $this->subject);
         Assert::assertEquals(
             new OpenApiDocument(
                 '3.1.0',
