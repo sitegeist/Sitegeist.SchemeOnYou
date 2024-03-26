@@ -4,13 +4,8 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
-use Neos\Flow\Annotations as Flow;
-
-#[Flow\Scope('singleton')]
 class SchemaNormalizer
 {
-    use IsTrait;
-
     /**
      * @return array<mixed>|int|bool|string|float|null
      */
@@ -35,9 +30,9 @@ class SchemaNormalizer
                 return self::convertDateInterval($value);
             } elseif ($value instanceof \BackedEnum) {
                 return $value->value;
-            } elseif (self::isCollectionClassName(get_class($value))) {
+            } elseif (IsDataTransferObjectCollection::isSatisfiedByReflectionClass(new \ReflectionClass($value))) {
                 return self::convertCollection($value);
-            } elseif (self::isValueObjectClassName(get_class($value))) {
+            } elseif (IsDataTransferObject::isSatisfiedByReflectionClass(new \ReflectionClass($value))) {
                 return self::convertValueObject($value);
             }
             throw new \DomainException('Unsupported object ' . get_class($value));

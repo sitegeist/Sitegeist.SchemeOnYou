@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
-use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Reflection\ClassReflection;
 
-#[Flow\Scope('singleton')]
 class SchemaDenormalizer
 {
-    use IsTrait;
-
     /**
      * @param int|bool|string|float|array<mixed>|null $value
      * @return object|int|bool|string|float|null
@@ -63,9 +59,9 @@ class SchemaDenormalizer
                 is_int($value) || is_string($value) => $targetType::from($value),
                 default => throw new \DomainException('Can only denormalize enums from int or string')
             };
-        } elseif (is_array($value) && class_exists($targetType) && self::isCollectionClassName($targetType)) {
+        } elseif (is_array($value) && class_exists($targetType) && IsDataTransferObjectCollection::isSatisfiedByClassName($targetType)) {
             return self::convertCollection($value, $targetType);
-        } elseif (class_exists($targetType) && self::isValueObjectClassName($targetType)) {
+        } elseif (class_exists($targetType) && IsDataTransferObject::isSatisfiedByClassName($targetType)) {
             return self::convertValueObject($value, $targetType);
         }
 

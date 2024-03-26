@@ -38,9 +38,9 @@ final class IsSupported
             return true;
         } elseif (is_a($reflection->getName(), \BackedEnum::class, true)) {
             return true;
-        } elseif (IsValueObject::isSatisfiedByReflectionClass($reflection)) {
+        } elseif (IsDataTransferObject::isSatisfiedByReflectionClass($reflection)) {
             return true;
-        } elseif (IsCollection::isSatisfiedByReflectionClass($reflection)) {
+        } elseif (IsDataTransferObjectCollection::isSatisfiedByReflectionClass($reflection)) {
             return true;
         }
         return false;

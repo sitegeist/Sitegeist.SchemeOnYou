@@ -112,9 +112,9 @@ final readonly class OpenApiSchema implements \JsonSerializable
      */
     public static function fromReflectionClass(\ReflectionClass $reflection): self
     {
-        if (IsCollection::isSatisfiedByReflectionClass($reflection)) {
+        if (IsDataTransferObjectCollection::isSatisfiedByReflectionClass($reflection)) {
             return self::fromCollectionReflectionClass($reflection);
-        } elseif (IsValueObject::isSatisfiedByReflectionClass($reflection)) {
+        } elseif (IsDataTransferObject::isSatisfiedByReflectionClass($reflection)) {
             return self::fromObjectReflectionClass($reflection);
         }
         throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
