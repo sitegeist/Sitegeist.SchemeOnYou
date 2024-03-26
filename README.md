@@ -137,7 +137,7 @@ A supported collection object has to adhere to the following rules:
 final readonly class AddressCollection
 {
     /**
-     * @var Holiday[]
+     * @var Address[]
      */
     public array $items;
 
