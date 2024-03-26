@@ -23,7 +23,7 @@ use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathItem;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiRequestBody;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiResponses;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
-use Sitegeist\SchemeOnYou\Domain\Schema\IsSupported;
+use Sitegeist\SchemeOnYou\Domain\Schema\IsSupportedInSchema;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
 use Neos\Flow\Mvc\Routing\Router;
 
@@ -70,11 +70,11 @@ class OpenApiDocumentFactory
                     continue;
                 }
                 $methodReturnType = $methodReflection->getReturnType();
-                if ($methodReturnType instanceof \ReflectionNamedType && class_exists($methodReturnType->getName()) && IsSupported::isSatisfiedByReflectionType($methodReturnType)) {
+                if ($methodReturnType instanceof \ReflectionNamedType && class_exists($methodReturnType->getName()) && IsSupportedInSchema::isSatisfiedByReflectionType($methodReturnType)) {
                     $requiredSchemaClasses[] = $methodReturnType->getName();
                 } elseif ($methodReturnType instanceof \ReflectionUnionType) {
                     foreach ($methodReturnType->getTypes() as $subtype) {
-                        if ($subtype instanceof \ReflectionNamedType && class_exists($subtype->getName()) && IsSupported::isSatisfiedByReflectionType($subtype)) {
+                        if ($subtype instanceof \ReflectionNamedType && class_exists($subtype->getName()) && IsSupportedInSchema::isSatisfiedByReflectionType($subtype)) {
                             $requiredSchemaClasses[] = $subtype->getName();
                         }
                     }
@@ -84,7 +84,7 @@ class OpenApiDocumentFactory
                     if ($parameterType instanceof \ReflectionNamedType) {
                         if (in_array($parameterType->getName(), ['int', 'bool', 'string', 'float', \DateTime::class, \DateTimeInterface::class, \DateInterval::class])) {
                             continue;
-                        } elseif (class_exists($parameterType->getName()) && IsSupported::isSatisfiedByReflectionType($parameterType)) {
+                        } elseif (class_exists($parameterType->getName()) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterType)) {
                             $requiredSchemaClasses[] = $parameterType->getName();
                         }
                     }
@@ -248,7 +248,7 @@ class OpenApiDocumentFactory
                     if (in_array($parameterTypeName, $requiredSchemaClasses)) {
                         continue;
                     }
-                    if (class_exists($parameterTypeName) && IsSupported::isSatisfiedByReflectionType($parameterType)) {
+                    if (class_exists($parameterTypeName) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterType)) {
                         $requiredSchemaClasses[] = $parameterTypeName;
                         $classesToCheckStack[] = $parameterTypeName;
                     } else {
@@ -261,7 +261,7 @@ class OpenApiDocumentFactory
                             if (in_array($parameterSubtypeName, $requiredSchemaClasses)) {
                                 continue;  // already checked
                             }
-                            if (class_exists($parameterSubtypeName) && IsSupported::isSatisfiedByReflectionType($parameterSubType)) {
+                            if (class_exists($parameterSubtypeName) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterSubType)) {
                                 $requiredSchemaClasses[] = $parameterSubtypeName;
                                 $classesToCheckStack[] = $parameterSubtypeName;
                             }
