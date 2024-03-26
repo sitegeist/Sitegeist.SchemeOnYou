@@ -39,6 +39,9 @@ final class IsDataTransferObjectCollection
         return self::$evaluationRuntimeCache[$reflectionClass->name];
     }
 
+    /**
+     * @param \ReflectionClass<object> $reflectionClass
+     */
     private static function evaluateReflectionClass(\ReflectionClass $reflectionClass): bool
     {
         $parameters = $reflectionClass->getConstructor()?->getParameters() ?: [];
