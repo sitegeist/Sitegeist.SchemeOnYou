@@ -36,7 +36,8 @@ final readonly class Parameter
 
                 return new self(
                     $arguments['in'] ?? $arguments[0],
-                    $arguments['description'] ?? $arguments[1] ?? null,
+                    $arguments['style'] ?? $arguments[1] ?? null,
+                    $arguments['description'] ?? $arguments[2] ?? null,
                 );
             default:
                 throw new \DomainException(
