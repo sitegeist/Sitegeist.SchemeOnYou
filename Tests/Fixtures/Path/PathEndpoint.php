@@ -7,20 +7,15 @@ namespace Sitegeist\SchemeOnYou\Tests\Fixtures\Path;
 use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterStyle;
-use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
+use Sitegeist\SchemeOnYou\Domain\Path\RequestBodyContentType;
 
 final readonly class PathEndpoint
 {
-    #[OpenApi\Path(pathDefinition: new PathDefinition('/my/null-endpoint'), httpMethod: OpenApi\HttpMethod::METHOD_GET)]
     public function nullEndpointMethod(): EndpointResponse
     {
         return new EndpointResponse('acknowledged');
     }
 
-    #[OpenApi\Path(
-        pathDefinition: new PathDefinition('/my/single-parameter-endpoint'),
-        httpMethod: OpenApi\HttpMethod::METHOD_GET
-    )]
     public function singleParameterAndResponseEndpointMethod(
         #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
         EndpointQuery $endpointQuery
@@ -28,10 +23,6 @@ final readonly class PathEndpoint
         return new EndpointResponse('Hello world in language ' . $endpointQuery->language);
     }
 
-    #[OpenApi\Path(
-        pathDefinition: new PathDefinition('/my/simple-parameter-endpoint'),
-        httpMethod: OpenApi\HttpMethod::METHOD_GET
-    )]
     public function scalarParametersAndResponseEndpointMethod(
         #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
         string $name,
@@ -45,7 +36,6 @@ final readonly class PathEndpoint
         return new EndpointResponse('Hello world ' . $name . ' (' . $number . ' ' . $numberWithDecimals . ' ' . ($switch ? 'on' : 'off') . ')');
     }
 
-    #[OpenApi\Path(pathDefinition: new PathDefinition('/my/scalar-parameter-endpoint'), httpMethod: OpenApi\HttpMethod::METHOD_GET)]
     public function scalarParameterEndpointMethod(
         #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
         string $message,
@@ -65,7 +55,6 @@ final readonly class PathEndpoint
         return new EndpointResponse('acknowledged');
     }
 
-    #[OpenApi\Path(pathDefinition: new PathDefinition('/my/scalar-nullable-parameter-endpoint'), httpMethod: OpenApi\HttpMethod::METHOD_GET)]
     public function scalarNullableParameterEndpointMethod(
         #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
         ?string $message = null,
@@ -85,22 +74,13 @@ final readonly class PathEndpoint
         return new EndpointResponse('acknowledged');
     }
 
-
-    #[OpenApi\Path(
-        pathDefinition: new PathDefinition('/my/request-body-endpoint'),
-        httpMethod: OpenApi\HttpMethod::METHOD_POST
-    )]
     public function requestBodyAndSingleResponseEndpointMethod(
-        #[OpenApi\RequestBody(OpenApi\RequestBodyContentType::CONTENT_TYPE_JSON)]
+        #[OpenApi\RequestBody(RequestBodyContentType::CONTENT_TYPE_JSON)]
         EndpointQuery $endpointQuery
     ): EndpointResponse {
         return new EndpointResponse('Hello world in language ' . $endpointQuery->language);
     }
 
-    #[OpenApi\Path(
-        pathDefinition: new PathDefinition('/my/endpoint/{endpointQuery}'),
-        httpMethod: OpenApi\HttpMethod::METHOD_GET
-    )]
     public function multipleParametersAndResponsesEndpointMethod(
         #[OpenApi\Parameter(ParameterLocation::LOCATION_PATH)]
         EndpointQuery $endpointQuery,

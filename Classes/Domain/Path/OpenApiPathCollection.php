@@ -18,20 +18,6 @@ final readonly class OpenApiPathCollection implements \JsonSerializable
         $this->items = $items;
     }
 
-    /**
-     * @param array<class-string,array<string>> $methodNames indexed by class name
-     */
-    public static function fromMethodNames(array $methodNames): self
-    {
-        $paths = [];
-        foreach ($methodNames as $className => $methodNamesForClass) {
-            foreach ($methodNamesForClass as $methodName) {
-                $paths[] = OpenApiPathItem::fromMethodName($className, $methodName);
-            }
-        }
-        return new self(...$paths);
-    }
-
     public function merge(OpenApiPathCollection $other): OpenApiPathCollection
     {
         return new OpenApiPathCollection(...$this->items, ...$other->items);
