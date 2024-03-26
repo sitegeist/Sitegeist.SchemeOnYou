@@ -81,7 +81,12 @@ final readonly class OpenApiSchema implements \JsonSerializable
             if (in_array($typeName, ['int', 'bool', 'string', 'float'])) {
                 return new self(
                     name: $reflection->getName(),
-                    type: $typeName,
+                    type: match ($typeName) {
+                        'int' => 'integer',
+                        'bool' => 'boolean',
+                        'string' => 'string',
+                        'float' => 'number',
+                    },
                 );
             } elseif (in_array($typeName, [\DateTime::class, \DateTimeImmutable::class])) {
                 return new self(

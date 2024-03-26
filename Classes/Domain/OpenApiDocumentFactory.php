@@ -71,11 +71,11 @@ class OpenApiDocumentFactory
                 }
                 $methodReturnType = $methodReflection->getReturnType();
                 if ($methodReturnType instanceof \ReflectionNamedType && class_exists($methodReturnType->getName()) && IsSupportedInSchema::isSatisfiedByReflectionType($methodReturnType)) {
-                    $requiredSchemaClasses[] = $methodReturnType->getName();
+                    $requiredSchemaClasses[$methodReturnType->getName()] = $methodReturnType->getName();
                 } elseif ($methodReturnType instanceof \ReflectionUnionType) {
                     foreach ($methodReturnType->getTypes() as $subtype) {
                         if ($subtype instanceof \ReflectionNamedType && class_exists($subtype->getName()) && IsSupportedInSchema::isSatisfiedByReflectionType($subtype)) {
-                            $requiredSchemaClasses[] = $subtype->getName();
+                            $requiredSchemaClasses[$subtype->getName()] = $subtype->getName();
                         }
                     }
                 }
@@ -85,7 +85,7 @@ class OpenApiDocumentFactory
                         if (in_array($parameterType->getName(), ['int', 'bool', 'string', 'float', \DateTime::class, \DateTimeInterface::class, \DateInterval::class])) {
                             continue;
                         } elseif (class_exists($parameterType->getName()) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterType)) {
-                            $requiredSchemaClasses[] = $parameterType->getName();
+                            $requiredSchemaClasses[$parameterType->getName()] = $parameterType->getName();
                         }
                     }
                 }
@@ -94,6 +94,7 @@ class OpenApiDocumentFactory
 
             $requiredSchemaClasses = $this->addConstructorArgumentTypesToRequiredSchemaClasses($requiredSchemaClasses);
         }
+        $requiredSchemaClasses = array_values($requiredSchemaClasses);
 
         $rootObjectConfiguration = Arrays::arrayMergeRecursiveOverrule($rootObjectConfiguration, [
             'info' => [
@@ -138,7 +139,7 @@ class OpenApiDocumentFactory
         } elseif (str_contains($localClassName, '\\Controller\\')) {
             list($subPackage, $controllerName) = explode('\\Controller\\', $localClassName);
         } else {
-            throw new \DomainException('Unknown controller pattern');
+            throw new \DomainException('Unknown controller pattern ' . $localClassName);
         }
 
         if (!str_ends_with($methodName, 'Action')) {
@@ -204,12 +205,12 @@ class OpenApiDocumentFactory
         }
 
         foreach ($this->router->getRoutes() as $route) {
-            $path = str_replace(
-                ['{@package}', '{@subpackage}', '{@controller}', '{@action}'],
-                [$controllerPackageKey, $subPackage, $controller, $action],
-                $route->getUriPattern()
-            );
             if ($route->resolves($resolveContext)) {
+                $path = str_replace(
+                    ['{@package}', '{@subpackage}', '{@controller}', '{@action}'],
+                    [$controllerPackageKey, $subPackage, $controller, $action],
+                    $route->getUriPattern()
+                );
                 foreach ($route->getHttpMethods() as $httpMethod) {
                     $paths[] = new OpenApiPathItem(
                         new PathDefinition('/' . $path),
@@ -249,7 +250,7 @@ class OpenApiDocumentFactory
                         continue;
                     }
                     if (class_exists($parameterTypeName) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterType)) {
-                        $requiredSchemaClasses[] = $parameterTypeName;
+                        $requiredSchemaClasses[$parameterTypeName] = $parameterTypeName;
                         $classesToCheckStack[] = $parameterTypeName;
                     } else {
                         throw new \DomainException(sprintf('Parameter %s has unsupported type %s in class %s', $constructorParameter->getName(), $parameterTypeName, $className));
@@ -262,7 +263,7 @@ class OpenApiDocumentFactory
                                 continue;  // already checked
                             }
                             if (class_exists($parameterSubtypeName) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterSubType)) {
-                                $requiredSchemaClasses[] = $parameterSubtypeName;
+                                $requiredSchemaClasses[$parameterSubtypeName] = $parameterSubtypeName;
                                 $classesToCheckStack[] = $parameterSubtypeName;
                             }
                         } else {

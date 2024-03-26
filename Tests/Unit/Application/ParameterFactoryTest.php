@@ -13,7 +13,7 @@ use Sitegeist\SchemeOnYou\Application\ParameterFactory;
 use Sitegeist\SchemeOnYou\Domain\Path\HttpMethod;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\AnotherEndpointQuery;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\EndpointQuery;
-use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\PathEndpoint;
+use Sitegeist\SchemeOnYou\Tests\Controller\PathController;
 
 final class ParameterFactoryTest extends TestCase
 {
@@ -46,8 +46,8 @@ final class ParameterFactoryTest extends TestCase
                     new Uri('https://acme.site')
                 )
             ),
-            'className' => PathEndpoint::class,
-            'methodName' => 'nullEndpointMethod',
+            'className' => PathController::class,
+            'methodName' => 'nullEndpointAction',
             'expectedParameters' => []
         ];
 
@@ -62,8 +62,8 @@ final class ParameterFactoryTest extends TestCase
                     ]
                 ])
             ),
-            'className' => PathEndpoint::class,
-            'methodName' => 'singleParameterAndResponseEndpointMethod',
+            'className' => PathController::class,
+            'methodName' => 'singleParameterAndResponseEndpointAction',
             'expectedParameters' => [
                 'endpointQuery' => new EndpointQuery('de')
             ]
@@ -82,8 +82,8 @@ final class ParameterFactoryTest extends TestCase
                     'other' => 'suppe'
                 ])
             ),
-            'className' => PathEndpoint::class,
-            'methodName' => 'scalarParametersAndResponseEndpointMethod',
+            'className' => PathController::class,
+            'methodName' => 'scalarParametersAndResponseEndpointAction',
             'expectedParameters' => [
                 'name' => 'foo',
                 'number' => 12,
@@ -104,8 +104,8 @@ final class ParameterFactoryTest extends TestCase
 
         yield 'withMultipleParameters' => [
             'request' => $multipleParametersRequest,
-            'className' => PathEndpoint::class,
-            'methodName' => 'multipleParametersAndResponsesEndpointMethod',
+            'className' => PathController::class,
+            'methodName' => 'multipleParametersAndResponsesEndpointAction',
             'expectedParameters' => [
                 'endpointQuery' => new EndpointQuery('de'),
                 'anotherEndpointQuery' => new AnotherEndpointQuery(true),
