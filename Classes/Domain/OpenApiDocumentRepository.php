@@ -5,16 +5,6 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain;
 
 use Neos\Flow\Annotations as Flow;
-use Neos\Flow\Reflection\ClassReflection;
-use Neos\Flow\Reflection\ReflectionService;
-use Sitegeist\SchemeOnYou\Application\OpenApiController;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaAttribute;
-use Sitegeist\SchemeOnYou\Domain\Metadata\Path as PathAttribute;
-use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathCollection;
-use Sitegeist\SchemeOnYou\Domain\Schema\IsCollection;
-use Sitegeist\SchemeOnYou\Domain\Schema\IsSupported;
-use Sitegeist\SchemeOnYou\Domain\Schema\IsValueObject;
-use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
 
 #[Flow\Scope('singleton')]
 final class OpenApiDocumentRepository

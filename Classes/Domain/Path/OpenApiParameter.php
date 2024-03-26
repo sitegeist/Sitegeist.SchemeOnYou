@@ -9,7 +9,6 @@ use Sitegeist\SchemeOnYou\Domain\Metadata\Parameter as ParameterAttribute;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaAttribute;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiReference;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchema;
-use Sitegeist\SchemeOnYou\Domain\Schema\Type;
 
 /**
  * @see https://swagger.io/specification/#parameter-object
@@ -52,10 +51,10 @@ final readonly class OpenApiParameter implements \JsonSerializable
             return new self(
                 name: $reflectionParameter->name,
                 in: $parameterAttribute->in,
-                description: $parameterAttribute->description ?: '',
-                required: !$reflectionParameter->allowsNull(),
                 type: $parameterSchema->type,
                 format: $parameterSchema->format,
+                description: $parameterAttribute->description ?: '',
+                required: !$reflectionParameter->allowsNull(),
                 style: $parameterAttribute->style
             );
         }
@@ -75,6 +74,7 @@ final readonly class OpenApiParameter implements \JsonSerializable
         return new self(
             name: $reflectionParameter->name,
             in: $parameterAttribute->in,
+            type: $parameterSchema->type,
             description: $parameterAttribute->description ?: $schemaAttribute->description,
             required: !$reflectionParameter->isDefaultValueAvailable(),
             schema: $parameterSchema->type === 'object' ? $parameterSchema->toReference() : null,
@@ -85,8 +85,7 @@ final readonly class OpenApiParameter implements \JsonSerializable
                     ]
                 ]
                 : null,
-            style: $parameterAttribute->style,
-            type: $parameterSchema->type
+            style: $parameterAttribute->style
         );
     }
 
