@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SchemeOnYou\Domain\Metadata;
+namespace Sitegeist\SchemeOnYou\Domain\Path;
 
 enum HttpMethod: string implements \JsonSerializable
 {

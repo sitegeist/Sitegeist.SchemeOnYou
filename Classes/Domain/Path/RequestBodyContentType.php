@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SchemeOnYou\Domain\Metadata;
+namespace Sitegeist\SchemeOnYou\Domain\Path;
 
 use Neos\Flow\Mvc\ActionRequest;
 

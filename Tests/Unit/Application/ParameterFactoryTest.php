@@ -10,7 +10,7 @@ use Neos\Flow\Mvc\ActionRequest;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Application\ParameterFactory;
-use Sitegeist\SchemeOnYou\Domain\Metadata\HttpMethod;
+use Sitegeist\SchemeOnYou\Domain\Path\HttpMethod;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\AnotherEndpointQuery;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\EndpointQuery;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\PathEndpoint;

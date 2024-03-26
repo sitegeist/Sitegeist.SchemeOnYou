@@ -6,7 +6,6 @@ namespace Sitegeist\SchemeOnYou\Domain\Path;
 
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
-use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBodyContentType;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiReference;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchema;
 

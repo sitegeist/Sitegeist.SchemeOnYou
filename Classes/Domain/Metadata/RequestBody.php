@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Metadata;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\SchemeOnYou\Domain\Path\RequestBodyContentType;
 
 /**
  * @see https://swagger.io/docs/specification/describing-request-body/

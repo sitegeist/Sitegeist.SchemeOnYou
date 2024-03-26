@@ -6,6 +6,9 @@ namespace Sitegeist\SchemeOnYou\Domain\Path;
 
 use Neos\Flow\Mvc\ActionRequest;
 
+/**
+ * @see https://swagger.io/specification/#parameter-locations
+ */
 enum ParameterLocation: string implements \JsonSerializable
 {
     case LOCATION_PATH = 'path';

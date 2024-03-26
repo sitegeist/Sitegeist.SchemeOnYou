@@ -13,7 +13,7 @@ use Neos\Flow\Reflection\ReflectionService;
 use Neos\Utility\Arrays;
 use Psr\Http\Message\UriFactoryInterface;
 use Sitegeist\SchemeOnYou\Application\OpenApiController;
-use Sitegeist\SchemeOnYou\Domain\Metadata\HttpMethod;
+use Sitegeist\SchemeOnYou\Domain\Path\HttpMethod;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Parameter;
 use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiParameter;
