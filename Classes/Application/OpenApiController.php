@@ -6,21 +6,15 @@ namespace Sitegeist\SchemeOnYou\Application;
 
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\ActionResponse;
+use Neos\Flow\Mvc\Controller\ActionController;
 use Neos\Flow\Mvc\Controller\Arguments;
 use Neos\Flow\Mvc\Controller\ControllerContext;
-use Neos\Flow\Mvc\Controller\ControllerInterface;
 use Neos\Flow\Mvc\Routing\UriBuilder;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Response;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
 
-abstract class OpenApiController implements ControllerInterface
+abstract class OpenApiController extends ActionController
 {
-    protected ActionRequest $request;
-
-    protected ActionResponse $response;
-
-    protected ControllerContext $controllerContext;
-
     final public function processRequest(ActionRequest $request, ActionResponse $response): void
     {
         $this->request = $request;
