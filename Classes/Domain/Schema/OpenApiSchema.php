@@ -118,7 +118,9 @@ final readonly class OpenApiSchema implements \JsonSerializable
      */
     public static function fromReflectionClass(\ReflectionClass $reflection): self
     {
-        if (IsDataTransferObjectCollection::isSatisfiedByReflectionClass($reflection)) {
+        if ($reflection->isEnum() && $reflection->isSubclassOf(\BackedEnum::class)) {
+            return self::fromReflectionEnum(new \ReflectionEnum($reflection->getName()));
+        } elseif (IsDataTransferObjectCollection::isSatisfiedByReflectionClass($reflection)) {
             return self::fromCollectionReflectionClass($reflection);
         } elseif (IsDataTransferObject::isSatisfiedByReflectionClass($reflection)) {
             return self::fromObjectReflectionClass($reflection);

@@ -238,6 +238,9 @@ class OpenApiDocumentFactory
         while (count($classesToCheckStack) > 0) {
             $className = array_shift($classesToCheckStack);
             $classReflection = new ClassReflection($className);
+            if ($classReflection->isSubclassOf(\BackedEnum::class)) {
+                continue;
+            }
             $constructorReflection = $classReflection->getConstructor();
             foreach ($constructorReflection->getParameters() as $constructorParameter) {
                 $parameterType = $constructorParameter->getType();
