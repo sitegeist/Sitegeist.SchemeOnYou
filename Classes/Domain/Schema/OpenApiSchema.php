@@ -120,6 +120,18 @@ final readonly class OpenApiSchema implements \JsonSerializable
     {
         if ($reflection->isEnum() && $reflection->isSubclassOf(\BackedEnum::class)) {
             return self::fromReflectionEnum(new \ReflectionEnum($reflection->getName()));
+        } elseif (in_array($reflection->getName(), [\DateTime::class, \DateTimeImmutable::class])) {
+            return new self(
+                name: $reflection->getName(),
+                type: 'string',
+                format: 'date-time',
+            );
+        } elseif ($reflection->getName() === \DateInterval::class) {
+            return new self(
+                name: $reflection->getName(),
+                type: 'string',
+                format: 'duration',
+            );
         } elseif (IsDataTransferObjectCollection::isSatisfiedByReflectionClass($reflection)) {
             return self::fromCollectionReflectionClass($reflection);
         } elseif (IsDataTransferObject::isSatisfiedByReflectionClass($reflection)) {

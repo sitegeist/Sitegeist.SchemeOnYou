@@ -238,7 +238,8 @@ class OpenApiDocumentFactory
         while (count($classesToCheckStack) > 0) {
             $className = array_shift($classesToCheckStack);
             $classReflection = new ClassReflection($className);
-            if ($classReflection->isSubclassOf(\BackedEnum::class)) {
+            if ($classReflection->isEnum() || in_array($classReflection->getName(), [ \DateTimeImmutable::class, \DateTime::class, \DateInterval::class])) {
+                // no need to look for constructor arguments in here
                 continue;
             }
             $constructorReflection = $classReflection->getConstructor();
@@ -246,7 +247,7 @@ class OpenApiDocumentFactory
                 $parameterType = $constructorParameter->getType();
                 if ($parameterType instanceof \ReflectionNamedType) {
                     $parameterTypeName = $parameterType->getName();
-                    if (in_array($parameterTypeName, ['int', 'bool', 'string', 'float', \DateTimeImmutable::class, \DateTime::class, \DateTimeInterface::class, \DateInterval::class])) {
+                    if (in_array($parameterTypeName, ['int', 'bool', 'string', 'float', \DateTimeImmutable::class, \DateTime::class, \DateInterval::class])) {
                         continue;
                     }
                     if (in_array($parameterTypeName, $requiredSchemaClasses)) {
