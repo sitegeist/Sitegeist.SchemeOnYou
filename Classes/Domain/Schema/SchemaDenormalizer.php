@@ -98,6 +98,9 @@ class SchemaDenormalizer
         if (is_array($value)) {
             foreach ($parameterReflections as $name => $parameter) {
                 $type = $parameter->getType();
+                if ($parameter->isDefaultValueAvailable() && !array_key_exists($parameter->getName(), $value)) {
+                    continue;
+                }
                 $convertedArguments[$name] = match (true) {
                     $type === null => throw new \DomainException('Cannot convert untyped property ' . $parameter->getName()),
                     $type instanceof \ReflectionNamedType => self::convertValue($value[$parameter->getName()], $type->getName()),
