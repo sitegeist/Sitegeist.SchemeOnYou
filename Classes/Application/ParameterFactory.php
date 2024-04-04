@@ -33,9 +33,6 @@ class ParameterFactory
             if (!$type instanceof \ReflectionNamedType) {
                 throw new \DomainException('Can only resolve named parameters with single type', 1709721743);
             }
-            if ($type->allowsNull()) {
-                throw new \DomainException('Nullable types are not supported yet', 1709721755);
-            }
 
             $requestBodyAttribute = RequestBody::tryFromReflectionParameter($parameter);
             if ($requestBodyAttribute) {
