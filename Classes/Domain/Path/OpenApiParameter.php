@@ -72,7 +72,7 @@ final readonly class OpenApiParameter implements \JsonSerializable
         $parameterSchema = OpenApiSchema::fromReflectionClass($reflectionClass);
 
         return new self(
-            name: $reflectionParameter->name,
+            name: $reflectionParameter->name . (($parameterAttribute->in === ParameterLocation::LOCATION_QUERY && $parameterSchema->type === 'array') ? '[]' : ''),
             in: $parameterAttribute->in,
             type: $parameterSchema->type,
             description: $parameterAttribute->description ?: $schemaAttribute->description,
