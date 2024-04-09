@@ -220,6 +220,8 @@ class OpenApiDocumentFactory
                         OpenApiResponses::fromReflectionMethod($methodReflection)
                     );
                 }
+                // only the first matching route is needed so we can break the loop here
+                break;
             }
         }
 

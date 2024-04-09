@@ -11,6 +11,8 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Application\ParameterFactory;
 use Sitegeist\SchemeOnYou\Domain\Path\HttpMethod;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Identifier;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\IdentifierCollection;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\AnotherEndpointQuery;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\EndpointQuery;
 use Sitegeist\SchemeOnYou\Tests\Controller\PathController;
@@ -109,6 +111,26 @@ final class ParameterFactoryTest extends TestCase
             'expectedParameters' => [
                 'endpointQuery' => new EndpointQuery('de'),
                 'anotherEndpointQuery' => new AnotherEndpointQuery(true),
+            ]
+        ];
+
+        $collectionParametersRequest = ActionRequest::fromHttpRequest(
+            (new ServerRequest(
+                HttpMethod::METHOD_GET->value,
+                new Uri('https://acme.site/?identifierCollection[]=foo&identifierCollection[]=bar&identifier=baz')
+            ))->withQueryParams([
+                'identifierCollection' => ['foo','bar'],
+                'identifier' => 'baz'
+            ])
+        );
+
+        yield 'withSingleValueObjectsParameterEndpointAction' => [
+            'request' => $collectionParametersRequest,
+            'className' => PathController::class,
+            'methodName' => 'singleValueObjectsParameterEndpointAction',
+            'expectedParameters' => [
+                'identifierCollection' => new IdentifierCollection(new Identifier('foo'), new Identifier('bar')),
+                'identifier' => new Identifier('baz')
             ]
         ];
     }

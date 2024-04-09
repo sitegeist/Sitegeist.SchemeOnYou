@@ -53,7 +53,7 @@ final readonly class OpenApiParameter implements \JsonSerializable
                 in: $parameterAttribute->in,
                 type: $parameterSchema->type,
                 format: $parameterSchema->format,
-                description: $parameterAttribute->description ?: '',
+                description: $parameterAttribute->description,
                 required: !$reflectionParameter->allowsNull(),
                 style: $parameterAttribute->style
             );

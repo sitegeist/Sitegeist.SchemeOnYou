@@ -110,6 +110,10 @@ final class OpenApiDocumentFactoryTest extends TestCase
                     'multipleParametersAndResponsesEndpoint',
                     'my-multiple-parameters-and-responses-endpoint'
                 ),
+                $this->createMockRoute(
+                    'singleValueObjectsParameterEndpoint',
+                    'single-value-objects-parameter-endpoint'
+                ),
             ]);
 
         $mockObjectManager = $this->getMockBuilder(ObjectManager::class)
@@ -483,6 +487,41 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             )
                         )
                     ),
+                    new OpenApiPathItem(
+                        new PathDefinition('/single-value-objects-parameter-endpoint'),
+                        HttpMethod::METHOD_GET,
+                        new OpenApiParameterCollection(
+                            new OpenApiParameter(
+                                name: 'identifier',
+                                in: ParameterLocation::LOCATION_QUERY,
+                                type: 'string',
+                                required: true,
+                                description: 'see https://schema.org/identifier',
+                                schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier'),
+                                style: ParameterStyle::STYLE_FORM
+                            ),
+                            new OpenApiParameter(
+                                name: 'identifierCollection[]',
+                                in: ParameterLocation::LOCATION_QUERY,
+                                type: 'array',
+                                required: true,
+                                schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_IdentifierCollection'),
+                                style: ParameterStyle::STYLE_FORM
+                            ),
+                        ),
+                        null,
+                        new OpenApiResponses(
+                            new OpenApiResponse(
+                                200,
+                                'the query was successful',
+                                [
+                                    'application/json' => [
+                                        'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointResponse')
+                                    ]
+                                ]
+                            )
+                        )
+                    ),
                 ),
                 [],
                 new OpenApiComponents(
@@ -538,7 +577,19 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             required: [
                                 'pleaseFail'
                             ]
-                        )
+                        ),
+                        new OpenApiSchema(
+                            name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier',
+                            type: 'string',
+                            description: 'see https://schema.org/identifier',
+                        ),
+                        new OpenApiSchema(
+                            name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_IdentifierCollection',
+                            type: 'array',
+                            items: new OpenApiReference(
+                                ref: '#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier'
+                            )
+                        ),
                     ),
                 ),
                 [],
