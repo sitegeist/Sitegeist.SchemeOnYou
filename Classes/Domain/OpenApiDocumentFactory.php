@@ -7,6 +7,7 @@ namespace Sitegeist\SchemeOnYou\Domain;
 use Neos\Flow\Mvc\Routing\Dto\ResolveContext;
 use Neos\Flow\Mvc\Routing\Dto\RouteParameters;
 use Neos\Flow\ObjectManagement\ObjectManager;
+use Neos\Flow\ObjectManagement\Proxy\ProxyInterface;
 use Neos\Flow\Reflection\ClassReflection;
 use Neos\Flow\Reflection\MethodReflection;
 use Neos\Flow\Reflection\ReflectionService;
@@ -64,8 +65,17 @@ class OpenApiDocumentFactory
                 continue;
             }
 
+            // in case of flow proxies we use the method reflections of the parent class to
+            // get the correct attributes for the method parameters
             $classReflection = new ClassReflection($className);
-            foreach ($classReflection->getMethods() as $methodReflection) {
+            $parentClassReflection = $classReflection->getParentClass();
+            if ($classReflection->implementsInterface(ProxyInterface::class) && $parentClassReflection && str_ends_with($parentClassReflection->name, '_Original')) {
+                $methodReflections = $parentClassReflection->getMethods();
+            } else {
+                $methodReflections = $classReflection->getMethods();
+            }
+
+            foreach ($methodReflections as $methodReflection) {
                 if (!str_ends_with($methodReflection->getName(), 'Action')) {
                     continue;
                 }
@@ -123,7 +133,7 @@ class OpenApiDocumentFactory
 
         $controllerObjectName = $this->objectManager->getCaseSensitiveObjectName($className);
         if (!$controllerObjectName) {
-            throw new \DomainException('Class ' . $className . ' is unknown to the objet manager and thus cannot be processed');
+            throw new \DomainException('Class ' . $className . ' is unknown to the object manager and thus cannot be processed');
         }
         $controllerPackageKey = $this->objectManager->getPackageKeyByObjectName($controllerObjectName);
         $controllerPackageNamespace = str_replace('.', '\\', $controllerPackageKey);
