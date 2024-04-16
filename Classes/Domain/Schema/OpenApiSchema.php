@@ -18,8 +18,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
      * @param array<int,string> $required
      */
     public function __construct(
-        public string $name,
         public string $type,
+        public ?string $name = null,
         public ?string $description = null,
         public ?array $enum = null,
         public ?array $properties = null,
@@ -47,20 +47,20 @@ final readonly class OpenApiSchema implements \JsonSerializable
         $definitionMetadata = SchemaMetadata::fromReflectionClass($reflection);
         return match ($reflection->getBackingType()?->getName()) {
             'string' => new self(
-                $definitionMetadata->name ?: $reflection->getShortName(),
-                'string',
-                $definitionMetadata->description,
-                array_map(
+                name: $definitionMetadata->name ?: $reflection->getShortName(),
+                type: 'string',
+                description: $definitionMetadata->description,
+                enum: array_map(
                     /** @phpstan-ignore-next-line parameter and return types are enforced before */
                     fn(\ReflectionEnumBackedCase $case): string => $case->getBackingValue(),
                     $reflection->getCases()
                 )
             ),
             'int' => new self(
-                $definitionMetadata->name ?: $reflection->getShortName(),
-                'integer',
-                $definitionMetadata->description,
-                array_map(
+                name: $definitionMetadata->name ?: $reflection->getShortName(),
+                type: 'integer',
+                description: $definitionMetadata->description,
+                enum: array_map(
                     /** @phpstan-ignore-next-line parameter and return types are enforced before */
                     fn(\ReflectionEnumBackedCase $case): int => $case->getBackingValue(),
                     $reflection->getCases()
@@ -80,7 +80,6 @@ final readonly class OpenApiSchema implements \JsonSerializable
             $typeName = $reflectionType->getName();
             if (in_array($typeName, ['int', 'bool', 'string', 'float'])) {
                 return new self(
-                    name: $reflection->getName(),
                     type: match ($typeName) {
                         'int' => 'integer',
                         'bool' => 'boolean',
@@ -91,13 +90,11 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 );
             } elseif (in_array($typeName, [\DateTime::class, \DateTimeImmutable::class])) {
                 return new self(
-                    name: $reflection->getName(),
                     type: 'string',
                     format: 'date-time',
                 );
             } elseif ($typeName === \DateInterval::class) {
                 return new self(
-                    name: $reflection->getName(),
                     type: 'string',
                     format: 'duration',
                 );
@@ -122,13 +119,11 @@ final readonly class OpenApiSchema implements \JsonSerializable
             return self::fromReflectionEnum(new \ReflectionEnum($reflection->getName()));
         } elseif (in_array($reflection->getName(), [\DateTime::class, \DateTimeImmutable::class])) {
             return new self(
-                name: $reflection->getName(),
                 type: 'string',
                 format: 'date-time',
             );
         } elseif ($reflection->getName() === \DateInterval::class) {
             return new self(
-                name: $reflection->getName(),
                 type: 'string',
                 format: 'duration',
             );

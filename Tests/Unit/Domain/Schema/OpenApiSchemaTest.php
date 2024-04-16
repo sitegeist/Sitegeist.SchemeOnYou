@@ -42,10 +42,10 @@ final class OpenApiSchemaTest extends TestCase
         yield 'stringEnum' => [
             'className' => DayOfWeek::class,
             'expectedDefinition' => new OpenApiSchema(
-                'Sitegeist_SchemeOnYou_Tests_Fixtures_DayOfWeek',
-                'string',
-                'see https://schema.org/DayOfWeek',
-                [
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_DayOfWeek',
+                type: 'string',
+                description: 'see https://schema.org/DayOfWeek',
+                enum: [
                     'https://schema.org/Monday',
                     'https://schema.org/Tuesday',
                     'https://schema.org/Wednesday',
@@ -60,10 +60,10 @@ final class OpenApiSchemaTest extends TestCase
         yield 'intEnum' => [
             'className' => ImportantNumber::class,
             'expectedDefinition' => new OpenApiSchema(
-                'Sitegeist_SchemeOnYou_Tests_Fixtures_ImportantNumber',
-                'integer',
-                'important numbers only',
-                [
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_ImportantNumber',
+                type: 'integer',
+                description: 'important numbers only',
+                enum: [
                     23,
                     42,
                 ],
@@ -73,27 +73,27 @@ final class OpenApiSchemaTest extends TestCase
         yield 'stringValueObject' => [
             'className' => Identifier::class,
             'expectedDefinition' => new OpenApiSchema(
-                'Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier',
-                'string',
-                'see https://schema.org/identifier',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier',
+                type: 'string',
+                description: 'see https://schema.org/identifier',
             ),
         ];
 
         yield 'intValueObject' => [
             'className' => QuantitativeValue::class,
             'expectedDefinition' => new OpenApiSchema(
-                'Sitegeist_SchemeOnYou_Tests_Fixtures_QuantitativeValue',
-                'integer',
-                'see https://schema.org/QuantitativeValue',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_QuantitativeValue',
+                type: 'integer',
+                description: 'see https://schema.org/QuantitativeValue',
             ),
         ];
 
         yield 'floatValueObject' => [
             'className' => Number::class,
             'expectedDefinition' => new OpenApiSchema(
-                'Sitegeist_SchemeOnYou_Tests_Fixtures_Number',
-                'number',
-                'see https://schema.org/Number',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Number',
+                type: 'number',
+                description: 'see https://schema.org/Number',
             ),
         ];
 
