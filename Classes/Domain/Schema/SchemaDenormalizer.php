@@ -37,20 +37,11 @@ class SchemaDenormalizer
         } elseif ($targetType === 'bool') {
             return (bool) $value;
         } elseif ($targetType === \DateTime::class) {
-            return match (true) {
-                is_string($value) => \DateTime::createFromFormat(\DateTimeInterface::RFC3339, $value),
-                default => throw new \DomainException('Can only denormalize \DateTime from an RFC 3339 string')
-            };
+            return self::convertDateTime($value);
         } elseif ($targetType === \DateTimeImmutable::class) {
-            return match (true) {
-                is_string($value) => \DateTimeImmutable::createFromFormat(\DateTimeInterface::RFC3339, $value),
-                default => throw new \DomainException('Can only denormalize \DateTimeImmutable from an RFC 3339 string')
-            };
+            return self::convertDateTimeImmutable($value);
         } elseif ($targetType === \DateInterval::class) {
-            return match (true) {
-                is_string($value) => new \DateInterval($value),
-                default => throw new \DomainException('Can only denormalize \DateInterval from string')
-            };
+            return self::convertDateInterval($value);
         } elseif (
             // Enums are final, so is_a suffices
             is_a($targetType, \BackedEnum::class, true)
@@ -113,5 +104,50 @@ class SchemaDenormalizer
             return new $targetType(value: $convertedValue);
         }
         throw new \DomainException('Only single value objects can be serialized as single value');
+    }
+
+    /**
+     * @param array<string,mixed>|int|float|string|bool $value
+     */
+    protected static function convertDateTime(array|float|bool|int|string $value): \DateTime
+    {
+        $converted = match (true) {
+            is_string($value) => \DateTime::createFromFormat(\DateTimeInterface::RFC3339, $value),
+            default => false,
+        };
+        if ($converted === false) {
+            throw new \DomainException('Can only denormalize \DateTime from an RFC 3339 string');
+        }
+        return $converted;
+    }
+
+    /**
+     * @param array<string,mixed>|int|float|string|bool $value
+     */
+    protected static function convertDateTimeImmutable(array|float|bool|int|string $value): \DateTimeImmutable
+    {
+        $converted = match (true) {
+            is_string($value) => \DateTimeImmutable::createFromFormat(\DateTimeInterface::RFC3339, $value),
+            default => false,
+        };
+        if ($converted === false) {
+            throw new \DomainException('Can only denormalize \DateTimeImmutable from an RFC 3339 string');
+        }
+        return $converted;
+    }
+
+    /**
+     * @param array<string,mixed>|int|float|string|bool $value
+     */
+    protected static function convertDateInterval(array|float|bool|int|string $value): \DateInterval
+    {
+        $converted = match (true) {
+            is_string($value) => new \DateInterval($value),
+            default => false,
+        };
+        if ($converted === false) {
+            throw new \DomainException('Can only denormalize \DateInterval from an ISO 8601 string');
+        }
+        return $converted;
     }
 }
