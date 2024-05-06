@@ -124,7 +124,7 @@ class SchemaDenormalizer
         if ($converted === false) {
             throw new \DomainException('Can only denormalize \DateTime from an RFC 3339 string');
         }
-        if ($format === StringProperty::FORMAT_DATE) {
+        if ($propertyAttribute?->format === StringProperty::FORMAT_DATE) {
             $converted->setTime(0, 0, 0);
         }
         return $converted;

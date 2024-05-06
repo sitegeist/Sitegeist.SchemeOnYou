@@ -60,7 +60,7 @@ final class SchemaNormalizerTest extends TestCase
             Fixtures\Date::class,
             new Date(new \DateTimeImmutable('2010-01-28T00:00:00' . (new \DateTimeImmutable('2010-01-28T00:00:00'))->format('P'))),
             '2010-01-28',
-            (new \ReflectionClass(Date::class))->getConstructor()->getParameters()[0]
+            (new \ReflectionClass(Date::class))->getConstructor()?->getParameters()[0] ?? null
         ];
         yield 'Int backed Enum' => [Fixtures\ImportantNumber::class, Fixtures\ImportantNumber::NUMBER_42, 42];
         yield 'String backed Enum' => [Fixtures\DayOfWeek::class, Fixtures\DayOfWeek::DAY_FRIDAY, 'https://schema.org/Friday'];

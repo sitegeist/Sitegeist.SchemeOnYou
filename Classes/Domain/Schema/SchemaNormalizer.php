@@ -50,14 +50,14 @@ class SchemaNormalizer
 
 
     /**
-     * @param object $value
+     * @param \ReflectionClass<object> $reflectionClass
      * @return array<integer,int|bool|float|string|array<mixed>|null>
      */
     private static function convertCollection(object $value, \ReflectionClass $reflectionClass): array
     {
         $values = array_values(get_object_vars($value));
         if (count($values) === 1 && is_array($values[0])) {
-            $reflectionParameter = $reflectionClass->getConstructor()->getParameters()[0];
+            $reflectionParameter = $reflectionClass->getConstructor()?->getParameters()[0] ?? null;
             return array_map(
                 fn($subvalue) => self::convertValue($subvalue, $reflectionParameter),
                 $values[0]
@@ -68,12 +68,13 @@ class SchemaNormalizer
 
     /**
      * @return array<string,int|bool|float|string|array<mixed>|null>|int|float|string
+     * @param \ReflectionClass<object> $reflectionClass
      */
     private static function convertValueObject(object $value, \ReflectionClass $reflectionClass): array|int|float|string
     {
         $properties = get_object_vars($value);
         if (array_keys($properties) === ['value']) {
-            $reflectionParameter = $reflectionClass->getConstructor()->getParameters()[0] ?? null;
+            $reflectionParameter = $reflectionClass->getConstructor()?->getParameters()[0] ?? null;
             if ($reflectionParameter) {
                 $reflectionType = $reflectionParameter->getType();
                 if (
@@ -83,11 +84,11 @@ class SchemaNormalizer
                 ) {
                     $stringPropertyAttribute = StringProperty::tryFromReflectionParameter($reflectionParameter);
                     if ($stringPropertyAttribute) {
-                        $format = $stringPropertyAttribute->format;
-                        return match ($format) {
-                            StringProperty::FORMAT_DATE => $properties['value']->format('Y-m-d'),
-                            default => $properties['value']
+                        $format = match ($stringPropertyAttribute->format) {
+                            StringProperty::FORMAT_DATE => 'Y-m-d',
+                            default => \DateTimeImmutable::RFC3339
                         };
+                        return $properties['value']->format($format);
                     }
                 }
             }
@@ -99,7 +100,7 @@ class SchemaNormalizer
         foreach (get_object_vars($value) as $propertyName => $propertyValue) {
             $conversion[$propertyName] = self::convertValue(
                 $propertyValue,
-                $reflectionClass->getConstructor()->getParameters()[$propertyKey]
+                $reflectionClass->getConstructor()?->getParameters()[$propertyKey]
             );
             $propertyKey++;
         }

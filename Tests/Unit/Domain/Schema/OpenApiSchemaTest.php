@@ -110,7 +110,7 @@ final class OpenApiSchemaTest extends TestCase
             ),
         ];
 
-        yield 'dateValueObject'=> [
+        yield 'dateValueObject' => [
             'className' => Date::class,
             'expectedDefinition' => new OpenApiSchema(
                 type: 'string',
