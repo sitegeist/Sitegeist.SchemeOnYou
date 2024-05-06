@@ -47,8 +47,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
         $definitionMetadata = SchemaMetadata::fromReflectionClass($reflection);
         return match ($reflection->getBackingType()?->getName()) {
             'string' => new self(
-                name: $definitionMetadata->name ?: $reflection->getShortName(),
                 type: 'string',
+                name: $definitionMetadata->name ?: $reflection->getShortName(),
                 description: $definitionMetadata->description,
                 enum: array_map(
                     /** @phpstan-ignore-next-line parameter and return types are enforced before */
@@ -57,8 +57,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 )
             ),
             'int' => new self(
-                name: $definitionMetadata->name ?: $reflection->getShortName(),
                 type: 'integer',
+                name: $definitionMetadata->name ?: $reflection->getShortName(),
                 description: $definitionMetadata->description,
                 enum: array_map(
                     /** @phpstan-ignore-next-line parameter and return types are enforced before */
@@ -148,8 +148,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
         $parameterSchema = self::fromReflectionClass(new \ReflectionClass($parameterClassName));
 
         return new self(
-            name: $definitionMetadata->name ?: $reflection->getShortName(),
             type: 'array',
+            name: $definitionMetadata->name ?: $reflection->getShortName(),
             description: $definitionMetadata->description,
             items: $parameterSchema->toReference()
         );
@@ -170,7 +170,6 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 && $singleConstructorParameter->name === 'value'
             ) {
                 return new self(
-                    name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
                     type: match ($singleConstructorParameter->getType()->getName()) {
                         'string', 'DateTimeImmutable', 'DateTime', 'DateInterval' => 'string',
                         'int' => 'integer',
@@ -182,6 +181,7 @@ final readonly class OpenApiSchema implements \JsonSerializable
                             . ' of class ' . $reflectionClass->name
                         )
                     },
+                    name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
                     description: $schemaMetadata->description,
                     format: match ($singleConstructorParameter->getType()->getName()) {
                         'DateTimeImmutable' => 'date-time',
@@ -244,8 +244,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
         }
 
         return new self(
-            name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
             type: 'object',
+            name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
             description: $schemaMetadata->description,
             properties: $properties,
             required: $required
