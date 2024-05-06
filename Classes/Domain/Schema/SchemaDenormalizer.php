@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Reflection\ClassReflection;
+use Sitegeist\SchemeOnYou\Domain\Metadata\StringProperty;
 
 class SchemaDenormalizer
 {
@@ -12,16 +13,16 @@ class SchemaDenormalizer
      * @param int|bool|string|float|array<mixed>|null $value
      * @return object|int|bool|string|float|null
      */
-    public static function denormalizeValue(null|int|bool|string|float|array $value, string $targetType): object|int|bool|string|float|null
+    public static function denormalizeValue(null|int|bool|string|float|array $value, string $targetType, ?\ReflectionParameter $reflectionParameter = null): object|int|bool|string|float|null
     {
-        return self::convertValue($value, $targetType);
+        return self::convertValue($value, $targetType, $reflectionParameter);
     }
 
     /**
      * @param null|int|bool|string|float|array<mixed> $value
      * @return object|int|bool|string|float|null
      */
-    private static function convertValue(null|int|bool|string|float|array $value, string $targetType): object|int|bool|string|float|null
+    private static function convertValue(null|int|bool|string|float|array $value, string $targetType, ?\ReflectionParameter $reflectionParameter = null): object|int|bool|string|float|null
     {
         if ($value === null) {
             return null;
@@ -37,9 +38,9 @@ class SchemaDenormalizer
         } elseif ($targetType === 'bool') {
             return (bool) $value;
         } elseif ($targetType === \DateTime::class) {
-            return self::convertDateTime($value);
+            return self::convertDateTime($value, $reflectionParameter);
         } elseif ($targetType === \DateTimeImmutable::class) {
-            return self::convertDateTimeImmutable($value);
+            return self::convertDateTimeImmutable($value, $reflectionParameter);
         } elseif ($targetType === \DateInterval::class) {
             return self::convertDateInterval($value);
         } elseif (
@@ -87,20 +88,20 @@ class SchemaDenormalizer
         $parameterReflections = $reflection->getConstructor()->getParameters();
         $convertedArguments = [];
         if (is_array($value)) {
-            foreach ($parameterReflections as $name => $parameter) {
-                $type = $parameter->getType();
-                if ($parameter->isDefaultValueAvailable() && !array_key_exists($parameter->getName(), $value)) {
+            foreach ($parameterReflections as $name => $reflectionParameter) {
+                $type = $reflectionParameter->getType();
+                if ($reflectionParameter->isDefaultValueAvailable() && !array_key_exists($reflectionParameter->getName(), $value)) {
                     continue;
                 }
                 $convertedArguments[$name] = match (true) {
-                    $type === null => throw new \DomainException('Cannot convert untyped property ' . $parameter->getName()),
-                    $type instanceof \ReflectionNamedType => self::convertValue($value[$parameter->getName()], $type->getName()),
+                    $type === null => throw new \DomainException('Cannot convert untyped property ' . $reflectionParameter->getName()),
+                    $type instanceof \ReflectionNamedType => self::convertValue($value[$reflectionParameter->getName()], $type->getName(), $reflectionParameter),
                     default => throw new \DomainException('Cannot convert ' . get_class($type) . ' yet'),
                 };
             }
             return new $targetType(...$convertedArguments);
         } elseif (count($parameterReflections) === 1 && $parameterReflections[0]->getName() === 'value' && $parameterReflections[0]->getType() instanceof \ReflectionNamedType) {
-            $convertedValue = self::convertValue($value, $parameterReflections[0]->getType()->getName());
+            $convertedValue = self::convertValue($value, $parameterReflections[0]->getType()->getName(), $parameterReflections[0]);
             return new $targetType(value: $convertedValue);
         }
         throw new \DomainException('Only single value objects can be serialized as single value');
@@ -109,14 +110,22 @@ class SchemaDenormalizer
     /**
      * @param array<string,mixed>|int|float|string|bool $value
      */
-    protected static function convertDateTime(array|float|bool|int|string $value): \DateTime
+    protected static function convertDateTime(array|float|bool|int|string $value, ?\ReflectionParameter $reflectionParameter = null): \DateTime
     {
+        $propertyAttribute = $reflectionParameter ? StringProperty::tryFromReflectionParameter($reflectionParameter) : null;
+        $format = match ($propertyAttribute?->format) {
+            StringProperty::FORMAT_DATE => 'Y-m-d',
+            default => \DateTimeInterface::RFC3339
+        };
         $converted = match (true) {
-            is_string($value) => \DateTime::createFromFormat(\DateTimeInterface::RFC3339, $value),
+            is_string($value) => \DateTime::createFromFormat($format, $value),
             default => false,
         };
         if ($converted === false) {
             throw new \DomainException('Can only denormalize \DateTime from an RFC 3339 string');
+        }
+        if ($propertyAttribute?->format === StringProperty::FORMAT_DATE) {
+            $converted->setTime(0, 0, 0);
         }
         return $converted;
     }
@@ -124,14 +133,22 @@ class SchemaDenormalizer
     /**
      * @param array<string,mixed>|int|float|string|bool $value
      */
-    protected static function convertDateTimeImmutable(array|float|bool|int|string $value): \DateTimeImmutable
+    protected static function convertDateTimeImmutable(array|float|bool|int|string $value, ?\ReflectionParameter $reflectionParameter = null): \DateTimeImmutable
     {
+        $propertyAttribute = $reflectionParameter ? StringProperty::tryFromReflectionParameter($reflectionParameter) : null;
+        $format = match ($propertyAttribute?->format) {
+            StringProperty::FORMAT_DATE => 'Y-m-d',
+            default => \DateTimeInterface::RFC3339
+        };
         $converted = match (true) {
-            is_string($value) => \DateTimeImmutable::createFromFormat(\DateTimeInterface::RFC3339, $value),
+            is_string($value) => \DateTimeImmutable::createFromFormat($format, $value),
             default => false,
         };
         if ($converted === false) {
             throw new \DomainException('Can only denormalize \DateTimeImmutable from an RFC 3339 string');
+        }
+        if ($propertyAttribute?->format === StringProperty::FORMAT_DATE) {
+            $converted = $converted->setTime(0, 0, 0);
         }
         return $converted;
     }
