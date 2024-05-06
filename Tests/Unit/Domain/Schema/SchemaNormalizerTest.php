@@ -9,14 +9,10 @@ use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
 use Sitegeist\SchemeOnYou\Tests\Fixtures;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Date;
 
 final class SchemaNormalizerTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
-
     /**
      * @dataProvider valueNormalizationPairs
      * @test
@@ -24,7 +20,7 @@ final class SchemaNormalizerTest extends TestCase
     public function normalizeValue(
         string $type,
         mixed $value,
-        mixed $normalized
+        mixed $normalized,
     ): void {
         Assert::assertEquals($normalized, SchemaNormalizer::normalizeValue($value));
     }
@@ -36,9 +32,10 @@ final class SchemaNormalizerTest extends TestCase
     public function denormalizeValue(
         string $type,
         mixed $value,
-        mixed $normalized
+        mixed $normalized,
+        ?\ReflectionParameter $reflectionParameter = null
     ): void {
-        Assert::assertEquals($value, SchemaDenormalizer::denormalizeValue($normalized, $type));
+        Assert::assertEquals($value, SchemaDenormalizer::denormalizeValue($normalized, $type, $reflectionParameter));
     }
 
     /**
@@ -59,6 +56,12 @@ final class SchemaNormalizerTest extends TestCase
         yield 'DateTime' => [\DateTime::class, new \DateTime('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
         yield 'DateTimeImmutable' => [\DateTimeImmutable::class, new \DateTimeImmutable('2010-01-28T15:00:00+02:00'), '2010-01-28T15:00:00+02:00'];
         yield 'DateInterval' => [\DateInterval::class, new \DateInterval('P1Y'), 'P1Y'];
+        yield 'Date' => [
+            Fixtures\Date::class,
+            new Date(new \DateTimeImmutable('2010-01-28T00:00:00' . (new \DateTimeImmutable('2010-01-28T00:00:00'))->format('P'))),
+            '2010-01-28',
+            (new \ReflectionClass(Date::class))->getConstructor()->getParameters()[0]
+        ];
         yield 'Int backed Enum' => [Fixtures\ImportantNumber::class, Fixtures\ImportantNumber::NUMBER_42, 42];
         yield 'String backed Enum' => [Fixtures\DayOfWeek::class, Fixtures\DayOfWeek::DAY_FRIDAY, 'https://schema.org/Friday'];
         yield 'PostalAddress' => [
@@ -197,6 +200,20 @@ final class SchemaNormalizerTest extends TestCase
                     "when" => "2010-01-28T15:00:00+02:00",
                     "howLong" => "P1Y",
                 ]
+            ]
+        ];
+
+        yield 'Credentials' => [
+            Fixtures\Credentials::class,
+            new Fixtures\Credentials(
+                username: 'Peter-Klaus Fledermaus',
+                password: new Fixtures\Password('secret'),
+                expirationDate: new \DateTimeImmutable('2010-01-28T00:00:00' . (new \DateTimeImmutable('2010-01-28T00:00:00'))->format('P'))
+            ),
+            [
+                'username' => 'Peter-Klaus Fledermaus',
+                'password' => 'secret',
+                'expirationDate' => '2010-01-28',
             ]
         ];
     }

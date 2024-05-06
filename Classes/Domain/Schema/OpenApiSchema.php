@@ -6,6 +6,7 @@ namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaMetadata;
+use Sitegeist\SchemeOnYou\Domain\Metadata\StringProperty;
 
 #[Flow\Proxy(false)]
 final readonly class OpenApiSchema implements \JsonSerializable
@@ -87,11 +88,16 @@ final readonly class OpenApiSchema implements \JsonSerializable
                         'float' => 'number',
                         default => throw new \DomainException('Unsupported type ' . $typeName)
                     },
+                    format: match ($typeName) {
+                        'string' => StringProperty::tryfromReflectionParameter($reflection)?->format ?: null,
+                        default => null,
+                    }
                 );
             } elseif (in_array($typeName, [\DateTime::class, \DateTimeImmutable::class])) {
+                $propertyAttribute = StringProperty::tryfromReflectionParameter($reflection);
                 return new self(
                     type: 'string',
-                    format: 'date-time',
+                    format: $propertyAttribute?->format ?: 'date-time',
                 );
             } elseif ($typeName === \DateInterval::class) {
                 return new self(
@@ -169,6 +175,7 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 $singleConstructorParameter->getType() instanceof \ReflectionNamedType
                 && $singleConstructorParameter->name === 'value'
             ) {
+                $propertyAttribute = StringProperty::tryfromReflectionParameter($singleConstructorParameter);
                 return new self(
                     type: match ($singleConstructorParameter->getType()->getName()) {
                         'string', 'DateTimeImmutable', 'DateTime', 'DateInterval' => 'string',
@@ -184,8 +191,9 @@ final readonly class OpenApiSchema implements \JsonSerializable
                     name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
                     description: $schemaMetadata->description,
                     format: match ($singleConstructorParameter->getType()->getName()) {
-                        'DateTimeImmutable' => 'date-time',
+                        'DateTimeImmutable' => $propertyAttribute?->format ?: 'date-time',
                         'DateInterval' => 'duration',
+                        'string' => $propertyAttribute?->format ?: null,
                         default => null
                     },
                 );
@@ -204,7 +212,10 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 );
             }
             $properties[$reflectionParameter->name] = match (get_class($type)) {
-                \ReflectionNamedType::class => SchemaType::selfOrReferenceFromReflectionNamedType($type),
+                \ReflectionNamedType::class => SchemaType::selfOrReferenceFromReflectionNamedType(
+                    $type,
+                    $reflectionParameter
+                ),
                 \ReflectionUnionType::class => [
                     'oneOf' => array_map(
                         fn (\ReflectionType $singleType): SchemaType|OpenApiReference
@@ -217,7 +228,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
                                         1709560366
                                     ),
                                 \ReflectionNamedType::class => SchemaType::selfOrReferenceFromReflectionNamedType(
-                                    $singleType
+                                    $singleType,
+                                    $reflectionParameter,
                                 ),
                                 default => throw new \DomainException('wat')
                             },

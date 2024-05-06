@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
+use Sitegeist\SchemeOnYou\Domain\Metadata\StringProperty;
 
 #[Flow\Proxy(false)]
 final readonly class SchemaType implements \JsonSerializable
@@ -23,8 +24,8 @@ final readonly class SchemaType implements \JsonSerializable
         $type = $reflectionParameter->getType();
 
         return match (true) {
-            $type instanceof \ReflectionNamedType => self::selfOrReferenceFromReflectionNamedType($type),
-            $type instanceof \ReflectionUnionType => self::fromReflectionUnionType($type),
+            $type instanceof \ReflectionNamedType => self::selfOrReferenceFromReflectionNamedType($type, $reflectionParameter),
+            $type instanceof \ReflectionUnionType => self::fromReflectionUnionType($type, $reflectionParameter),
             $type instanceof \ReflectionIntersectionType => throw new \DomainException(
                 'Cannot resolve schema type from intersection type given for parameter '
                 . $reflectionParameter->name,
@@ -37,7 +38,8 @@ final readonly class SchemaType implements \JsonSerializable
     }
 
     public static function selfOrReferenceFromReflectionNamedType(
-        \ReflectionNamedType $reflectionType
+        \ReflectionNamedType $reflectionType,
+        \ReflectionParameter $reflectionParameter,
     ): self|OpenApiReference {
         $type = match ($reflectionType->getName()) {
             'null' => [
@@ -46,9 +48,10 @@ final readonly class SchemaType implements \JsonSerializable
             'bool', 'boolean' => [
                 'type' => 'boolean'
             ],
-            'string' => [
-                'type' => 'string'
-            ],
+            'string' => array_filter([
+                'type' => 'string',
+                'description' => StringProperty::tryFromReflectionParameter($reflectionParameter)?->description
+            ]),
             'int', 'integer' => [
                 'type' => 'integer'
             ],
@@ -60,7 +63,7 @@ final readonly class SchemaType implements \JsonSerializable
             ],
             'DateTimeImmutable' => [
                 'type' => 'string',
-                'format' => 'date-time'
+                'format' => StringProperty::tryFromReflectionParameter($reflectionParameter)?->format ?: 'date-time'
             ],
             'DateInterval' => [
                 'type' => 'string',
@@ -88,7 +91,7 @@ final readonly class SchemaType implements \JsonSerializable
             : ($type instanceof OpenApiReference ? $type : new self($type));
     }
 
-    public static function fromReflectionUnionType(\ReflectionUnionType $reflectionUnionType): self
+    public static function fromReflectionUnionType(\ReflectionUnionType $reflectionUnionType, \ReflectionParameter $reflectionParameter): self
     {
         $types = [];
         foreach ($reflectionUnionType->getTypes() as $reflectionType) {
@@ -98,7 +101,7 @@ final readonly class SchemaType implements \JsonSerializable
                     1709560366
                 );
             }
-            $types[] = self::selfOrReferenceFromReflectionNamedType($reflectionType);
+            $types[] = self::selfOrReferenceFromReflectionNamedType($reflectionType, $reflectionParameter);
         }
         if ($reflectionUnionType->allowsNull()) {
             $types[] = [
