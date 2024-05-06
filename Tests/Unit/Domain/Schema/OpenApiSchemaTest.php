@@ -42,8 +42,8 @@ final class OpenApiSchemaTest extends TestCase
         yield 'stringEnum' => [
             'className' => DayOfWeek::class,
             'expectedDefinition' => new OpenApiSchema(
-                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_DayOfWeek',
                 type: 'string',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_DayOfWeek',
                 description: 'see https://schema.org/DayOfWeek',
                 enum: [
                     'https://schema.org/Monday',
@@ -60,8 +60,8 @@ final class OpenApiSchemaTest extends TestCase
         yield 'intEnum' => [
             'className' => ImportantNumber::class,
             'expectedDefinition' => new OpenApiSchema(
-                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_ImportantNumber',
                 type: 'integer',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_ImportantNumber',
                 description: 'important numbers only',
                 enum: [
                     23,
@@ -73,8 +73,8 @@ final class OpenApiSchemaTest extends TestCase
         yield 'stringValueObject' => [
             'className' => Identifier::class,
             'expectedDefinition' => new OpenApiSchema(
-                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier',
                 type: 'string',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier',
                 description: 'see https://schema.org/identifier',
             ),
         ];
@@ -82,8 +82,8 @@ final class OpenApiSchemaTest extends TestCase
         yield 'intValueObject' => [
             'className' => QuantitativeValue::class,
             'expectedDefinition' => new OpenApiSchema(
-                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_QuantitativeValue',
                 type: 'integer',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_QuantitativeValue',
                 description: 'see https://schema.org/QuantitativeValue',
             ),
         ];
@@ -91,8 +91,8 @@ final class OpenApiSchemaTest extends TestCase
         yield 'floatValueObject' => [
             'className' => Number::class,
             'expectedDefinition' => new OpenApiSchema(
-                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Number',
                 type: 'number',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Number',
                 description: 'see https://schema.org/Number',
             ),
         ];
@@ -100,8 +100,8 @@ final class OpenApiSchemaTest extends TestCase
         yield 'arrayValueObjectWithOptionalAndNullable' => [
             'className' => PostalAddress::class,
             'expectedDefinition' => new OpenApiSchema(
-                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_PostalAddress',
                 type: 'object',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_PostalAddress',
                 description: 'see https://schema.org/PostalAddress',
                 properties: [
                     'streetAddress' => new SchemaType([
@@ -148,8 +148,8 @@ final class OpenApiSchemaTest extends TestCase
         yield 'arrayValueObjectWithDiverselyTypedProperties' => [
             'className' => WeirdThing::class,
             'expectedDefinition' => new OpenApiSchema(
-                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_WeirdThing',
                 type: 'object',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_WeirdThing',
                 description: 'a thing composed of all primitive types',
                 properties: [
                     'if' => new SchemaType([
@@ -187,8 +187,8 @@ final class OpenApiSchemaTest extends TestCase
         yield 'listValueObject' => [
             'className' => PostalAddressCollection::class,
             'expectedDefinition' => new OpenApiSchema(
-                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_PostalAddressCollection',
                 type: 'array',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_PostalAddressCollection',
                 description: 'a collection of postal addresses, see https://schema.org/PostalAddress',
                 items: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_PostalAddress'),
             ),
@@ -197,8 +197,8 @@ final class OpenApiSchemaTest extends TestCase
         yield 'compositeValueObject' => [
             'className' => Composition::class,
             'expectedDefinition' => new OpenApiSchema(
-                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Composition',
                 type: 'object',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Composition',
                 description: 'a composition of types',
                 properties: [
                     'dayOfWeek' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_DayOfWeek'),
