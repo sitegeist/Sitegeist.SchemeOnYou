@@ -10,7 +10,7 @@ use Neos\Flow\Annotations as Flow;
  * @see https://swagger.io/docs/specification/data-models/data-types/#string
  */
 #[Flow\Proxy(false)]
-#[\Attribute(\Attribute::TARGET_PARAMETER)]
+#[\Attribute(\Attribute::TARGET_PROPERTY)]
 final readonly class StringProperty
 {
     public const FORMAT_DATE = 'date';
