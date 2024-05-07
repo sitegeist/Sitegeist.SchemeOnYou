@@ -29,6 +29,7 @@ final readonly class OpenApiParameter implements \JsonSerializable
         public OpenApiSchema|OpenApiReference|null $schema = null,
         public ?array $content = null,
         public ?ParameterStyle $style = null,
+        public bool $explode = false,
     ) {
         $this->required = $in === ParameterLocation::LOCATION_PATH ? true : $required;
     }

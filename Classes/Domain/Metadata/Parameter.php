@@ -17,12 +17,17 @@ final readonly class Parameter
 {
     public ParameterStyle $style;
 
+    public bool $explode;
+
     public function __construct(
         public ParameterLocation $in,
         ?ParameterStyle $style = null,
+        bool $explode = false,
         public ?string $description = null,
     ) {
         $this->style = $style ?: ParameterStyle::createDefaultForParameterLocation($this->in);
+        // PHP cannot properly deal with exploded form parameters, such as 
+        $this->explode = $this->style === ParameterStyle::STYLE_FORM ? false : $explode;
     }
 
     public static function fromReflectionParameter(\ReflectionParameter $reflectionParameter): self
