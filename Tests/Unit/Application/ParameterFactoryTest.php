@@ -55,14 +55,10 @@ final class ParameterFactoryTest extends TestCase
 
         yield 'withSingleParameter' => [
             'request' => ActionRequest::fromHttpRequest(
-                (new ServerRequest(
+                new ServerRequest(
                     HttpMethod::METHOD_GET->value,
                     new Uri('https://acme.site/?endpointQuery=de')
-                ))->withQueryParams([
-                    'endpointQuery' => [
-                        'language' => 'de'
-                    ]
-                ])
+                )
             ),
             'className' => PathController::class,
             'methodName' => 'singleParameterAndResponseEndpointAction',
@@ -73,16 +69,10 @@ final class ParameterFactoryTest extends TestCase
 
         yield 'withScalarParameters' => [
             'request' => ActionRequest::fromHttpRequest(
-                (new ServerRequest(
+                new ServerRequest(
                     HttpMethod::METHOD_GET->value,
-                    new Uri('https://acme.site/')
-                ))->withQueryParams([
-                    'name' => 'foo',
-                    'number' => 12,
-                    'numberWithDecimals' => 33.33,
-                    'switch' => 1,
-                    'other' => 'suppe'
-                ])
+                    new Uri('https://acme.site/?name=foo&number=12&numberWithDecimals=33.33&switch=1&other=suppe')
+                )
             ),
             'className' => PathController::class,
             'methodName' => 'scalarParametersAndResponseEndpointAction',
@@ -95,14 +85,11 @@ final class ParameterFactoryTest extends TestCase
         ];
 
         $multipleParametersRequest = ActionRequest::fromHttpRequest(
-            (new ServerRequest(
+            new ServerRequest(
                 HttpMethod::METHOD_GET->value,
-                new Uri('https://acme.site/?endpointQuery=de')
-            ))->withQueryParams([
-                'anotherEndpointQuery' => '{"pleaseFail": true}'
-            ])
+                new Uri('https://acme.site/?endpointQuery=de&anotherEndpointQuery=1')
+            )
         );
-        $multipleParametersRequest->setArgument('endpointQuery', ['language' => 'de']);
 
         yield 'withMultipleParameters' => [
             'request' => $multipleParametersRequest,
@@ -115,13 +102,10 @@ final class ParameterFactoryTest extends TestCase
         ];
 
         $collectionParametersRequest = ActionRequest::fromHttpRequest(
-            (new ServerRequest(
+            new ServerRequest(
                 HttpMethod::METHOD_GET->value,
-                new Uri('https://acme.site/?identifierCollection[]=foo&identifierCollection[]=bar&identifier=baz')
-            ))->withQueryParams([
-                'identifierCollection' => ['foo','bar'],
-                'identifier' => 'baz'
-            ])
+                new Uri('https://acme.site/?identifierCollection=foo&identifierCollection=bar&identifier=baz')
+            )
         );
 
         yield 'withSingleValueObjectsParameterEndpointAction' => [

@@ -475,7 +475,7 @@ final class OpenApiDocumentFactoryTest extends TestCase
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
-                                name: 'identifierCollection[]',
+                                name: 'identifierCollection',
                                 in: ParameterLocation::LOCATION_QUERY,
                                 required: true,
                                 schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_IdentifierCollection'),

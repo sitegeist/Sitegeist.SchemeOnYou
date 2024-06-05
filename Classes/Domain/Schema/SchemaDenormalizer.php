@@ -50,8 +50,12 @@ class SchemaDenormalizer
                 is_int($value) || is_string($value) => $targetType::from($value),
                 default => throw new \DomainException('Can only denormalize enums from int or string')
             };
-        } elseif (is_array($value) && class_exists($targetType) && IsDataTransferObjectCollection::isSatisfiedByClassName($targetType)) {
-            return self::convertCollection($value, $targetType);
+        } elseif (class_exists($targetType) && IsDataTransferObjectCollection::isSatisfiedByClassName($targetType)) {
+            if (is_array($value)) {
+                return self::convertCollection($value, $targetType);
+            } else {
+                return self::convertCollection([$value], $targetType);
+            }
         } elseif (class_exists($targetType) && IsDataTransferObject::isSatisfiedByClassName($targetType)) {
             return self::convertValueObject($value, $targetType);
         }

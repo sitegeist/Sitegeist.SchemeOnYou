@@ -24,10 +24,19 @@ enum ParameterLocation: string implements \JsonSerializable
     {
         return match ($this) {
             ParameterLocation::LOCATION_PATH => $request->hasArgument($parameterName) ? $request->getArgument($parameterName) : null,
-            ParameterLocation::LOCATION_QUERY => $request->getHttpRequest()->getQueryParams()[$parameterName] ?? null,
+            ParameterLocation::LOCATION_QUERY => $this->resolveQueryParameterFromRequest($request, $parameterName),
             ParameterLocation::LOCATION_HEADER => $request->getHttpRequest()->hasHeader($parameterName) ? $request->getHttpRequest()->getHeader($parameterName) : null,
             ParameterLocation::LOCATION_COOKIE => $request->getHttpRequest()->getCookieParams()[$parameterName] ?? null,
         };
+    }
+
+    /**
+     * @return null|true|string|string[]
+     */
+    public function resolveQueryParameterFromRequest(ActionRequest $request, string $parameterName): null|true|string|array
+    {
+        $query = OpenApiQuery::fromQueryString($request->getHttpRequest()->getUri()->getQuery());
+        return $query->findParameterValue($parameterName, ParameterStyle::STYLE_FORM, true);
     }
 
     public function jsonSerialize(): string
