@@ -100,11 +100,12 @@ final class ParameterFactoryTest extends TestCase
                 new Uri('https://acme.site/de/')
             ))->withQueryParams(
                 [
-                    'endpointQuery' => ['language' => 'de'],
                     'anotherEndpointQuery' => '{"pleaseFail":"true"}'
                 ]
             )
         );
+        $multipleParametersRequest->setArgument('endpointQuery', ['language' => 'de']);
+
         yield 'withMultipleParameters' => [
             'request' => $multipleParametersRequest,
             'className' => PathController::class,
@@ -118,9 +119,9 @@ final class ParameterFactoryTest extends TestCase
         $collectionParametersRequest = ActionRequest::fromHttpRequest(
             (new ServerRequest(
                 HttpMethod::METHOD_GET->value,
-                new Uri('https://acme.site/?identifierCollection[]=foo&identifierCollection[]=bar&identifier=baz')
+                new Uri('https://acme.site/?identifierCollection=foo&identifierCollection=bar&identifier=baz')
             ))->withQueryParams([
-                'identifierCollection' => ['foo','bar'],
+                'identifierCollection' => '["foo","bar"]',
                 'identifier' => 'baz'
             ])
         );

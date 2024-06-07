@@ -480,7 +480,7 @@ final class OpenApiDocumentFactoryTest extends TestCase
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
-                                name: 'identifierCollection[]',
+                                name: 'identifierCollection',
                                 description: '',
                                 in: ParameterLocation::LOCATION_QUERY,
                                 required: true,
