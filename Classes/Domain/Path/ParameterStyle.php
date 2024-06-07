@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Domain\Path;
 
+use Sitegeist\SchemeOnYou\Domain\Schema\IsSingleValueDataTransferObject;
+use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchema;
+
 /**
  * @see https://swagger.io/specification/#style-values
  */
@@ -28,6 +31,48 @@ enum ParameterStyle: string implements \JsonSerializable
             ParameterLocation::LOCATION_HEADER => ParameterStyle::STYLE_SIMPLE,
             ParameterLocation::LOCATION_COOKIE => ParameterStyle::STYLE_FORM
         };
+    }
+
+    /**
+     * @see https://swagger.io/specification/#fixed-fields-10
+     */
+    public static function createDefaultForParameterLocationAndReflection(ParameterLocation $location, \ReflectionParameter $reflectionParameter): self
+    {
+        return match ($location) {
+            ParameterLocation::LOCATION_QUERY => self::createDefaultForQueryLocationAndReflection($reflectionParameter),
+            ParameterLocation::LOCATION_PATH => ParameterStyle::STYLE_SIMPLE,
+            ParameterLocation::LOCATION_HEADER => ParameterStyle::STYLE_SIMPLE,
+            ParameterLocation::LOCATION_COOKIE => ParameterStyle::STYLE_FORM
+        };
+    }
+
+    public static function createDefaultForQueryLocationAndReflection(\ReflectionParameter $reflectionParameter): self
+    {
+        $reflectionType = $reflectionParameter->getType();
+        if (!$reflectionType instanceof \ReflectionNamedType) {
+            throw new \DomainException(
+                'Query Parameters can only be resolved from named parameters',
+                1710067045
+            );
+        }
+        $type = $reflectionType->getName();
+        if (in_array($type, ['int', 'bool', 'string', 'float', \DateTimeImmutable::class, \DateTime::class, \DateInterval::class])) {
+            return ParameterStyle::STYLE_FORM;
+        }
+        if (!class_exists($type)) {
+            throw new \DomainException(
+                'Query parameters can only be resolved from class parameters, ' . $type . ' given for parameter '
+                . $reflectionParameter->getDeclaringClass()?->name
+                . '::' . $reflectionParameter->getDeclaringFunction()->name
+                . '::' . $reflectionParameter->name,
+                1709592649
+            );
+        }
+        if (IsSingleValueDataTransferObject::isSatisfiedByClassName($type)) {
+            return ParameterStyle::STYLE_FORM;
+        }
+
+        return  ParameterStyle::STYLE_DEEP_OBJECT;
     }
 
     /**

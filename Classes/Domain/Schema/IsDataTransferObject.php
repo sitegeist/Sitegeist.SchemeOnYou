@@ -43,8 +43,9 @@ final class IsDataTransferObject
      */
     private static function evaluateReflectionClass(\ReflectionClass $reflectionClass): bool
     {
-        if ($reflectionClass instanceof \ReflectionEnum) {
-            return true;
+        if ($reflectionClass->isEnum()) {
+            /** @phpstan-ignore-next-line */
+            return (new \ReflectionEnum($reflectionClass->getName()))->isBacked();
         }
         if ($reflectionClass->isReadOnly() === false) {
             return false;

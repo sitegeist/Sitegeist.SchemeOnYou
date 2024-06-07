@@ -30,13 +30,16 @@ final readonly class Parameter
         $parameterAttributes = $reflectionParameter->getAttributes(self::class);
         switch (count($parameterAttributes)) {
             case 0:
-                return new self(ParameterLocation::LOCATION_QUERY);
+                return new self(
+                    in: ParameterLocation::LOCATION_QUERY,
+                    style: ParameterStyle::createDefaultForParameterLocationAndReflection(ParameterLocation::LOCATION_QUERY, $reflectionParameter)
+                );
             case 1:
                 $arguments = $parameterAttributes[0]->getArguments();
 
                 return new self(
                     $arguments['in'] ?? $arguments[0],
-                    $arguments['style'] ?? $arguments[1] ?? null,
+                    $arguments['style'] ?? $arguments[1] ?? ParameterStyle::createDefaultForParameterLocationAndReflection($arguments[0], $reflectionParameter),
                     $arguments['description'] ?? $arguments[2] ?? null,
                 );
             default:
