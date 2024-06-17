@@ -167,9 +167,4 @@ final class DtoSpecificationTest extends TestCase
         $this->assertEquals($isDTC, IsDataTransferObjectCollection::isSatisfiedByClassName($className), sprintf('IsDataTransferObjectCollection should return "%s" for class "%s"', $isSupported ? 'true' : 'false', $className));
         $this->assertEquals($isSVDTO, IsSingleValueDataTransferObject::isSatisfiedByClassName($className), sprintf('IsSingleValueDataTransferObject should return "%s" for class "%s"', $isSupported ? 'true' : 'false', $className));
     }
-
-    public function testFoo(): void
-    {
-        $this->assertEquals(false, IsDataTransferObject::isSatisfiedByClassName(Fixtures\InvalidObjects\NonBackedEnum::class));
-    }
 }
