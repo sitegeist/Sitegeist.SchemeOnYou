@@ -8,6 +8,7 @@ use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\ObjectManagement\Proxy\ProxyInterface;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Parameter as ParameterAttribute;
 use Sitegeist\SchemeOnYou\Domain\Metadata\RequestBody;
+use Sitegeist\SchemeOnYou\Domain\Path\NoSuchParameter;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
 
 class ParameterFactory
@@ -37,18 +38,20 @@ class ParameterFactory
             $requestBodyAttribute = RequestBody::tryFromReflectionParameter($parameter);
             if ($requestBodyAttribute) {
                 $parameterValueFromRequest = $requestBodyAttribute->contentType->resolveParameterFromRequest($request, $parameter->name);
-                $parameterValueFromRequest = $requestBodyAttribute->contentType->decodeParameterValue($parameterValueFromRequest);
+                if (!$parameterValueFromRequest instanceof NoSuchParameter) {
+                    $parameterValueFromRequest = $requestBodyAttribute->contentType->decodeParameterValue($parameterValueFromRequest);
+                }
             } else {
                 $parameterAttribute = ParameterAttribute::fromReflectionParameter($parameter);
                 $parameterValueFromRequest = $parameterAttribute->in->resolveParameterFromRequest($request, $parameter->name);
-                $parameterValueFromRequest = $parameterAttribute->style->decodeParameterValue($parameterValueFromRequest);
+                if (!$parameterValueFromRequest instanceof NoSuchParameter) {
+                    $parameterValueFromRequest = $parameterAttribute->style->decodeParameterValue($parameterValueFromRequest);
+                }
             }
-
-            if ($parameterValueFromRequest !== null || $parameter->isDefaultValueAvailable() === false) {
+            if (!$parameterValueFromRequest instanceof NoSuchParameter) {
                 $parameters[$parameter->name] = SchemaDenormalizer::denormalizeValue($parameterValueFromRequest, $type->getName(), $parameter);
             }
         }
-
         return $parameters;
     }
 }

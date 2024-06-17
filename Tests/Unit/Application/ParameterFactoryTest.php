@@ -94,7 +94,7 @@ final class ParameterFactoryTest extends TestCase
             ]
         ];
 
-        yield 'withScalarNullableParameters' => [
+        yield 'withScalarNullableParametersNoQueryArguments' => [
             'request' => ActionRequest::fromHttpRequest(
                 (new ServerRequest(
                     HttpMethod::METHOD_GET->value,
@@ -107,15 +107,23 @@ final class ParameterFactoryTest extends TestCase
             ]
         ];
 
-        yield 'withScalarNullableNoDefaultParameters' => [
+        yield 'withScalarNullableParametersNullPassed' => [
             'request' => ActionRequest::fromHttpRequest(
                 (new ServerRequest(
                     HttpMethod::METHOD_GET->value,
                     new Uri('https://acme.site/')
-                ))->withQueryParams([])
+                ))->withQueryParams([
+                    'message' => null,
+                    'number' => null,
+                    'weight' => null,
+                    'switch' => null,
+                    'dateTime' => null,
+                    'dateTimeImmutable' => null,
+                    'dateInterval' => null
+                ])
             ),
             'className' => PathController::class,
-            'methodName' => 'scalarNullableParameterWithoutDefaultEndpointAction',
+            'methodName' => 'scalarNullableParameterEndpointAction',
             'expectedParameters' => [
                 'message' => null,
                 'number' => null,
@@ -127,16 +135,32 @@ final class ParameterFactoryTest extends TestCase
             ]
         ];
 
-        yield 'withScalarParametersAndDefaultValues' => [
+        yield 'withScalarNullableParametersValuePassed' => [
             'request' => ActionRequest::fromHttpRequest(
                 (new ServerRequest(
                     HttpMethod::METHOD_GET->value,
                     new Uri('https://acme.site/')
-                ))->withQueryParams([])
+                ))->withQueryParams([
+                    'message' => 'aaa',
+                    'number' => 123,
+                    'weight' => 456.0,
+                    'switch' => 1,
+                    'dateTime' => '2005-08-15T15:52:01+00:00',
+                    'dateTimeImmutable' => '2005-08-15T15:52:01+00:00',
+                    'dateInterval' => 'P7D'
+                ])
             ),
             'className' => PathController::class,
-            'methodName' => 'scalarParameterWithDefaultValuesAction',
-            'expectedParameters' => []
+            'methodName' => 'scalarNullableParameterEndpointAction',
+            'expectedParameters' => [
+                'message' => 'aaa',
+                'number' => 123,
+                'weight' => 456.0,
+                'switch' => true,
+                'dateTime' => \DateTime::createFromFormat(\DateTime::ATOM, '2005-08-15T15:52:01+00:00'),
+                'dateTimeImmutable' => \DateTimeImmutable::createFromFormat(\DateTime::ATOM, '2005-08-15T15:52:01+00:00'),
+                'dateInterval' => new \DateInterval("P7D")
+            ]
         ];
 
         $multipleParametersRequest = ActionRequest::fromHttpRequest(
