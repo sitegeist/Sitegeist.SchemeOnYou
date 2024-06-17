@@ -81,6 +81,25 @@ final class PathController extends OpenApiController
         return new EndpointResponse('acknowledged');
     }
 
+    public function scalarNullableParameterWithoutDefaultEndpointAction(
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?string $message,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?int $number,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?float $weight,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?bool $switch,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?\DateTime $dateTime,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?\DateTime $dateTimeImmutable,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        ?\DateInterval $dateInterval,
+    ): EndpointResponse {
+        return new EndpointResponse('acknowledged');
+    }
+
     public function scalarParameterWithDefaultValuesAction(
         #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
         string $message = "suppe",

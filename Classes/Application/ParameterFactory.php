@@ -44,7 +44,9 @@ class ParameterFactory
                 $parameterValueFromRequest = $parameterAttribute->style->decodeParameterValue($parameterValueFromRequest);
             }
 
-            $parameters[$parameter->name] = SchemaDenormalizer::denormalizeValue($parameterValueFromRequest, $type->getName(), $parameter);
+            if ($parameterValueFromRequest !== null || $parameter->isDefaultValueAvailable() === false) {
+                $parameters[$parameter->name] = SchemaDenormalizer::denormalizeValue($parameterValueFromRequest, $type->getName(), $parameter);
+            }
         }
 
         return $parameters;

@@ -104,6 +104,19 @@ final class ParameterFactoryTest extends TestCase
             'className' => PathController::class,
             'methodName' => 'scalarNullableParameterEndpointAction',
             'expectedParameters' => [
+            ]
+        ];
+
+        yield 'withScalarNullableNoDefaultParameters' => [
+            'request' => ActionRequest::fromHttpRequest(
+                (new ServerRequest(
+                    HttpMethod::METHOD_GET->value,
+                    new Uri('https://acme.site/')
+                ))->withQueryParams([])
+            ),
+            'className' => PathController::class,
+            'methodName' => 'scalarNullableParameterWithoutDefaultEndpointAction',
+            'expectedParameters' => [
                 'message' => null,
                 'number' => null,
                 'weight' => null,
@@ -123,12 +136,7 @@ final class ParameterFactoryTest extends TestCase
             ),
             'className' => PathController::class,
             'methodName' => 'scalarParameterWithDefaultValuesAction',
-            'expectedParameters' => [
-                'message' => 'suppe',
-                'number' => 42,
-                'weight' => 666,
-                'switch' => false,
-            ]
+            'expectedParameters' => []
         ];
 
         $multipleParametersRequest = ActionRequest::fromHttpRequest(
