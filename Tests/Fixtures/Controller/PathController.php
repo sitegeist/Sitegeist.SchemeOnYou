@@ -81,6 +81,19 @@ final class PathController extends OpenApiController
         return new EndpointResponse('acknowledged');
     }
 
+    public function scalarParameterWithDefaultValuesAction(
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        string $message = "suppe",
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        int $number = 42,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        float $weight = 666,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        bool $switch = false,
+    ): EndpointResponse {
+        return new EndpointResponse('acknowledged');
+    }
+
     public function requestBodyAndSingleResponseEndpointAction(
         #[OpenApi\RequestBody(RequestBodyContentType::CONTENT_TYPE_JSON)]
         EndpointQuery $endpointQuery
