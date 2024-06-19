@@ -22,7 +22,7 @@ final class SchemaNormalizerTest extends TestCase
         ];
         yield 'PostalAddress with missing parameter in between' => [
             Fixtures\PostalAddress::class,
-            ['streetAddress' => 'Dämonenweg 23', 'addressRegion' => 'Hölle', 'postOfficeBoxNumber' => 666],
+            ['streetAddress' => 'Dämonenweg 23', 'addressRegion' => 'Hölle', 'postOfficeBoxNumber' => '666'],
             new Fixtures\PostalAddress(streetAddress: 'Dämonenweg 23', addressRegion: 'Hölle', postOfficeBoxNumber: '666')
         ];
     }
