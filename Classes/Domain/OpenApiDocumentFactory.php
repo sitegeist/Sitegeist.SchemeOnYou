@@ -222,13 +222,16 @@ class OpenApiDocumentFactory
                     $route->getUriPattern()
                 );
                 foreach ($route->getHttpMethods() as $httpMethod) {
-                    $paths[] = new OpenApiPathItem(
-                        new PathDefinition('/' . $path),
-                        HttpMethod::from(strtolower($httpMethod)),
-                        new OpenApiParameterCollection(...$parameters),
-                        $requestBody,
-                        OpenApiResponses::fromReflectionMethod($methodReflection)
-                    );
+                    $httpMethod = HttpMethod::tryFrom(strtolower($httpMethod));
+                    if ($httpMethod instanceof HttpMethod) {
+                        $paths[] = new OpenApiPathItem(
+                            new PathDefinition('/' . $path),
+                            $httpMethod,
+                            new OpenApiParameterCollection(...$parameters),
+                            $requestBody,
+                            OpenApiResponses::fromReflectionMethod($methodReflection)
+                        );
+                    }
                 }
                 // only the first matching route is needed so we can break the loop here
                 break;
