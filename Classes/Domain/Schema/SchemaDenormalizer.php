@@ -88,7 +88,8 @@ class SchemaDenormalizer
         $parameterReflections = $reflection->getConstructor()->getParameters();
         $convertedArguments = [];
         if (is_array($value)) {
-            foreach ($parameterReflections as $name => $reflectionParameter) {
+            foreach ($parameterReflections as $reflectionParameter) {
+                $name = $reflectionParameter->getName();
                 $type = $reflectionParameter->getType();
                 if ($reflectionParameter->isDefaultValueAvailable() && !array_key_exists($reflectionParameter->getName(), $value)) {
                     continue;
