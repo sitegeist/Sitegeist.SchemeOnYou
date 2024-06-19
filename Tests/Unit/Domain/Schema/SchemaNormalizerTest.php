@@ -13,6 +13,30 @@ use Sitegeist\SchemeOnYou\Tests\Fixtures\Date;
 
 final class SchemaNormalizerTest extends TestCase
 {
+    public static function denormalizeObjectsWithOptionalParametersDataProvider(): \Generator
+    {
+        yield 'min PostalAddress' => [
+            Fixtures\PostalAddress::class,
+            ['streetAddress' => 'Sesamstraße 42', 'addressRegion' => 'Muppetingen'],
+            new Fixtures\PostalAddress(streetAddress: 'Sesamstraße 42', addressRegion: 'Muppetingen')
+        ];
+        yield 'PostalAddress with missing parameter in between' => [
+            Fixtures\PostalAddress::class,
+            ['streetAddress' => 'Dämonenweg 23', 'addressRegion' => 'Hölle', 'postOfficeBoxNumber' => 666],
+            new Fixtures\PostalAddress(streetAddress: 'Dämonenweg 23', addressRegion: 'Hölle', postOfficeBoxNumber: '666')
+        ];
+    }
+
+    /**
+     * @dataProvider denormalizeObjectsWithOptionalParametersDataProvider
+     * @test
+     */
+    public function denormalizeObjectsWithOptionalParameters(mixed $type, mixed $data, mixed $expected): void
+    {
+        Assert::assertEquals($expected, SchemaDenormalizer::denormalizeValue($data, $type));
+    }
+
+
     /**
      * @dataProvider valueNormalizationPairs
      * @test
