@@ -39,7 +39,7 @@ final readonly class Parameter
 
                 return new self(
                     $arguments['in'] ?? $arguments[0],
-                    $arguments['style'] ?? $arguments[1] ?? ParameterStyle::createDefaultForParameterLocationAndReflection($arguments[0], $reflectionParameter),
+                    $arguments['style'] ?? $arguments[1] ?? ParameterStyle::createDefaultForParameterLocationAndReflection($arguments['in'] ?? $arguments[0], $reflectionParameter),
                     $arguments['description'] ?? $arguments[2] ?? null,
                 );
             default:
