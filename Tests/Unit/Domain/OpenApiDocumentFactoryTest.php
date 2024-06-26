@@ -196,8 +196,6 @@ final class OpenApiDocumentFactoryTest extends TestCase
                                 in: ParameterLocation::LOCATION_QUERY,
                                 description: 'the endpoint query',
                                 required: true,
-                                schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQuery'),
-                                style: ParameterStyle::STYLE_DEEP_OBJECT,
                                 content: [
                                     'application/json' => [
                                         'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQuery'),
@@ -436,12 +434,12 @@ final class OpenApiDocumentFactoryTest extends TestCase
                                 in: ParameterLocation::LOCATION_QUERY,
                                 description: 'another endpoint query',
                                 required: true,
-                                schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_AnotherEndpointQuery'),
                                 content: [
                                     'application/json' => [
                                         'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_AnotherEndpointQuery')
                                     ]
                                 ],
+                                schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_AnotherEndpointQuery'),
                                 style: ParameterStyle::STYLE_DEEP_OBJECT
                             )
                         ),
@@ -484,8 +482,6 @@ final class OpenApiDocumentFactoryTest extends TestCase
                                 description: '',
                                 in: ParameterLocation::LOCATION_QUERY,
                                 required: true,
-                                schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_IdentifierCollection'),
-                                style: ParameterStyle::STYLE_DEEP_OBJECT,
                                 content: [
                                     'application/json' => [
                                         'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_IdentifierCollection')
