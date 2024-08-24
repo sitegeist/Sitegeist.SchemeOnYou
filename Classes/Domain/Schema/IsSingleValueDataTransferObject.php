@@ -7,7 +7,7 @@ namespace Sitegeist\SchemeOnYou\Domain\Schema;
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
-final class IsDataTransferObjectCollection
+final class IsSingleValueDataTransferObject
 {
     /**
      * @var array<class-string,bool>
@@ -31,7 +31,6 @@ final class IsDataTransferObjectCollection
      */
     public static function isSatisfiedByReflectionClass(\ReflectionClass $reflectionClass): bool
     {
-
         if (!array_key_exists($reflectionClass->name, self::$evaluationRuntimeCache)) {
             self::$evaluationRuntimeCache[$reflectionClass->name] = self::evaluateReflectionClass($reflectionClass);
         }
@@ -44,29 +43,15 @@ final class IsDataTransferObjectCollection
      */
     private static function evaluateReflectionClass(\ReflectionClass $reflectionClass): bool
     {
-        // readonly
-        if ($reflectionClass->isReadOnly() === false) {
-            return false;
+        if ($reflectionClass->isEnum()) {
+            /** @phpstan-ignore-next-line */
+            return (new \ReflectionEnum($reflectionClass->getName()))->isBacked();
         }
-        // a single variadic constructor parameter of a supported type
-        $parameters = $reflectionClass->getConstructor()?->getParameters() ?: [];
-        if (count($parameters) !== 1) {
-            return false;
-        }
-        $collectionParameter = $parameters[0];
-        if ($collectionParameter->isVariadic() === false) {
-            return false;
-        }
-        $collectionParameterType = $collectionParameter->getType();
-        if ($collectionParameterType instanceof \ReflectionNamedType) {
-            if (!IsSupportedInSchema::isSatisfiedByReflectionType($collectionParameterType)) {
-                return false;
+        if (IsDataTransferObject::isSatisfiedByReflectionClass($reflectionClass)) {
+            $parameters = $reflectionClass->getConstructor()?->getParameters() ?: [];
+            if (count($parameters) === 1 && $parameters[0]->name === 'value') {
+                return true;
             }
-        }
-        // a single property of type array
-        $properties = $reflectionClass->getProperties();
-        if (count($properties) === 1 && $properties[0]->getType() instanceof \ReflectionNamedType && $properties[0]->getType()->getName() === 'array') {
-            return true;
         }
         return false;
     }

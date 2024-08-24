@@ -18,15 +18,15 @@ enum ParameterLocation: string implements \JsonSerializable
 
     /**
      * @todo really?
-     * @return array<mixed>|int|bool|string|float|null
+     * @return NoSuchParameter|array<mixed>|int|bool|string|float|null
      */
-    public function resolveParameterFromRequest(ActionRequest $request, string $parameterName): array|int|bool|string|float|null
+    public function resolveParameterFromRequest(ActionRequest $request, string $parameterName): NoSuchParameter|array|int|bool|string|float|null
     {
         return match ($this) {
-            ParameterLocation::LOCATION_PATH => $request->getArgument($parameterName),
-            ParameterLocation::LOCATION_QUERY => $request->getHttpRequest()->getQueryParams()[$parameterName],
-            ParameterLocation::LOCATION_HEADER => $request->getHttpRequest()->getHeader($parameterName),
-            ParameterLocation::LOCATION_COOKIE => $request->getHttpRequest()->getCookieParams()[$parameterName],
+            ParameterLocation::LOCATION_PATH => $request->hasArgument($parameterName) ? $request->getArgument($parameterName) : new NoSuchParameter(),
+            ParameterLocation::LOCATION_QUERY => array_key_exists($parameterName, $request->getHttpRequest()->getQueryParams()) ? $request->getHttpRequest()->getQueryParams()[$parameterName] : new NoSuchParameter(),
+            ParameterLocation::LOCATION_HEADER => $request->getHttpRequest()->hasHeader($parameterName) ? $request->getHttpRequest()->getHeader($parameterName) : new NoSuchParameter(),
+            ParameterLocation::LOCATION_COOKIE => $request->getHttpRequest()->getCookieParams()[$parameterName] ?? new NoSuchParameter(),
         };
     }
 

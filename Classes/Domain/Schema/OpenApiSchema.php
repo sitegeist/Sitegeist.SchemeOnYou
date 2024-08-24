@@ -6,6 +6,7 @@ namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaMetadata;
+use Sitegeist\SchemeOnYou\Domain\Metadata\StringProperty;
 
 #[Flow\Proxy(false)]
 final readonly class OpenApiSchema implements \JsonSerializable
@@ -18,8 +19,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
      * @param array<int,string> $required
      */
     public function __construct(
-        public string $name,
         public string $type,
+        public ?string $name = null,
         public ?string $description = null,
         public ?array $enum = null,
         public ?array $properties = null,
@@ -47,20 +48,20 @@ final readonly class OpenApiSchema implements \JsonSerializable
         $definitionMetadata = SchemaMetadata::fromReflectionClass($reflection);
         return match ($reflection->getBackingType()?->getName()) {
             'string' => new self(
-                $definitionMetadata->name ?: $reflection->getShortName(),
-                'string',
-                $definitionMetadata->description,
-                array_map(
+                type: 'string',
+                name: $definitionMetadata->name ?: $reflection->getShortName(),
+                description: $definitionMetadata->description,
+                enum: array_map(
                     /** @phpstan-ignore-next-line parameter and return types are enforced before */
                     fn(\ReflectionEnumBackedCase $case): string => $case->getBackingValue(),
                     $reflection->getCases()
                 )
             ),
             'int' => new self(
-                $definitionMetadata->name ?: $reflection->getShortName(),
-                'integer',
-                $definitionMetadata->description,
-                array_map(
+                type: 'integer',
+                name: $definitionMetadata->name ?: $reflection->getShortName(),
+                description: $definitionMetadata->description,
+                enum: array_map(
                     /** @phpstan-ignore-next-line parameter and return types are enforced before */
                     fn(\ReflectionEnumBackedCase $case): int => $case->getBackingValue(),
                     $reflection->getCases()
@@ -80,7 +81,6 @@ final readonly class OpenApiSchema implements \JsonSerializable
             $typeName = $reflectionType->getName();
             if (in_array($typeName, ['int', 'bool', 'string', 'float'])) {
                 return new self(
-                    name: $reflection->getName(),
                     type: match ($typeName) {
                         'int' => 'integer',
                         'bool' => 'boolean',
@@ -88,16 +88,19 @@ final readonly class OpenApiSchema implements \JsonSerializable
                         'float' => 'number',
                         default => throw new \DomainException('Unsupported type ' . $typeName)
                     },
+                    format: match ($typeName) {
+                        'string' => StringProperty::tryfromReflectionParameter($reflection)?->format ?: null,
+                        default => null,
+                    }
                 );
             } elseif (in_array($typeName, [\DateTime::class, \DateTimeImmutable::class])) {
+                $propertyAttribute = StringProperty::tryfromReflectionParameter($reflection);
                 return new self(
-                    name: $reflection->getName(),
                     type: 'string',
-                    format: 'date-time',
+                    format: $propertyAttribute?->format ?: 'date-time',
                 );
             } elseif ($typeName === \DateInterval::class) {
                 return new self(
-                    name: $reflection->getName(),
                     type: 'string',
                     format: 'duration',
                 );
@@ -118,7 +121,19 @@ final readonly class OpenApiSchema implements \JsonSerializable
      */
     public static function fromReflectionClass(\ReflectionClass $reflection): self
     {
-        if (IsDataTransferObjectCollection::isSatisfiedByReflectionClass($reflection)) {
+        if ($reflection->isEnum() && $reflection->isSubclassOf(\BackedEnum::class)) {
+            return self::fromReflectionEnum(new \ReflectionEnum($reflection->getName()));
+        } elseif (in_array($reflection->getName(), [\DateTime::class, \DateTimeImmutable::class])) {
+            return new self(
+                type: 'string',
+                format: 'date-time',
+            );
+        } elseif ($reflection->getName() === \DateInterval::class) {
+            return new self(
+                type: 'string',
+                format: 'duration',
+            );
+        } elseif (IsDataTransferObjectCollection::isSatisfiedByReflectionClass($reflection)) {
             return self::fromCollectionReflectionClass($reflection);
         } elseif (IsDataTransferObject::isSatisfiedByReflectionClass($reflection)) {
             return self::fromObjectReflectionClass($reflection);
@@ -139,8 +154,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
         $parameterSchema = self::fromReflectionClass(new \ReflectionClass($parameterClassName));
 
         return new self(
-            name: $definitionMetadata->name ?: $reflection->getShortName(),
             type: 'array',
+            name: $definitionMetadata->name ?: $reflection->getShortName(),
             description: $definitionMetadata->description,
             items: $parameterSchema->toReference()
         );
@@ -160,8 +175,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 $singleConstructorParameter->getType() instanceof \ReflectionNamedType
                 && $singleConstructorParameter->name === 'value'
             ) {
+                $propertyAttribute = StringProperty::tryfromReflectionParameter($singleConstructorParameter);
                 return new self(
-                    name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
                     type: match ($singleConstructorParameter->getType()->getName()) {
                         'string', 'DateTimeImmutable', 'DateTime', 'DateInterval' => 'string',
                         'int' => 'integer',
@@ -173,10 +188,12 @@ final readonly class OpenApiSchema implements \JsonSerializable
                             . ' of class ' . $reflectionClass->name
                         )
                     },
+                    name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
                     description: $schemaMetadata->description,
                     format: match ($singleConstructorParameter->getType()->getName()) {
-                        'DateTimeImmutable' => 'date-time',
+                        'DateTimeImmutable' => $propertyAttribute?->format ?: 'date-time',
                         'DateInterval' => 'duration',
+                        'string' => $propertyAttribute?->format ?: null,
                         default => null
                     },
                 );
@@ -195,7 +212,10 @@ final readonly class OpenApiSchema implements \JsonSerializable
                 );
             }
             $properties[$reflectionParameter->name] = match (get_class($type)) {
-                \ReflectionNamedType::class => SchemaType::selfOrReferenceFromReflectionNamedType($type),
+                \ReflectionNamedType::class => SchemaType::selfOrReferenceFromReflectionNamedType(
+                    $type,
+                    $reflectionParameter
+                ),
                 \ReflectionUnionType::class => [
                     'oneOf' => array_map(
                         fn (\ReflectionType $singleType): SchemaType|OpenApiReference
@@ -208,7 +228,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
                                         1709560366
                                     ),
                                 \ReflectionNamedType::class => SchemaType::selfOrReferenceFromReflectionNamedType(
-                                    $singleType
+                                    $singleType,
+                                    $reflectionParameter,
                                 ),
                                 default => throw new \DomainException('wat')
                             },
@@ -235,8 +256,8 @@ final readonly class OpenApiSchema implements \JsonSerializable
         }
 
         return new self(
-            name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
             type: 'object',
+            name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
             description: $schemaMetadata->description,
             properties: $properties,
             required: $required

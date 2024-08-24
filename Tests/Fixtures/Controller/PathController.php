@@ -9,6 +9,8 @@ use Sitegeist\SchemeOnYou\Domain\Metadata as OpenApi;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 use Sitegeist\SchemeOnYou\Domain\Path\ParameterStyle;
 use Sitegeist\SchemeOnYou\Domain\Path\RequestBodyContentType;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Identifier;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\IdentifierCollection;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\AnotherEndpointQuery;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\EndpointQuery;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Path\EndpointQueryFailed;
@@ -95,5 +97,14 @@ final class PathController extends OpenApiController
         return $anotherEndpointQuery->pleaseFail
             ? new EndpointQueryFailed('Failure was requested')
             : new EndpointResponse('Hello world in language ' . $endpointQuery->language);
+    }
+
+    public function singleValueObjectsParameterEndpointAction(
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        Identifier $identifier,
+        #[OpenApi\Parameter(ParameterLocation::LOCATION_QUERY)]
+        IdentifierCollection $identifierCollection,
+    ): EndpointResponse {
+        return new EndpointResponse('acknowledged');
     }
 }

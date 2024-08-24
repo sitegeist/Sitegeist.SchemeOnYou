@@ -13,13 +13,13 @@ enum RequestBodyContentType: string implements \JsonSerializable
 
     /**
      * @todo really?
-     * @return array<mixed>|int|bool|string|float|null
+     * @return NoSuchParameter|array<mixed>|int|bool|string|float|null
      */
-    public function resolveParameterFromRequest(ActionRequest $request, string $parameterName): array|int|bool|string|float|null
+    public function resolveParameterFromRequest(ActionRequest $request, string $parameterName): NoSuchParameter|array|int|bool|string|float|null
     {
         return match ($this) {
             RequestBodyContentType::CONTENT_TYPE_JSON => (string)$request->getHttpRequest()->getBody(),
-            RequestBodyContentType::CONTENT_TYPE_FORM => $request->getArgument($parameterName)
+            RequestBodyContentType::CONTENT_TYPE_FORM => $request->hasArgument($parameterName) ? $request->getArgument($parameterName) : new NoSuchParameter()
         };
     }
 

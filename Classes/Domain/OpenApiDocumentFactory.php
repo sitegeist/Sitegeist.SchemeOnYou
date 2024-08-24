@@ -8,6 +8,7 @@ use Neos\Flow\Mvc\Routing\Dto\ResolveContext;
 use Neos\Flow\Mvc\Routing\Dto\RouteParameters;
 use Neos\Flow\Mvc\Routing\RoutesProviderInterface;
 use Neos\Flow\ObjectManagement\ObjectManager;
+use Neos\Flow\ObjectManagement\Proxy\ProxyInterface;
 use Neos\Flow\Reflection\ClassReflection;
 use Neos\Flow\Reflection\MethodReflection;
 use Neos\Flow\Reflection\ReflectionService;
@@ -65,8 +66,17 @@ class OpenApiDocumentFactory
                 continue;
             }
 
+            // in case of flow proxies we use the method reflections of the parent class to
+            // get the correct attributes for the method parameters
             $classReflection = new ClassReflection($className);
-            foreach ($classReflection->getMethods() as $methodReflection) {
+            $parentClassReflection = $classReflection->getParentClass();
+            if ($classReflection->implementsInterface(ProxyInterface::class) && $parentClassReflection && str_ends_with($parentClassReflection->name, '_Original')) {
+                $methodReflections = $parentClassReflection->getMethods();
+            } else {
+                $methodReflections = $classReflection->getMethods();
+            }
+
+            foreach ($methodReflections as $methodReflection) {
                 if (!str_ends_with($methodReflection->getName(), 'Action')) {
                     continue;
                 }
@@ -124,7 +134,7 @@ class OpenApiDocumentFactory
 
         $controllerObjectName = $this->objectManager->getCaseSensitiveObjectName($className);
         if (!$controllerObjectName) {
-            throw new \DomainException('Class ' . $className . ' is unknown to the objet manager and thus cannot be processed');
+            throw new \DomainException('Class ' . $className . ' is unknown to the object manager and thus cannot be processed');
         }
         $controllerPackageKey = $this->objectManager->getPackageKeyByObjectName($controllerObjectName);
         $controllerPackageNamespace = str_replace('.', '\\', $controllerPackageKey);
@@ -213,14 +223,19 @@ class OpenApiDocumentFactory
                     $route->getUriPattern()
                 );
                 foreach ($route->getHttpMethods() as $httpMethod) {
-                    $paths[] = new OpenApiPathItem(
-                        new PathDefinition('/' . $path),
-                        HttpMethod::from(strtolower($httpMethod)),
-                        new OpenApiParameterCollection(...$parameters),
-                        $requestBody,
-                        OpenApiResponses::fromReflectionMethod($methodReflection)
-                    );
+                    $httpMethod = HttpMethod::tryFrom(strtolower($httpMethod));
+                    if ($httpMethod instanceof HttpMethod) {
+                        $paths[] = new OpenApiPathItem(
+                            new PathDefinition('/' . $path),
+                            $httpMethod,
+                            new OpenApiParameterCollection(...$parameters),
+                            $requestBody,
+                            OpenApiResponses::fromReflectionMethod($methodReflection)
+                        );
+                    }
                 }
+                // only the first matching route is needed so we can break the loop here
+                break;
             }
         }
 
@@ -239,12 +254,16 @@ class OpenApiDocumentFactory
         while (count($classesToCheckStack) > 0) {
             $className = array_shift($classesToCheckStack);
             $classReflection = new ClassReflection($className);
+            if ($classReflection->isEnum() || in_array($classReflection->getName(), [ \DateTimeImmutable::class, \DateTime::class, \DateInterval::class])) {
+                // no need to look for constructor arguments in here
+                continue;
+            }
             $constructorReflection = $classReflection->getConstructor();
             foreach ($constructorReflection->getParameters() as $constructorParameter) {
                 $parameterType = $constructorParameter->getType();
                 if ($parameterType instanceof \ReflectionNamedType) {
                     $parameterTypeName = $parameterType->getName();
-                    if (in_array($parameterTypeName, ['int', 'bool', 'string', 'float', \DateTimeImmutable::class, \DateTime::class, \DateTimeInterface::class, \DateInterval::class])) {
+                    if (in_array($parameterTypeName, ['int', 'bool', 'string', 'float', \DateTimeImmutable::class, \DateTime::class, \DateInterval::class])) {
                         continue;
                     }
                     if (in_array($parameterTypeName, $requiredSchemaClasses)) {

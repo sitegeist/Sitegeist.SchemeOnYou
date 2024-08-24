@@ -110,6 +110,10 @@ final class OpenApiDocumentFactoryTest extends TestCase
                     'multipleParametersAndResponsesEndpoint',
                     'my-multiple-parameters-and-responses-endpoint'
                 ),
+                $this->createMockRoute(
+                    'singleValueObjectsParameterEndpoint',
+                    'single-value-objects-parameter-endpoint'
+                ),
             ]);
 
         $mockObjectManager = $this->getMockBuilder(ObjectManager::class)
@@ -190,11 +194,15 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             new OpenApiParameter(
                                 name: 'endpointQuery',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'object',
                                 description: 'the endpoint query',
                                 required: true,
                                 schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQuery'),
-                                style: ParameterStyle::STYLE_FORM
+                                style: ParameterStyle::STYLE_DEEP_OBJECT,
+                                content: [
+                                    'application/json' => [
+                                        'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQuery'),
+                                    ]
+                                ]
                             )
                         ),
                         null,
@@ -217,32 +225,28 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             new OpenApiParameter(
                                 name: 'name',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'string',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'string'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'number',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'integer',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'integer'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'numberWithDecimals',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'number',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'number'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'switch',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'boolean',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'boolean'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
@@ -267,58 +271,49 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             new OpenApiParameter(
                                 name: 'message',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'string',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'string'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'number',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'integer',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'integer'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'weight',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'number',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'number'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'switch',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'boolean',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'boolean'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'dateTime',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'string',
-                                format: 'date-time',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'string', format: 'date-time'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'dateTimeImmutable',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'string',
-                                format: 'date-time',
+                                schema: new OpenApiSchema(type: 'string', format: 'date-time'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'dateInterval',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'string',
-                                format: 'duration',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'string', format: 'duration'),
                                 required: true,
                                 style: ParameterStyle::STYLE_FORM
                             ),
@@ -343,58 +338,49 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             new OpenApiParameter(
                                 name: 'message',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'string',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'string'),
                                 required: false,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'number',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'integer',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'integer'),
                                 required: false,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'weight',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'number',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'number'),
                                 required: false,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'switch',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'boolean',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'boolean'),
                                 required: false,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'dateTime',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'string',
-                                format: 'date-time',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'string', format: 'date-time'),
                                 required: false,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'dateTimeImmutable',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'string',
-                                format: 'date-time',
+                                schema: new OpenApiSchema(type: 'string', format: 'date-time'),
                                 required: false,
                                 style: ParameterStyle::STYLE_FORM
                             ),
                             new OpenApiParameter(
                                 name: 'dateInterval',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'string',
-                                format: 'duration',
-                                description: '',
+                                schema: new OpenApiSchema(type: 'string', format: 'duration'),
                                 required: false,
                                 style: ParameterStyle::STYLE_FORM
                             ),
@@ -440,16 +426,14 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             new OpenApiParameter(
                                 name: 'endpointQuery',
                                 in: ParameterLocation::LOCATION_PATH,
-                                type: 'object',
                                 description: 'the endpoint query',
                                 required: true,
                                 schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQuery'),
-                                style: ParameterStyle::STYLE_SIMPLE
+                                style: ParameterStyle::STYLE_SIMPLE,
                             ),
                             new OpenApiParameter(
                                 name: 'anotherEndpointQuery',
                                 in: ParameterLocation::LOCATION_QUERY,
-                                type: 'object',
                                 description: 'another endpoint query',
                                 required: true,
                                 schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_AnotherEndpointQuery'),
@@ -483,6 +467,45 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             )
                         )
                     ),
+                    new OpenApiPathItem(
+                        new PathDefinition('/single-value-objects-parameter-endpoint'),
+                        HttpMethod::METHOD_GET,
+                        new OpenApiParameterCollection(
+                            new OpenApiParameter(
+                                name: 'identifier',
+                                in: ParameterLocation::LOCATION_QUERY,
+                                required: true,
+                                description: 'see https://schema.org/identifier',
+                                schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier'),
+                                style: ParameterStyle::STYLE_FORM
+                            ),
+                            new OpenApiParameter(
+                                name: 'identifierCollection',
+                                description: '',
+                                in: ParameterLocation::LOCATION_QUERY,
+                                required: true,
+                                schema: new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_IdentifierCollection'),
+                                style: ParameterStyle::STYLE_DEEP_OBJECT,
+                                content: [
+                                    'application/json' => [
+                                        'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_IdentifierCollection')
+                                    ]
+                                ]
+                            ),
+                        ),
+                        null,
+                        new OpenApiResponses(
+                            new OpenApiResponse(
+                                200,
+                                'the query was successful',
+                                [
+                                    'application/json' => [
+                                        'schema' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointResponse')
+                                    ]
+                                ]
+                            )
+                        )
+                    ),
                 ),
                 [],
                 new OpenApiComponents(
@@ -497,7 +520,7 @@ final class OpenApiDocumentFactoryTest extends TestCase
                                 ])
                             ],
                             required: [
-                                'thing'
+                            'thing'
                             ]
                         ),
                         new OpenApiSchema(
@@ -510,7 +533,7 @@ final class OpenApiDocumentFactoryTest extends TestCase
                                 ])
                             ],
                             required: [
-                                'language'
+                            'language'
                             ]
                         ),
                         new OpenApiSchema(
@@ -523,7 +546,7 @@ final class OpenApiDocumentFactoryTest extends TestCase
                                 ])
                             ],
                             required: [
-                                'reason'
+                            'reason'
                             ]
                         ),
                         new OpenApiSchema(
@@ -536,9 +559,21 @@ final class OpenApiDocumentFactoryTest extends TestCase
                                 ])
                             ],
                             required: [
-                                'pleaseFail'
+                            'pleaseFail'
                             ]
-                        )
+                        ),
+                        new OpenApiSchema(
+                            name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier',
+                            type: 'string',
+                            description: 'see https://schema.org/identifier',
+                        ),
+                        new OpenApiSchema(
+                            name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_IdentifierCollection',
+                            type: 'array',
+                            items: new OpenApiReference(
+                                ref: '#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier'
+                            )
+                        ),
                     ),
                 ),
                 [],

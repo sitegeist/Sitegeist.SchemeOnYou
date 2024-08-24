@@ -24,8 +24,6 @@ final readonly class OpenApiParameter implements \JsonSerializable
     public function __construct(
         public string $name,
         public ParameterLocation $in,
-        public string $type,
-        public ?string $format = null,
         public ?string $description = null,
         ?bool $required = null,
         public OpenApiSchema|OpenApiReference|null $schema = null,
@@ -51,9 +49,8 @@ final readonly class OpenApiParameter implements \JsonSerializable
             return new self(
                 name: $reflectionParameter->name,
                 in: $parameterAttribute->in,
-                type: $parameterSchema->type,
-                format: $parameterSchema->format,
-                description: $parameterAttribute->description ?: '',
+                schema: $parameterSchema,
+                description: $parameterAttribute->description,
                 required: !$reflectionParameter->allowsNull(),
                 style: $parameterAttribute->style
             );
@@ -74,10 +71,9 @@ final readonly class OpenApiParameter implements \JsonSerializable
         return new self(
             name: $reflectionParameter->name,
             in: $parameterAttribute->in,
-            type: $parameterSchema->type,
             description: $parameterAttribute->description ?: $schemaAttribute->description,
             required: !$reflectionParameter->isDefaultValueAvailable(),
-            schema: $parameterSchema->type === 'object' ? $parameterSchema->toReference() : null,
+            schema: $parameterSchema->toReference(),
             content: $parameterAttribute->style === ParameterStyle::STYLE_DEEP_OBJECT
                 ? [
                     'application/json' => [
