@@ -27,7 +27,6 @@ use Sitegeist\SchemeOnYou\Domain\Path\OpenApiResponses;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 use Sitegeist\SchemeOnYou\Domain\Schema\IsSupportedInSchema;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
-use Neos\Flow\Mvc\Routing\Router;
 
 class OpenApiDocumentFactory
 {
@@ -136,7 +135,7 @@ class OpenApiDocumentFactory
         if (!$controllerObjectName) {
             throw new \DomainException('Class ' . $className . ' is unknown to the object manager and thus cannot be processed');
         }
-        $controllerPackageKey = $this->objectManager->getPackageKeyByObjectName($controllerObjectName);
+        $controllerPackageKey = $this->objectManager->getPackageKeyByObjectName($controllerObjectName) ?: '';
         $controllerPackageNamespace = str_replace('.', '\\', $controllerPackageKey);
         if (!str_ends_with($className, 'Controller')) {
             throw new \DomainException('Only for controller classes');
