@@ -6,9 +6,6 @@ namespace Sitegeist\SchemeOnYou\Application;
 
 use Neos\Flow\Mvc\ActionRequest;
 use Neos\Flow\Mvc\Controller\ActionController;
-use Neos\Flow\Mvc\Controller\Arguments;
-use Neos\Flow\Mvc\Controller\ControllerContext;
-use Neos\Flow\Mvc\Routing\UriBuilder;
 use Psr\Http\Message\ResponseInterface;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Response;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
@@ -18,14 +15,6 @@ abstract class OpenApiController extends ActionController
     final public function processRequest(ActionRequest $request): ResponseInterface
     {
         $this->request = $request;
-        $uriBuilder = new UriBuilder();
-        $uriBuilder->setRequest($this->request);
-        $this->controllerContext = new ControllerContext(
-            $this->request,
-            $this->response,
-            new Arguments([]),
-            $uriBuilder
-        );
 
         $actionName = $request->getControllerActionName() . 'Action';
         if (!method_exists($this, $actionName)) {
