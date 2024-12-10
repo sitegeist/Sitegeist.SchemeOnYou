@@ -171,7 +171,8 @@ _!!! There is a small chance the arguments passed to the constructor are not sto
   
 ## Installation
 
-Sitegeist.SchemeOnYou is available via packagist. Run `composer require sitegeist/schemeonyou` to require this package.
+Sitegeist.SchemeOnYou is available via packagist. Run `composer require sitegeist/schemeonyou` to require this package. 
+You may also want to install `flowpack/cors` or any other CORS package if you are using the endpoints from different urls .
 
 We use semantic versioning, so every breaking change will increase the major version number.
 
