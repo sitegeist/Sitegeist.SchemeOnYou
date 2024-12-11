@@ -73,15 +73,22 @@ final readonly class OpenApiParameter implements \JsonSerializable
             in: $parameterAttribute->in,
             description: $parameterAttribute->description ?: $schemaAttribute->description,
             required: !$reflectionParameter->isDefaultValueAvailable(),
-            schema: $parameterSchema->toReference(),
-            content: $parameterAttribute->style === ParameterStyle::STYLE_DEEP_OBJECT
-                ? [
+            schema: match ($parameterAttribute->style) {
+                ParameterStyle::STYLE_X_JSON => null,
+                default => $parameterSchema->toReference()
+            },
+            content: match ($parameterAttribute->style) {
+                ParameterStyle::STYLE_DEEP_OBJECT, ParameterStyle::STYLE_X_JSON => [
                     'application/json' => [
                         'schema' => $parameterSchema->toReference()
                     ]
-                ]
-                : null,
-            style: $parameterAttribute->style
+                ],
+                default => null
+            },
+            style: match ($parameterAttribute->style) {
+                ParameterStyle::STYLE_X_JSON => null,
+                default => $parameterAttribute->style
+            },
         );
     }
 
