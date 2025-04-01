@@ -22,8 +22,3 @@ Sitegeist:
     # the separate dictionaries that may be rendered
     # example: {name: string, classNames: [string]}
     documents: []
-
-    # Sends CORS headers, e.g. in the OpenApiDocumentController
-    sendCORSHeaders: true
-
-
