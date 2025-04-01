@@ -86,7 +86,6 @@ final readonly class OpenApiSchema implements \JsonSerializable
                         'bool' => 'boolean',
                         'string' => 'string',
                         'float' => 'number',
-                        default => throw new \DomainException('Unsupported type ' . $typeName)
                     },
                     format: match ($typeName) {
                         'string' => StringProperty::tryfromReflectionParameter($reflection)?->format ?: null,

@@ -22,5 +22,3 @@ Sitegeist:
     # the separate dictionaries that may be rendered
     # example: {name: string, classNames: [string]}
     documents: []
-
-

@@ -40,8 +40,8 @@ final readonly class OpenApiDocument implements \JsonSerializable
      */
     public static function createFromConfiguration(
         array $configuration,
-        OpenApiPathCollection $paths = null,
-        OpenApiComponents $components = null,
+        ?OpenApiPathCollection $paths = null,
+        ?OpenApiComponents $components = null,
     ): self {
         return new self(
             $configuration['openapi'],

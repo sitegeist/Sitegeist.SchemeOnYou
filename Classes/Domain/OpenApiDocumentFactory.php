@@ -6,6 +6,7 @@ namespace Sitegeist\SchemeOnYou\Domain;
 
 use Neos\Flow\Mvc\Routing\Dto\ResolveContext;
 use Neos\Flow\Mvc\Routing\Dto\RouteParameters;
+use Neos\Flow\Mvc\Routing\RoutesProviderInterface;
 use Neos\Flow\ObjectManagement\ObjectManager;
 use Neos\Flow\ObjectManagement\Proxy\ProxyInterface;
 use Neos\Flow\Reflection\ClassReflection;
@@ -26,13 +27,12 @@ use Sitegeist\SchemeOnYou\Domain\Path\OpenApiResponses;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 use Sitegeist\SchemeOnYou\Domain\Schema\IsSupportedInSchema;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
-use Neos\Flow\Mvc\Routing\Router;
 
 class OpenApiDocumentFactory
 {
     public function __construct(
         private readonly ReflectionService $reflectionService,
-        private readonly Router $router,
+        private readonly RoutesProviderInterface $routesProvider,
         private readonly ObjectManager $objectManager,
         private readonly UriFactoryInterface $uriFactory,
     ) {
@@ -135,7 +135,7 @@ class OpenApiDocumentFactory
         if (!$controllerObjectName) {
             throw new \DomainException('Class ' . $className . ' is unknown to the object manager and thus cannot be processed');
         }
-        $controllerPackageKey = $this->objectManager->getPackageKeyByObjectName($controllerObjectName);
+        $controllerPackageKey = $this->objectManager->getPackageKeyByObjectName($controllerObjectName) ?: '';
         $controllerPackageNamespace = str_replace('.', '\\', $controllerPackageKey);
         if (!str_ends_with($className, 'Controller')) {
             throw new \DomainException('Only for controller classes');
@@ -214,7 +214,7 @@ class OpenApiDocumentFactory
             }
         }
 
-        foreach ($this->router->getRoutes() as $route) {
+        foreach ($this->routesProvider->getRoutes() as $route) {
             if ($route->resolves($resolveContext)) {
                 $path = str_replace(
                     ['{@package}', '{@subpackage}', '{@controller}', '{@action}'],

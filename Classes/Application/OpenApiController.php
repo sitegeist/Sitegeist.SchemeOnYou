@@ -5,36 +5,16 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Application;
 
 use Neos\Flow\Mvc\ActionRequest;
-use Neos\Flow\Mvc\ActionResponse;
-use Neos\Flow\Mvc\Controller\Arguments;
-use Neos\Flow\Mvc\Controller\ControllerContext;
-use Neos\Flow\Mvc\Controller\ControllerInterface;
-use Neos\Flow\Mvc\Routing\UriBuilder;
+use Neos\Flow\Mvc\Controller\ActionController;
+use Psr\Http\Message\ResponseInterface;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Response;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaNormalizer;
 
-abstract class OpenApiController implements ControllerInterface
+abstract class OpenApiController extends ActionController
 {
-    protected ActionRequest $request;
-
-    protected ActionResponse $response;
-
-    protected ControllerContext $controllerContext;
-
-    final public function processRequest(ActionRequest $request, ActionResponse $response): void
+    final public function processRequest(ActionRequest $request): ResponseInterface
     {
         $this->request = $request;
-        $this->request->setDispatched(true);
-        $this->response = $response;
-        $this->response->setContentType('application/json');
-        $uriBuilder = new UriBuilder();
-        $uriBuilder->setRequest($this->request);
-        $this->controllerContext = new ControllerContext(
-            $this->request,
-            $this->response,
-            new Arguments([]),
-            $uriBuilder
-        );
 
         $actionName = $request->getControllerActionName() . 'Action';
         if (!method_exists($this, $actionName)) {
@@ -49,8 +29,13 @@ abstract class OpenApiController implements ControllerInterface
         $result = $this->$actionName(...$parameters);
 
         $responseMetadata = Response::fromReflectionClass(new \ReflectionClass($result));
-        $this->response->setStatusCode($responseMetadata->statusCode);
 
-        $this->response->setContent(json_encode(SchemaNormalizer::normalizeValue($result), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+        return new \GuzzleHttp\Psr7\Response(
+            $responseMetadata->statusCode,
+            [
+                'Content-Type' => 'application/json',
+            ],
+            \json_encode(SchemaNormalizer::normalizeValue($result), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)
+        );
     }
 }

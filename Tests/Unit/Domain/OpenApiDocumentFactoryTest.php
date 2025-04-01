@@ -8,6 +8,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Routing\Dto\ResolveContext;
 use Neos\Flow\Mvc\Routing\Route;
 use Neos\Flow\Mvc\Routing\Router;
+use Neos\Flow\Mvc\Routing\RoutesProviderInterface;
 use Neos\Flow\ObjectManagement\ObjectManager;
 use Neos\Flow\Persistence\Doctrine\PersistenceManager;
 use Neos\Flow\Reflection\ReflectionService;
@@ -76,10 +77,10 @@ final class OpenApiDocumentFactoryTest extends TestCase
             ->method('convertObjectsToIdentityArrays')
             ->willReturnCallback(fn (array $input): array => $input);
 
-        $mockRouter = $this->getMockBuilder(Router::class)
+        $mockRoutesProvider = $this->getMockBuilder(RoutesProviderInterface::class)
             ->onlyMethods(['getRoutes'])
             ->getMock();
-        $mockRouter->expects($this->any())
+        $mockRoutesProvider->expects($this->any())
             ->method('getRoutes')
             ->willReturn([
                 $this->createMockRoute(
@@ -132,7 +133,7 @@ final class OpenApiDocumentFactoryTest extends TestCase
 
         $this->subject = new OpenApiDocumentFactory(
             $mockReflectionService,
-            $mockRouter,
+            $mockRoutesProvider,
             $mockObjectManager,
             new UriFactory()
         );
