@@ -20,6 +20,8 @@ enum ParameterStyle: string implements \JsonSerializable
     case STYLE_PIPE_DELIMITED = 'pipeDelimited';
     case STYLE_DEEP_OBJECT = 'deepObject';
 
+    case STYLE_X_JSON = 'x-json';
+
     /**
      * @see https://swagger.io/specification/#fixed-fields-10
      */
@@ -72,7 +74,7 @@ enum ParameterStyle: string implements \JsonSerializable
             return ParameterStyle::STYLE_FORM;
         }
 
-        return  ParameterStyle::STYLE_DEEP_OBJECT;
+        return  ParameterStyle::STYLE_X_JSON;
     }
 
     /**
@@ -83,7 +85,7 @@ enum ParameterStyle: string implements \JsonSerializable
     public function decodeParameterValue(array|int|bool|string|float|null $parameterValue): array|int|bool|string|float|null
     {
         return match ($this) {
-            self::STYLE_DEEP_OBJECT => match (true) {
+            self::STYLE_DEEP_OBJECT, self::STYLE_X_JSON => match (true) {
                 $parameterValue === null => $parameterValue,
                 is_string($parameterValue) => \json_decode($parameterValue, true, 512, JSON_THROW_ON_ERROR),
                 default => throw new \DomainException('Parameters with deepObject style must be sent as JSON or null')
