@@ -23,6 +23,7 @@ use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathCollection;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathItem;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiRequestBody;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiResponses;
+use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 use Sitegeist\SchemeOnYou\Domain\Schema\IsSupportedInSchema;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
@@ -159,21 +160,9 @@ class OpenApiDocumentFactory
         $controller = substr($controllerName, 0, -10);
         $action = substr($methodName, 0, -6);
 
-        $resolveContext = new ResolveContext(
-            $this->uriFactory->createUri('http://localhost'),
-            [
-                '@package' => $controllerPackageKey,
-                '@subpackage' => $subPackage,
-                '@controller' => $controller,
-                '@action' => $action,
-            ],
-            false,
-            '',
-            RouteParameters::createEmpty()->withParameter('requestUriHost', 'localhost')
-        );
-
         $requestBody = null;
         $parameters = [];
+        $pathParameters = [];
         foreach ($methodReflection->getParameters() as $reflectionParameter) {
             $parameterProcessed = false;
 
@@ -207,11 +196,62 @@ class OpenApiDocumentFactory
                         );
                     }
                     $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
+                    foreach ($parameters as $parameter) {
+                        if ($parameter->in === ParameterLocation::LOCATION_PATH) {
+                            $pathParameters[] = $parameter;
+                        }
+                    }
                     $parameterProcessed = true;
                 }
             } else {
                 $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
             }
+        }
+
+        if ($pathParameters) {
+            $extraRouteValues = array_reduce(
+                $pathParameters,
+                function (array $carry, OpenApiParameter $parameter) {
+                    $carry[$parameter->name] = "string";
+                    return $carry;
+                },
+                []
+            );
+            $resolveContext = new ResolveContext(
+                $this->uriFactory->createUri('http://localhost'),
+                array_merge(
+                    [
+                        '@package' => $controllerPackageKey,
+                        '@subpackage' => $subPackage,
+                        '@controller' => $controller,
+                        '@action' => $action,
+                    ],
+                    $extraRouteValues
+                ),
+                false,
+                '',
+                RouteParameters::createEmpty()->withParameter('requestUriHost', 'localhost')
+            );
+            $resolveContext = new ResolveContext(
+                $resolveContext->getBaseUri(),
+                array_merge($resolveContext->getRouteValues(), $extraRouteValues),
+                $resolveContext->isForceAbsoluteUri(),
+                $resolveContext->getUriPathPrefix(),
+                $resolveContext->getParameters()
+            );
+        } else {
+            $resolveContext = new ResolveContext(
+                $this->uriFactory->createUri('http://localhost'),
+                [
+                    '@package' => $controllerPackageKey,
+                    '@subpackage' => $subPackage,
+                    '@controller' => $controller,
+                    '@action' => $action,
+                ],
+                false,
+                '',
+                RouteParameters::createEmpty()->withParameter('requestUriHost', 'localhost')
+            );
         }
 
         foreach ($this->router->getRoutes() as $route) {
@@ -233,8 +273,6 @@ class OpenApiDocumentFactory
                         );
                     }
                 }
-                // only the first matching route is needed so we can break the loop here
-                break;
             }
         }
 
