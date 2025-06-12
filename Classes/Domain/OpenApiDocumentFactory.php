@@ -164,11 +164,11 @@ class OpenApiDocumentFactory
         $parameters = [];
         $pathParameters = [];
         foreach ($methodReflection->getParameters() as $reflectionParameter) {
-            $parameterProcessed = false;
+            $bodyParameterProcessed = false;
 
             if ($bodyAttributes = $reflectionParameter->getAttributes(RequestBody::class)) {
                 foreach ($bodyAttributes as $attribute) {
-                    if ($parameterProcessed) {
+                    if ($bodyParameterProcessed) {
                         throw new \DomainException(
                             'Method parameter ' . $methodReflection->getDeclaringClass()->name
                             . '::' . $methodReflection->getName() . '::' . $reflectionParameter->name
@@ -183,76 +183,41 @@ class OpenApiDocumentFactory
                         );
                     }
                     $requestBody = OpenApiRequestBody::fromReflectionParameter($reflectionParameter);
-                    $parameterProcessed = true;
-                }
-            } elseif ($parameterAttributes = $reflectionParameter->getAttributes(Parameter::class)) {
-                foreach ($parameterAttributes as $attribute) {
-                    if ($parameterProcessed) {
-                        throw new \DomainException(
-                            'Method parameter ' . $methodReflection->getDeclaringClass()->name
-                            . '::' . $methodReflection->getName() . '::' . $reflectionParameter->name
-                            . ' must be attributed as either OpenAPI Parameter or RequestBody'
-                            . ' and was already attributed'
-                        );
-                    }
-                    $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
-                    foreach ($parameters as $parameter) {
-                        if ($parameter->in === ParameterLocation::LOCATION_PATH) {
-                            $pathParameters[] = $parameter;
-                        }
-                    }
-                    $parameterProcessed = true;
+                    $bodyParameterProcessed = true;
                 }
             } else {
                 $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
             }
         }
 
-        if ($pathParameters) {
-            $extraRouteValues = array_reduce(
-                $pathParameters,
-                function (array $carry, OpenApiParameter $parameter) {
+        // add fake string parameters for the LOCATION_PATH parameters
+        $additionalRouteValues = array_reduce(
+            $parameters,
+            function (array $carry, OpenApiParameter $parameter) {
+                if ($parameter->in === ParameterLocation::LOCATION_PATH) {
                     $carry[$parameter->name] = "string";
-                    return $carry;
-                },
-                []
-            );
-            $resolveContext = new ResolveContext(
-                $this->uriFactory->createUri('http://localhost'),
-                array_merge(
-                    [
-                        '@package' => $controllerPackageKey,
-                        '@subpackage' => $subPackage,
-                        '@controller' => $controller,
-                        '@action' => $action,
-                    ],
-                    $extraRouteValues
-                ),
-                false,
-                '',
-                RouteParameters::createEmpty()->withParameter('requestUriHost', 'localhost')
-            );
-            $resolveContext = new ResolveContext(
-                $resolveContext->getBaseUri(),
-                array_merge($resolveContext->getRouteValues(), $extraRouteValues),
-                $resolveContext->isForceAbsoluteUri(),
-                $resolveContext->getUriPathPrefix(),
-                $resolveContext->getParameters()
-            );
-        } else {
-            $resolveContext = new ResolveContext(
-                $this->uriFactory->createUri('http://localhost'),
+                }
+                return $carry;
+            },
+            []
+        );
+
+        // we try to route the parameter
+        $resolveContext = new ResolveContext(
+            $this->uriFactory->createUri('http://localhost'),
+            array_merge(
                 [
                     '@package' => $controllerPackageKey,
                     '@subpackage' => $subPackage,
                     '@controller' => $controller,
                     '@action' => $action,
                 ],
-                false,
-                '',
-                RouteParameters::createEmpty()->withParameter('requestUriHost', 'localhost')
-            );
-        }
+                $additionalRouteValues
+            ),
+            false,
+            '',
+            RouteParameters::createEmpty()->withParameter('requestUriHost', 'localhost')
+        );
 
         foreach ($this->router->getRoutes() as $route) {
             if ($route->resolves($resolveContext)) {
