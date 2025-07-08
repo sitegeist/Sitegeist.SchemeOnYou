@@ -10,6 +10,7 @@ use Neos\Flow\ObjectManagement\ObjectManager;
 use Neos\Flow\ObjectManagement\Proxy\ProxyInterface;
 use Neos\Flow\Reflection\ClassReflection;
 use Neos\Flow\Reflection\MethodReflection;
+use Neos\Flow\Reflection\ParameterReflection;
 use Neos\Flow\Reflection\ReflectionService;
 use Neos\Utility\Arrays;
 use Psr\Http\Message\UriFactoryInterface;
@@ -23,6 +24,7 @@ use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathCollection;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiPathItem;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiRequestBody;
 use Sitegeist\SchemeOnYou\Domain\Path\OpenApiResponses;
+use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 use Sitegeist\SchemeOnYou\Domain\Schema\IsSupportedInSchema;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
@@ -99,7 +101,7 @@ class OpenApiDocumentFactory
                         }
                     }
                 }
-                $paths = $paths->merge($this->createPathsFromPathAndMethodReflection($classReflection, $methodReflection));
+                $paths = $paths->merge($this->createPathsFromClassAndMethodReflection($classReflection, $methodReflection));
             }
 
             $requiredSchemaClasses = $this->addConstructorArgumentTypesToRequiredSchemaClasses($requiredSchemaClasses);
@@ -121,7 +123,7 @@ class OpenApiDocumentFactory
         );
     }
 
-    private function createPathsFromPathAndMethodReflection(ClassReflection $classReflection, MethodReflection $methodReflection): OpenApiPathCollection
+    private function createPathsFromClassAndMethodReflection(ClassReflection $classReflection, MethodReflection $methodReflection): OpenApiPathCollection
     {
         /**
          * @var OpenApiPathItem[] $paths
@@ -159,27 +161,14 @@ class OpenApiDocumentFactory
         $controller = substr($controllerName, 0, -10);
         $action = substr($methodName, 0, -6);
 
-        $resolveContext = new ResolveContext(
-            $this->uriFactory->createUri('http://localhost'),
-            [
-                '@package' => $controllerPackageKey,
-                '@subpackage' => $subPackage,
-                '@controller' => $controller,
-                '@action' => $action,
-            ],
-            false,
-            '',
-            RouteParameters::createEmpty()->withParameter('requestUriHost', 'localhost')
-        );
-
         $requestBody = null;
         $parameters = [];
-        foreach ($methodReflection->getParameters() as $reflectionParameter) {
-            $parameterProcessed = false;
+        $bodyParameterIsAlreadyProcessed = false;
 
+        foreach ($methodReflection->getParameters() as $reflectionParameter) {
             if ($bodyAttributes = $reflectionParameter->getAttributes(RequestBody::class)) {
                 foreach ($bodyAttributes as $attribute) {
-                    if ($parameterProcessed) {
+                    if ($bodyParameterIsAlreadyProcessed) {
                         throw new \DomainException(
                             'Method parameter ' . $methodReflection->getDeclaringClass()->name
                             . '::' . $methodReflection->getName() . '::' . $reflectionParameter->name
@@ -194,25 +183,41 @@ class OpenApiDocumentFactory
                         );
                     }
                     $requestBody = OpenApiRequestBody::fromReflectionParameter($reflectionParameter);
-                    $parameterProcessed = true;
-                }
-            } elseif ($parameterAttributes = $reflectionParameter->getAttributes(Parameter::class)) {
-                foreach ($parameterAttributes as $attribute) {
-                    if ($parameterProcessed) {
-                        throw new \DomainException(
-                            'Method parameter ' . $methodReflection->getDeclaringClass()->name
-                            . '::' . $methodReflection->getName() . '::' . $reflectionParameter->name
-                            . ' must be attributed as either OpenAPI Parameter or RequestBody'
-                            . ' and was already attributed'
-                        );
-                    }
-                    $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
-                    $parameterProcessed = true;
+                    $bodyParameterIsAlreadyProcessed = true;
                 }
             } else {
                 $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
             }
         }
+
+        // add fake string parameters for the LOCATION_PATH parameters
+        $additionalRouteValues = array_reduce(
+            $parameters,
+            function (array $carry, OpenApiParameter $parameter) {
+                if ($parameter->in === ParameterLocation::LOCATION_PATH) {
+                    $carry[$parameter->name] = "string";
+                }
+                return $carry;
+            },
+            []
+        );
+
+        // we try to route the parameter
+        $resolveContext = new ResolveContext(
+            $this->uriFactory->createUri('http://localhost'),
+            array_merge(
+                [
+                    '@package' => $controllerPackageKey,
+                    '@subpackage' => $subPackage,
+                    '@controller' => $controller,
+                    '@action' => $action,
+                ],
+                $additionalRouteValues
+            ),
+            false,
+            '',
+            RouteParameters::createEmpty()->withParameter('requestUriHost', 'localhost')
+        );
 
         foreach ($this->router->getRoutes() as $route) {
             if ($route->resolves($resolveContext)) {
@@ -233,8 +238,6 @@ class OpenApiDocumentFactory
                         );
                     }
                 }
-                // only the first matching route is needed so we can break the loop here
-                break;
             }
         }
 
