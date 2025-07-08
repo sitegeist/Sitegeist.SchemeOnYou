@@ -10,6 +10,7 @@ use Neos\Flow\ObjectManagement\ObjectManager;
 use Neos\Flow\ObjectManagement\Proxy\ProxyInterface;
 use Neos\Flow\Reflection\ClassReflection;
 use Neos\Flow\Reflection\MethodReflection;
+use Neos\Flow\Reflection\ParameterReflection;
 use Neos\Flow\Reflection\ReflectionService;
 use Neos\Utility\Arrays;
 use Psr\Http\Message\UriFactoryInterface;
@@ -100,7 +101,7 @@ class OpenApiDocumentFactory
                         }
                     }
                 }
-                $paths = $paths->merge($this->createPathsFromPathAndMethodReflection($classReflection, $methodReflection));
+                $paths = $paths->merge($this->createPathsFromClassAndMethodReflection($classReflection, $methodReflection));
             }
 
             $requiredSchemaClasses = $this->addConstructorArgumentTypesToRequiredSchemaClasses($requiredSchemaClasses);
@@ -122,7 +123,7 @@ class OpenApiDocumentFactory
         );
     }
 
-    private function createPathsFromPathAndMethodReflection(ClassReflection $classReflection, MethodReflection $methodReflection): OpenApiPathCollection
+    private function createPathsFromClassAndMethodReflection(ClassReflection $classReflection, MethodReflection $methodReflection): OpenApiPathCollection
     {
         /**
          * @var OpenApiPathItem[] $paths
@@ -162,13 +163,12 @@ class OpenApiDocumentFactory
 
         $requestBody = null;
         $parameters = [];
-        $pathParameters = [];
-        foreach ($methodReflection->getParameters() as $reflectionParameter) {
-            $bodyParameterProcessed = false;
+        $bodyParameterIsAlreadyProcessed = false;
 
+        foreach ($methodReflection->getParameters() as $reflectionParameter) {
             if ($bodyAttributes = $reflectionParameter->getAttributes(RequestBody::class)) {
                 foreach ($bodyAttributes as $attribute) {
-                    if ($bodyParameterProcessed) {
+                    if ($bodyParameterIsAlreadyProcessed) {
                         throw new \DomainException(
                             'Method parameter ' . $methodReflection->getDeclaringClass()->name
                             . '::' . $methodReflection->getName() . '::' . $reflectionParameter->name
@@ -183,7 +183,7 @@ class OpenApiDocumentFactory
                         );
                     }
                     $requestBody = OpenApiRequestBody::fromReflectionParameter($reflectionParameter);
-                    $bodyParameterProcessed = true;
+                    $bodyParameterIsAlreadyProcessed = true;
                 }
             } else {
                 $parameters[] = OpenApiParameter::fromReflectionParameter($reflectionParameter);
