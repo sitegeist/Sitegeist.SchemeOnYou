@@ -118,7 +118,16 @@ class OpenApiDocumentFactory
             $rootObjectConfiguration,
             $paths,
             new OpenApiComponents(
-                OpenApiSchemaCollection::fromClassNames($requiredSchemaClasses)
+                OpenApiSchemaCollection::fromClassNames($requiredSchemaClasses),
+                $rootObjectConfiguration['components']['responses'] ?? [],
+                $rootObjectConfiguration['components']['parameters'] ?? [],
+                $rootObjectConfiguration['components']['examples'] ?? [],
+                $rootObjectConfiguration['components']['requestBodies'] ?? [],
+                $rootObjectConfiguration['components']['headers'] ?? [],
+                $rootObjectConfiguration['components']['securitySchemes'] ?? [],
+                $rootObjectConfiguration['components']['links'] ?? [],
+                $rootObjectConfiguration['components']['callbacks'] ?? [],
+                $rootObjectConfiguration['components']['pathItems'] ?? []
             )
         );
     }
