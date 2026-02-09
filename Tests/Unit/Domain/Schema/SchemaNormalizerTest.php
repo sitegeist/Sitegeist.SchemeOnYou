@@ -241,6 +241,40 @@ final class SchemaNormalizerTest extends TestCase
                 'expirationDate' => '2010-01-28',
             ]
         ];
+
+        yield 'Stuff\ClassWithStuffViaInterface' => [
+            Fixtures\Stuff\ClassWithStuffViaInterface::class,
+            new Fixtures\Stuff\ClassWithStuffViaInterface(
+                name: 'Petra Fledermaus',
+                stuff: new Fixtures\Stuff\InterestingStuff(
+                    gossip: 'Peter Klaus hat ne Flamme'
+                )
+            ),
+            [
+                'name' => 'Petra Fledermaus',
+                'stuff' => [
+                    '__discriminator' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_InterestingStuff',
+                    'gossip' => 'Peter Klaus hat ne Flamme',
+                ]
+            ]
+        ];
+
+        yield 'Stuff\ClassWithStuffViaUnion' => [
+            Fixtures\Stuff\ClassWithStuffViaUnion::class,
+            new Fixtures\Stuff\ClassWithStuffViaUnion(
+                name: 'Petra Fledermaus',
+                stuff: new Fixtures\Stuff\BoringStuff(
+                    number: 23
+                )
+            ),
+            [
+                'name' => 'Petra Fledermaus',
+                'stuff' => [
+                    '__discriminator' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff',
+                    'number' => 23,
+                ]
+            ]
+        ];
     }
 
     public static function dateNormalizationAndDenormalizationDateProvider(): \Generator

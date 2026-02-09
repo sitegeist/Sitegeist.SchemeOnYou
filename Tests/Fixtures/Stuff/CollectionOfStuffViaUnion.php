@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff;
@@ -13,7 +14,8 @@ readonly class CollectionOfStuffViaUnion
      */
     public array $items;
 
-    public function __construct(BoringStuff|InterestingStuff ... $items) {
+    public function __construct(BoringStuff|InterestingStuff ...$items)
+    {
         $this->items = $items;
     }
 }

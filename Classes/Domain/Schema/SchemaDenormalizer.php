@@ -55,6 +55,16 @@ class SchemaDenormalizer
             return self::convertCollection($value, $targetType);
         } elseif (class_exists($targetType) && IsDataTransferObject::isSatisfiedByClassName($targetType)) {
             return self::convertValueObject($value, $targetType);
+        } elseif (interface_exists($targetType) && is_array($value) && array_key_exists(OpenApiSchema::DISCRIMINATOR_NAME, $value)) {
+            $selectedTargetType = $value[OpenApiSchema::DISCRIMINATOR_NAME];
+            /** @var string $fqn*/
+            $fqn = str_replace('_', '\\', $selectedTargetType);
+            if (
+                class_exists($fqn) && is_a($fqn, $targetType, true)
+                && (IsDataTransferObject::isSatisfiedByClassName($fqn) || IsDataTransferObjectCollection::isSatisfiedByClassName($fqn))
+            ) {
+                return self::convertValueObject($value, $fqn);
+            }
         }
 
         throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
@@ -82,6 +92,26 @@ class SchemaDenormalizer
     /**
      * @param array<string,mixed>|int|float|string|bool $value
      */
+    private static function convertValueObjectFromUnion(array|int|float|string|bool $value, \ReflectionUnionType $reflectionType): object
+    {
+        if (is_array($value) && array_key_exists(OpenApiSchema::DISCRIMINATOR_NAME, $value)) {
+            foreach ($reflectionType->getTypes() as $subType) {
+                if ($subType instanceof \ReflectionNamedType) {
+                    $fqn = str_replace('_', '\\', $value[ OpenApiSchema::DISCRIMINATOR_NAME ]);
+                    if ($subType->getName() === $fqn) {
+                        return self::convertValueObject($value, $fqn);
+                    }
+                } else {
+                    throw new \DomainException('Only unions of Named Types are supported');
+                }
+            }
+        }
+        throw new \DomainException('Only arrays with __discriminator can be converted to UnionTypes');
+    }
+
+    /**
+     * @param array<string,mixed>|int|float|string|bool $value
+     */
     private static function convertValueObject(array|int|float|string|bool $value, string $targetType): object
     {
         $reflection = new ClassReflection($targetType);
@@ -97,6 +127,7 @@ class SchemaDenormalizer
                 $convertedArguments[$name] = match (true) {
                     $type === null => throw new \DomainException('Cannot convert untyped property ' . $reflectionParameter->getName()),
                     $type instanceof \ReflectionNamedType => self::convertValue($value[$reflectionParameter->getName()], $type->getName(), $reflectionParameter),
+                    $type instanceof \ReflectionUnionType => self::convertValueObjectFromUnion($value[$reflectionParameter->getName()], $type),
                     default => throw new \DomainException('Cannot convert ' . get_class($type) . ' yet'),
                 };
             }

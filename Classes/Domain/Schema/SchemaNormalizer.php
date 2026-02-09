@@ -37,6 +37,20 @@ class SchemaNormalizer
                 return self::convertDateInterval($value);
             } elseif ($value instanceof \BackedEnum) {
                 return $value->value;
+            } elseif (
+                $reflectionParameter !== null
+                && (
+                    $reflectionParameter->getType() instanceof \ReflectionUnionType
+                    || ($reflectionParameter->getType() instanceof \ReflectionNamedType && interface_exists($reflectionParameter->getType()->getName()))
+                )
+            ) {
+                $convertedValue = self::convertValue($value);
+                if (is_array($convertedValue)) {
+                    $convertedValue[ OpenApiSchema::DISCRIMINATOR_NAME ] = str_replace('\\', '_', $value::class);
+                    return $convertedValue;
+                } else {
+                    throw new \DomainException('Interface type was mit an array ' . get_class($value));
+                }
             } elseif (IsDataTransferObjectCollection::isSatisfiedByReflectionClass(new \ReflectionClass($value))) {
                 return self::convertCollection($value, new \ReflectionClass($value));
             } elseif (IsDataTransferObject::isSatisfiedByReflectionClass(new \ReflectionClass($value))) {

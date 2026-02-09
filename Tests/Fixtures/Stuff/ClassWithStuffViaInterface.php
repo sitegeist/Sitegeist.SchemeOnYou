@@ -7,10 +7,11 @@ namespace Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff;
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
-readonly class BoringStuff implements StuffInterface
+readonly class ClassWithStuffViaInterface
 {
     public function __construct(
-        public int $number
+        public string $name,
+        public StuffInterface $stuff
     ) {
     }
 }

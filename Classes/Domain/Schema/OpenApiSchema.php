@@ -11,6 +11,8 @@ use Sitegeist\SchemeOnYou\Domain\Metadata\StringProperty;
 #[Flow\Proxy(false)]
 final readonly class OpenApiSchema implements \JsonSerializable
 {
+    public const DISCRIMINATOR_NAME = '__discriminator';
+
     /**
      * @param array<int,int|string>|null $enum
      * @codingStandardsIgnoreStart
