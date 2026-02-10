@@ -253,7 +253,7 @@ final class SchemaNormalizerTest extends TestCase
             [
                 'name' => 'Petra Fledermaus',
                 'stuff' => [
-                    '__discriminator' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_InterestingStuff',
+                    '__type__' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_InterestingStuff',
                     'gossip' => 'Peter Klaus hat ne Flamme',
                 ]
             ]
@@ -270,7 +270,7 @@ final class SchemaNormalizerTest extends TestCase
             [
                 'name' => 'Petra Fledermaus',
                 'stuff' => [
-                    '__discriminator' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff',
+                    '__type__' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff',
                     'number' => 23,
                 ]
             ]

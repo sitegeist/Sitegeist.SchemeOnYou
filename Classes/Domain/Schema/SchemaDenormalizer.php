@@ -55,8 +55,8 @@ class SchemaDenormalizer
             return self::convertCollection($value, $targetType);
         } elseif (class_exists($targetType) && IsDataTransferObject::isSatisfiedByClassName($targetType)) {
             return self::convertValueObject($value, $targetType);
-        } elseif (interface_exists($targetType) && is_array($value) && array_key_exists(OpenApiSchema::DISCRIMINATOR_NAME, $value)) {
-            $selectedTargetType = $value[OpenApiSchema::DISCRIMINATOR_NAME];
+        } elseif (interface_exists($targetType) && is_array($value) && array_key_exists(OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME, $value)) {
+            $selectedTargetType = $value[OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME];
             /** @var string $fqn*/
             $fqn = str_replace('_', '\\', $selectedTargetType);
             if (
@@ -94,10 +94,10 @@ class SchemaDenormalizer
      */
     private static function convertValueObjectFromUnion(array|int|float|string|bool $value, \ReflectionUnionType $reflectionType): object
     {
-        if (is_array($value) && array_key_exists(OpenApiSchema::DISCRIMINATOR_NAME, $value)) {
+        if (is_array($value) && array_key_exists(OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME, $value)) {
             foreach ($reflectionType->getTypes() as $subType) {
                 if ($subType instanceof \ReflectionNamedType) {
-                    $fqn = str_replace('_', '\\', $value[ OpenApiSchema::DISCRIMINATOR_NAME ]);
+                    $fqn = str_replace('_', '\\', $value[ OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME ]);
                     if ($subType->getName() === $fqn) {
                         return self::convertValueObject($value, $fqn);
                     }

@@ -8,7 +8,9 @@ use Neos\Flow\Annotations as Flow;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiReference;
+use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiOneOfCollection;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchema;
+use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaDiscriminator;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaType;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Composition;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Credentials;
@@ -21,6 +23,10 @@ use Sitegeist\SchemeOnYou\Tests\Fixtures\Password;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\PostalAddress;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\PostalAddressCollection;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\QuantitativeValue;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\BoringStuff;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\InterestingStuff;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\StuffInterface;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\WeirdStuff;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\WeirdThing;
 
 #[Flow\Proxy(false)]
@@ -34,7 +40,7 @@ final class OpenApiSchemaTest extends TestCase
         string $className,
         OpenApiSchema $expectedSchema
     ): void {
-        Assert::assertEquals($expectedSchema, OpenApiSchema::fromClassName($className));
+        Assert::assertEquals($expectedSchema, OpenApiSchema::fromTypeName($className));
     }
 
     /**
@@ -269,6 +275,26 @@ final class OpenApiSchemaTest extends TestCase
                     'expirationDate',
                 ]
             )
+        ];
+
+        $foo = new WeirdStuff(new \DateTimeImmutable(), false);
+        $bar = new InterestingStuff('');
+        $baz = new BoringStuff(24);
+
+        yield 'stuffInterface' => [
+            'className' => StuffInterface::class,
+            'expectedDefinition' => new OpenApiSchema(
+                type: 'object',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_StuffInterface',
+                description: '',
+                oneOf: new OpenApiOneOfCollection(
+                // no mocking of interface implementation detection ... yet
+                //                    new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff'),
+                //                    new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_InterestingStuff'),
+                //                    new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_WeirdStuff'),
+                ),
+                discriminator: new OpenApiSchemaDiscriminator()
+            ),
         ];
     }
 }

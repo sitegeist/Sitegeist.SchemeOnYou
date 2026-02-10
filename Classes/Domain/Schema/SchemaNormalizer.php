@@ -46,7 +46,7 @@ class SchemaNormalizer
             ) {
                 $convertedValue = self::convertValue($value);
                 if (is_array($convertedValue)) {
-                    $convertedValue[ OpenApiSchema::DISCRIMINATOR_NAME ] = str_replace('\\', '_', $value::class);
+                    $convertedValue[ OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME ] = str_replace('\\', '_', $value::class);
                     return $convertedValue;
                 } else {
                     throw new \DomainException('Interface type was mit an array ' . get_class($value));

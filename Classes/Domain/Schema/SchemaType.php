@@ -70,8 +70,8 @@ final readonly class SchemaType implements \JsonSerializable
                 'format' => 'duration'
             ],
             default => match (true) {
-                class_exists($reflectionType->getName()), enum_exists($reflectionType->getName())
-                    => OpenApiSchema::fromClassName($reflectionType->getName())->toReference(),
+                class_exists($reflectionType->getName()), enum_exists($reflectionType->getName(), interface_exists($reflectionType->getName()))
+                    => OpenApiSchema::fromTypeName($reflectionType->getName())->toReference(),
                 default => throw new \DomainException(
                     'Cannot resolve schema type for type ' . $reflectionType->getName(),
                     1709560846
