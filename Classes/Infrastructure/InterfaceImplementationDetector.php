@@ -7,6 +7,7 @@ namespace Sitegeist\SchemeOnYou\Infrastructure;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Reflection\ReflectionService;
 
+#[Flow\Scope("singleton")]
 class InterfaceImplementationDetector
 {
     #[Flow\Inject(name: ReflectionService::class)]
