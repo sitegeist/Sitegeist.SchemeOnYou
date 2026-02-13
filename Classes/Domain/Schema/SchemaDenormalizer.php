@@ -66,8 +66,7 @@ class SchemaDenormalizer
                 return self::convertValueObject($value, $fqn);
             }
         }
-
-        throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
+        throw new \DomainException('Unsupported type "' .  $targetType . '". Only scalar types, BackedEnums, Collections, ValueObjects are supported');
     }
 
     /**

@@ -70,10 +70,12 @@ final readonly class SchemaType implements \JsonSerializable
                 'format' => 'duration'
             ],
             default => match (true) {
-                class_exists($reflectionType->getName()), enum_exists($reflectionType->getName(), interface_exists($reflectionType->getName()))
+                class_exists($reflectionType->getName()),
+                enum_exists($reflectionType->getName()),
+                interface_exists($reflectionType->getName())
                     => OpenApiSchema::fromTypeName($reflectionType->getName())->toReference(),
                 default => throw new \DomainException(
-                    'Cannot resolve schema type for type ' . $reflectionType->getName(),
+                    'Cannot resolve schema type for type ',
                     1709560846
                 )
             }
@@ -93,7 +95,7 @@ final readonly class SchemaType implements \JsonSerializable
 
     public static function fromReflectionUnionType(\ReflectionUnionType $reflectionUnionType, \ReflectionParameter $reflectionParameter): self
     {
-        $types = [];
+        $subschemas = [];
         foreach ($reflectionUnionType->getTypes() as $reflectionType) {
             if (!$reflectionType instanceof \ReflectionNamedType) {
                 throw new \DomainException(
@@ -101,16 +103,34 @@ final readonly class SchemaType implements \JsonSerializable
                     1709560366
                 );
             }
-            $types[] = self::selfOrReferenceFromReflectionNamedType($reflectionType, $reflectionParameter);
+            $reflectionTypeName = $reflectionType->getName();
+            if (class_exists($reflectionTypeName) || enum_exists($reflectionTypeName)) {
+                $subschemas[] = new OpenApiSchema(
+                    type: 'object',
+                    allOf: new OpenApiSchemaOrReferenceCollection(
+                        OpenApiSchema::discriminatorForClassName($reflectionTypeName),
+                        OpenApiReference::fromClassName($reflectionTypeName)
+                    )
+                );
+            } else {
+                throw new \DomainException(
+                    'Type ' . $reflectionTypeName . ' is not supported in unions',
+                    1709560367
+                );
+            }
         }
+
         if ($reflectionUnionType->allowsNull()) {
-            $types[] = [
-                'type' => 'null'
-            ];
+            throw new \DomainException(
+                'nullable types are not supported in unions yet',
+                1709560368
+            );
         }
 
         return new self([
-            'oneOf' => $types
+            'type' => 'object',
+            'oneOf' => new OpenApiSchemaOrReferenceCollection(...$subschemas),
+            'discriminator' => new OpenApiSchemaDiscriminator()
         ]);
     }
 
