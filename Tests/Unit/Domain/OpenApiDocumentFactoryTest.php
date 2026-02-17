@@ -7,10 +7,9 @@ namespace Sitegeist\SchemeOnYou\Tests\Unit\Domain\Schema;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Routing\Dto\ResolveContext;
 use Neos\Flow\Mvc\Routing\Route;
-use Neos\Flow\Mvc\Routing\Router;
+use Neos\Flow\Mvc\Routing\Routes;
 use Neos\Flow\Mvc\Routing\RoutesProviderInterface;
 use Neos\Flow\ObjectManagement\ObjectManager;
-use Neos\Flow\Persistence\Doctrine\PersistenceManager;
 use Neos\Flow\Reflection\ReflectionService;
 use Neos\Http\Factories\UriFactory;
 use PHPUnit\Framework\Assert;
@@ -70,19 +69,12 @@ final class OpenApiDocumentFactoryTest extends TestCase
                 PathController::class
             ]);
 
-        $mockPersistenceManager = $this->getMockBuilder(PersistenceManager::class)
-            ->onlyMethods(['convertObjectsToIdentityArrays'])
-            ->getMock();
-        $mockPersistenceManager->expects($this->any())
-            ->method('convertObjectsToIdentityArrays')
-            ->willReturnCallback(fn (array $input): array => $input);
-
         $mockRoutesProvider = $this->getMockBuilder(RoutesProviderInterface::class)
             ->onlyMethods(['getRoutes'])
             ->getMock();
         $mockRoutesProvider->expects($this->any())
             ->method('getRoutes')
-            ->willReturn([
+            ->willReturn(Routes::create(
                 $this->createMockRoute(
                     'nullEndpoint',
                     'my-null-endpoint',
@@ -114,8 +106,8 @@ final class OpenApiDocumentFactoryTest extends TestCase
                 $this->createMockRoute(
                     'singleValueObjectsParameterEndpoint',
                     'single-value-objects-parameter-endpoint'
-                ),
-            ]);
+                )
+            ));
 
         $mockObjectManager = $this->getMockBuilder(ObjectManager::class)
             ->disableOriginalConstructor()
