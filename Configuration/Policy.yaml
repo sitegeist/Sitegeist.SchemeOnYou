@@ -13,3 +13,8 @@ roles:
       -
         privilegeTarget: 'Sitegeist.SchemeOnYou:OpenApi'
         permission: GRANT
+  'Sitegeist.SchemeOnYou:ApiSpecConsumer':
+    label: "Access to the api specs"
+    privileges:
+      - privilegeTarget: 'Sitegeist.SchemeOnYou:OpenApi'
+        permission: GRANT

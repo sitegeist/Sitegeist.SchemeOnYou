@@ -109,7 +109,7 @@ final class OpenApiDocumentFactoryTest extends TestCase
                 ),
                 $this->createMockRoute(
                     'multipleParametersAndResponsesEndpoint',
-                    'my-multiple-parameters-and-responses-endpoint'
+                    'my-multiple-parameters-and-responses-endpoint/{endpointQuery}'
                 ),
                 $this->createMockRoute(
                     'singleValueObjectsParameterEndpoint',
@@ -421,7 +421,7 @@ final class OpenApiDocumentFactoryTest extends TestCase
                         )
                     ),
                     new OpenApiPathItem(
-                        new PathDefinition('/my-multiple-parameters-and-responses-endpoint'),
+                        new PathDefinition('/my-multiple-parameters-and-responses-endpoint/{endpointQuery}'),
                         HttpMethod::METHOD_GET,
                         new OpenApiParameterCollection(
                             new OpenApiParameter(

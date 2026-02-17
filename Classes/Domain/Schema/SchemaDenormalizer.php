@@ -114,14 +114,20 @@ class SchemaDenormalizer
     protected static function convertDateTime(array|float|bool|int|string $value, ?\ReflectionParameter $reflectionParameter = null): \DateTime
     {
         $propertyAttribute = $reflectionParameter ? StringProperty::tryFromReflectionParameter($reflectionParameter) : null;
-        $format = match ($propertyAttribute?->format) {
-            StringProperty::FORMAT_DATE => 'Y-m-d',
-            default => \DateTimeInterface::RFC3339
+        $formats = match ($propertyAttribute?->format) {
+            StringProperty::FORMAT_DATE => ['Y-m-d'],
+            default =>  [\DateTimeInterface::RFC3339, \DateTimeInterface::RFC3339_EXTENDED]
         };
-        $converted = match (true) {
-            is_string($value) => \DateTime::createFromFormat($format, $value),
-            default => false,
-        };
+        if (is_string($value)) {
+            foreach ($formats as $format) {
+                $converted = \DateTime::createFromFormat($format, $value);
+                if ($converted instanceof \DateTime) {
+                    break;
+                }
+            }
+        } else {
+            $converted = false;
+        }
         if ($converted === false) {
             throw new \DomainException('Can only denormalize \DateTime from an RFC 3339 string');
         }
@@ -137,14 +143,20 @@ class SchemaDenormalizer
     protected static function convertDateTimeImmutable(array|float|bool|int|string $value, ?\ReflectionParameter $reflectionParameter = null): \DateTimeImmutable
     {
         $propertyAttribute = $reflectionParameter ? StringProperty::tryFromReflectionParameter($reflectionParameter) : null;
-        $format = match ($propertyAttribute?->format) {
-            StringProperty::FORMAT_DATE => 'Y-m-d',
-            default => \DateTimeInterface::RFC3339
+        $formats = match ($propertyAttribute?->format) {
+            StringProperty::FORMAT_DATE => ['Y-m-d'],
+            default => [\DateTimeInterface::RFC3339, \DateTimeInterface::RFC3339_EXTENDED]
         };
-        $converted = match (true) {
-            is_string($value) => \DateTimeImmutable::createFromFormat($format, $value),
-            default => false,
-        };
+        if (is_string($value)) {
+            foreach ($formats as $format) {
+                $converted = \DateTimeImmutable::createFromFormat($format, $value);
+                if ($converted instanceof \DateTimeImmutable) {
+                    break;
+                }
+            }
+        } else {
+            $converted = false;
+        }
         if ($converted === false) {
             throw new \DomainException('Can only denormalize \DateTimeImmutable from an RFC 3339 string');
         }

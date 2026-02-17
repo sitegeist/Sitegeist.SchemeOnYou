@@ -50,7 +50,16 @@ final readonly class OpenApiDocument implements \JsonSerializable
             $paths ?: new OpenApiPathCollection(),
             $configuration['webhooks'],
             $components ?: new OpenApiComponents(
-                new OpenApiSchemaCollection()
+                new OpenApiSchemaCollection(),
+                $configuration['components']['responses'] ?? [],
+                $configuration['components']['parameters'] ?? [],
+                $configuration['components']['examples'] ?? [],
+                $configuration['components']['requestBodies'] ?? [],
+                $configuration['components']['headers'] ?? [],
+                $configuration['components']['securitySchemes'] ?? [],
+                $configuration['components']['links'] ?? [],
+                $configuration['components']['callbacks'] ?? [],
+                $configuration['components']['pathItems'] ?? []
             ),
             $configuration['security'],
             $configuration['tags'],
