@@ -259,6 +259,7 @@ final class SchemaNormalizerTest extends TestCase
             ]
         ];
 
+
         yield 'Stuff\ClassWithStuffViaUnion' => [
             Fixtures\Stuff\ClassWithStuffViaUnion::class,
             new Fixtures\Stuff\ClassWithStuffViaUnion(
@@ -272,6 +273,66 @@ final class SchemaNormalizerTest extends TestCase
                 'stuff' => [
                     '__type__' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff',
                     'number' => 23,
+                ]
+            ]
+        ];
+
+        yield 'Stuff\CollectionOfStuffViaInterface' => [
+            Fixtures\Stuff\CollectionOfStuffViaInterface::class,
+            new Fixtures\Stuff\CollectionOfStuffViaInterface(
+                new Fixtures\Stuff\BoringStuff(
+                    number: 23
+                ),
+                new Fixtures\Stuff\WeirdStuff(
+                    date: new \DateTimeImmutable('2010-01-28T15:00:00+02:00'),
+                    whatever: false
+                ),
+                new Fixtures\Stuff\InterestingStuff(
+                    gossip: 'Peter Klaus hat ne Flamme',
+                )
+            ),
+            [
+                [
+                    '__type__' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff',
+                    'number' => 23,
+                ],
+                [
+                    '__type__' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_WeirdStuff',
+                    'date' => '2010-01-28T15:00:00+02:00',
+                    'whatever' => false,
+                ],
+                [
+                    '__type__' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_InterestingStuff',
+                    'gossip' => 'Peter Klaus hat ne Flamme',
+                ]
+            ]
+        ];
+
+        yield 'Stuff\CollectionOfStuffViaUnion' => [
+            Fixtures\Stuff\CollectionOfStuffViaUnion::class,
+            new Fixtures\Stuff\CollectionOfStuffViaUnion(
+                new Fixtures\Stuff\BoringStuff(
+                    number: 23
+                ),
+                new Fixtures\Stuff\BoringStuff(
+                    number: 42
+                ),
+                new Fixtures\Stuff\InterestingStuff(
+                    gossip: 'Peter Klaus hat ne Flamme',
+                )
+            ),
+            [
+                [
+                    '__type__' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff',
+                    'number' => 23,
+                ],
+                [
+                    '__type__' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff',
+                    'number' => 42,
+                ],
+                [
+                    '__type__' => 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_InterestingStuff',
+                    'gossip' => 'Peter Klaus hat ne Flamme',
                 ]
             ]
         ];

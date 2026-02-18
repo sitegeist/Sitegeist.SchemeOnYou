@@ -111,6 +111,22 @@ final class DtoSpecificationTest extends TestCase
             'isSVDTO' => false,
         ];
 
+        yield Fixtures\Stuff\ClassWithStuffViaInterface::class => [
+            'typeName' => Fixtures\Stuff\ClassWithStuffViaInterface::class,
+            'isSupported' => true,
+            'isDTO' => true,
+            'isDTC' => false,
+            'isSVDTO' => false,
+        ];
+
+        yield Fixtures\Stuff\ClassWithStuffViaUnion::class => [
+            'typeName' => Fixtures\Stuff\ClassWithStuffViaUnion::class,
+            'isSupported' => true,
+            'isDTO' => true,
+            'isDTC' => false,
+            'isSVDTO' => false,
+        ];
+
         // invalid collections
 
         yield Fixtures\InvalidObjects\CollectionWithTooManyConstructorArguments::class => [

@@ -77,15 +77,24 @@ class SchemaDenormalizer
         $reflection = new ClassReflection($targetType);
         $parameterReflection = $reflection->getConstructor()->getParameters()[0];
         $parameterType = $parameterReflection->getType();
-        if (!$parameterType instanceof \ReflectionNamedType) {
-            throw new \DomainException('Only named parameters are supported');
+        if ($parameterType instanceof \ReflectionNamedType) {
+            return new $targetType(
+                ...array_map(
+                    fn($item) => self::convertValue($item, $parameterType->getName()),
+                    $value
+                )
+            );
         }
-        return new $targetType(
-            ...array_map(
-                fn($item) => self::convertValue($item, $parameterType->getName()),
-                $value
-            )
-        );
+        if ($parameterType instanceof \ReflectionUnionType) {
+            return new $targetType(
+                ...array_map(
+                    fn($item) => self::convertValueObjectFromUnion($item, $parameterType),
+                    $value
+                )
+            );
+        }
+
+        throw new \DomainException('Only collections of named type and union type are supported');
     }
 
     /**
