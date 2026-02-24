@@ -24,6 +24,7 @@ final readonly class OpenApiSchema implements \JsonSerializable
         public ?string $description = null,
         public ?array $enum = null,
         public ?array $properties = null,
+        public ?bool $additionalProperties = null,
         public ?array $required = null,
         public ?string $format = null,
         public ?OpenApiReference $items = null,
@@ -259,6 +260,7 @@ final readonly class OpenApiSchema implements \JsonSerializable
             name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
             description: $schemaMetadata->description,
             properties: $properties,
+            additionalProperties: false,
             required: $required
         );
     }
@@ -273,6 +275,6 @@ final readonly class OpenApiSchema implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return array_filter(get_object_vars($this));
+        return array_filter(get_object_vars($this), fn ($value) => $value !== null);
     }
 }
