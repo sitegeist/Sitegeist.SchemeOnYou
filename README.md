@@ -90,6 +90,20 @@ class ExampleOpenApiController extends OpenApiController
 }
 ```
 
+Note that it's crucial to set one or more `httpMethods`, while Flow does not enforce this and catches all request types, OpenApi needs an explicit configuration.
+
+```yaml
+-
+  name: 'Example'
+  uriPattern: 'api/example'
+  httpMethods: ['GET']
+  defaults:
+    '@package': 'Vendor.Example'
+    '@controller': 'ExampleOpenApi'
+    '@action': 'index'
+    '@format': 'json'
+```
+
 ### PHP Attributes
 
 The following PHP Attributes allow to specify the details of the parameter and schema handling.
