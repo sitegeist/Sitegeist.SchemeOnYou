@@ -8,7 +8,10 @@ use Neos\Flow\Annotations as Flow;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiReference;
+use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiOneOfCollection;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchema;
+use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaDiscriminator;
+use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaOrReferenceCollection;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaType;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Composition;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Credentials;
@@ -21,6 +24,12 @@ use Sitegeist\SchemeOnYou\Tests\Fixtures\Password;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\PostalAddress;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\PostalAddressCollection;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\QuantitativeValue;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\BoringStuff;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithStuffViaInterface;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithStuffViaUnion;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\InterestingStuff;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\StuffInterface;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\WeirdStuff;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\WeirdThing;
 
 #[Flow\Proxy(false)]
@@ -34,7 +43,7 @@ final class OpenApiSchemaTest extends TestCase
         string $className,
         OpenApiSchema $expectedSchema
     ): void {
-        Assert::assertEquals($expectedSchema, OpenApiSchema::fromClassName($className));
+        Assert::assertEquals($expectedSchema, OpenApiSchema::fromTypeName($className));
     }
 
     /**
@@ -267,6 +276,82 @@ final class OpenApiSchemaTest extends TestCase
                     'username',
                     'password',
                     'expirationDate',
+                ]
+            )
+        ];
+
+        yield 'stuffInterface' => [
+            'className' => StuffInterface::class,
+            'expectedDefinition' => new OpenApiSchema(
+                type: 'object',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_StuffInterface',
+                description: '',
+                oneOf: new OpenApiSchemaOrReferenceCollection(
+                    // empty because we have no reflection service to find implementations here
+                ),
+                discriminator: new OpenApiSchemaDiscriminator()
+            ),
+        ];
+
+        /**
+         * Interfaces properties reference a distinct schema
+         */
+        yield 'ClassWithStuffViaInterface' => [
+            'className' => ClassWithStuffViaInterface::class,
+            'expectedDefinition' => new OpenApiSchema(
+                type: 'object',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithStuffViaInterface',
+                description: '',
+                properties: [
+                    'name' => new SchemaType([
+                        'type' => 'string',
+                    ]),
+                    'stuff' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_StuffInterface'),
+                ],
+                required: [
+                    'name',
+                    'stuff',
+                ]
+            )
+        ];
+
+        /**
+         * Union properties create a oneOf schema with discriminator
+         */
+        yield 'ClassWithStuffViaUnion' => [
+            'className' => ClassWithStuffViaUnion::class,
+            'expectedDefinition' => new OpenApiSchema(
+                type: 'object',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithStuffViaUnion',
+                description: '',
+                properties: [
+                    'name' => new SchemaType([
+                        'type' => 'string',
+                    ]),
+                    'stuff' => new SchemaType([
+                        'type' => 'object',
+                        'oneOf' => new OpenApiSchemaOrReferenceCollection(
+                            new OpenApiSchema(
+                                type: 'object',
+                                allOf: new OpenApiSchemaOrReferenceCollection(
+                                    OpenApiSchema::discriminatorForClassName(BoringStuff::class),
+                                    new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff'),
+                                )
+                            ),
+                            new OpenApiSchema(
+                                type: 'object',
+                                allOf: new OpenApiSchemaOrReferenceCollection(
+                                    OpenApiSchema::discriminatorForClassName(InterestingStuff::class),
+                                    new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_InterestingStuff'),
+                                )
+                            )
+                        ),
+                        'discriminator' => new OpenApiSchemaDiscriminator(),
+                    ]),
+                ],
+                required: [
+                    'name',
+                    'stuff',
                 ]
             )
         ];

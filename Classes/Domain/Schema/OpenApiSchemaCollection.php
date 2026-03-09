@@ -24,7 +24,7 @@ final readonly class OpenApiSchemaCollection implements \JsonSerializable
     public static function fromClassNames(array $classNames): self
     {
         return new self(...array_map(
-            fn (string $className): OpenApiSchema => OpenApiSchema::fromClassName($className),
+            fn (string $className): OpenApiSchema => OpenApiSchema::fromTypeName($className),
             $classNames
         ));
     }

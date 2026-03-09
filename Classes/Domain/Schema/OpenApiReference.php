@@ -17,6 +17,16 @@ final readonly class OpenApiReference implements \JsonSerializable
     ) {
     }
 
+    public static function fromClassName(string $className): self
+    {
+        return new self('#/components/schemas/' . str_replace('\\', '_', $className));
+    }
+
+    public function getName(): string
+    {
+        return str_replace('#/components/schemas/', '', $this->ref);
+    }
+
     /**
      * @return array<string,mixed>
      */

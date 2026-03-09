@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain\Schema;
 
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Core\Bootstrap;
+use Neos\Flow\Reflection\ReflectionService;
 use Sitegeist\SchemeOnYou\Domain\Metadata\Schema as SchemaMetadata;
 use Sitegeist\SchemeOnYou\Domain\Metadata\StringProperty;
+use Sitegeist\SchemeOnYou\Infrastructure\InterfaceImplementationDetector;
 
 #[Flow\Proxy(false)]
 final readonly class OpenApiSchema implements \JsonSerializable
@@ -27,21 +30,28 @@ final readonly class OpenApiSchema implements \JsonSerializable
         public ?array $required = null,
         public ?string $format = null,
         public ?OpenApiReference $items = null,
+        public ?OpenApiSchemaOrReferenceCollection $oneOf = null,
+        public ?OpenApiSchemaOrReferenceCollection $anyOf = null,
+        public ?OpenApiSchemaOrReferenceCollection $allOf = null,
+        public ?OpenApiSchemaDiscriminator $discriminator = null,
     ) {
     }
 
     /**
-     * @phpstan-param class-string $className
+     * @phpstan-param string $typeName
      */
-    public static function fromClassName(string $className): self
+    public static function fromTypeName(string $typeName): self
     {
-        if (enum_exists($className)) {
-            return self::fromReflectionEnum(new \ReflectionEnum($className));
-        } elseif (class_exists($className)) {
-            return self::fromReflectionClass(new \ReflectionClass($className));
+        if (enum_exists($typeName)) {
+            return self::fromReflectionEnum(new \ReflectionEnum($typeName));
+        } elseif (class_exists($typeName)) {
+            return self::fromReflectionClass(new \ReflectionClass($typeName));
+        } elseif (interface_exists($typeName)) {
+            return self::fromInterfaceReflectionClass(new \ReflectionClass($typeName));
         }
-        throw new \DomainException('Cannot create definition from incomprehensible type ' . $className, 1709500131);
+        throw new \DomainException('Cannot create definition from incomprehensible type ' . $typeName, 1709500131);
     }
+
 
     private static function fromReflectionEnum(\ReflectionEnum $reflection): self
     {
@@ -103,13 +113,10 @@ final readonly class OpenApiSchema implements \JsonSerializable
                     type: 'string',
                     format: 'duration',
                 );
-            } elseif (class_exists($typeName)) {
-                return self::fromClassName($typeName);
-            } else {
-                throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
             }
+            return self::fromReflectionNamedType($reflectionType);
         } elseif ($reflectionType instanceof \ReflectionUnionType) {
-            throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
+            return self::fromReflectionUnionType($reflectionType);
         } else {
             throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
         }
@@ -136,6 +143,9 @@ final readonly class OpenApiSchema implements \JsonSerializable
             return self::fromCollectionReflectionClass($reflection);
         } elseif (IsDataTransferObject::isSatisfiedByReflectionClass($reflection)) {
             return self::fromObjectReflectionClass($reflection);
+        } elseif (interface_exists($reflection->getName())) {
+            // @todo is this still used
+            return self::fromInterfaceReflectionClass($reflection);
         }
         throw new \DomainException(sprintf('Schema can only be created for collection, value objects and backed enums "%s" is neither.', $reflection->getName()));
     }
@@ -215,26 +225,10 @@ final readonly class OpenApiSchema implements \JsonSerializable
                     $type,
                     $reflectionParameter
                 ),
-                \ReflectionUnionType::class => [
-                    'oneOf' => array_map(
-                        fn (\ReflectionType $singleType): SchemaType|OpenApiReference
-                            => match (get_class($singleType)) {
-                                \ReflectionIntersectionType::class,
-                                    => throw new \DomainException(
-                                        'Cannot resolve schema reference from intersection type'
-                                        . ' given for constructor parameter'
-                                        . $reflectionParameter->name . ' of class ' . $reflectionClass->name,
-                                        1709560366
-                                    ),
-                                \ReflectionNamedType::class => SchemaType::selfOrReferenceFromReflectionNamedType(
-                                    $singleType,
-                                    $reflectionParameter,
-                                ),
-                                default => throw new \DomainException('wat')
-                            },
-                        $type->getTypes()
-                    )
-                ],
+                \ReflectionUnionType::class => SchemaType::fromReflectionUnionType(
+                    $type,
+                    $reflectionParameter
+                ),
                 \ReflectionIntersectionType::class => throw new \DomainException(
                     'Cannot resolve schema reference from intersection type given for constructor parameter'
                     . $reflectionParameter->name . ' of class ' . $reflectionClass->name,
@@ -260,6 +254,81 @@ final readonly class OpenApiSchema implements \JsonSerializable
             description: $schemaMetadata->description,
             properties: $properties,
             required: $required
+        );
+    }
+
+    private static function fromReflectionNamedType(\ReflectionNamedType $reflectionType): self
+    {
+        return self::fromTypeName($reflectionType->getName());
+    }
+
+    private static function fromReflectionUnionType(\ReflectionUnionType $reflection): self
+    {
+        $subSchemas = [];
+        foreach ($reflection->getTypes() as $type) {
+            if ($type instanceof \ReflectionNamedType) {
+                $subSchemas[] = new OpenApiSchema(
+                    type: 'object',
+                    allOf: new OpenApiSchemaOrReferenceCollection(
+                        self::discriminatorForClassName($type->getName()),
+                        OpenApiReference::fromClassName($type->getName())
+                    )
+                );
+            } else {
+                throw new \DomainException('Union types are only supported for named types. ' . get_class($type) . ' given');
+            }
+        }
+
+        return new self(
+            type: 'object',
+            oneOf: new OpenApiSchemaOrReferenceCollection(...$subSchemas),
+            discriminator: new OpenApiSchemaDiscriminator()
+        );
+    }
+
+    /**
+     * @param \ReflectionClass<object> $reflectionClass
+     */
+    private static function fromInterfaceReflectionClass(\ReflectionClass $reflectionClass): self
+    {
+        $schemaMetadata = SchemaMetadata::fromReflectionClass($reflectionClass);
+
+        $detector = new InterfaceImplementationDetector();
+        $implementationClasses = $detector->detect($reflectionClass->name);
+
+        $implementationSchemas = [];
+        foreach ($implementationClasses as $implementationClass) {
+            $implementationSchemas[] = new OpenApiSchema(
+                type: 'object',
+                allOf: new OpenApiSchemaOrReferenceCollection(
+                    self::discriminatorForClassName($implementationClass),
+                    OpenApiReference::fromClassName($implementationClass)
+                )
+            );
+        }
+
+        return new self(
+            type: 'object',
+            name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
+            description: $schemaMetadata->description,
+            oneOf: new OpenApiSchemaOrReferenceCollection(...$implementationSchemas),
+            discriminator: new OpenApiSchemaDiscriminator()
+        );
+    }
+
+    public static function discriminatorForClassName(string $className): self
+    {
+        return new self(
+            type: 'object',
+            properties: [
+                OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME => new SchemaType(
+                    [
+                        'type' => 'string',
+                        'enum' => [str_replace('\\', '_', $className)]
+                    ]
+                )
+            ],
+            required: [OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME]
         );
     }
 

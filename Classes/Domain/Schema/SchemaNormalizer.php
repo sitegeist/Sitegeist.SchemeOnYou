@@ -37,6 +37,20 @@ class SchemaNormalizer
                 return self::convertDateInterval($value);
             } elseif ($value instanceof \BackedEnum) {
                 return $value->value;
+            } elseif (
+                $reflectionParameter !== null
+                && (
+                    $reflectionParameter->getType() instanceof \ReflectionUnionType
+                    || ($reflectionParameter->getType() instanceof \ReflectionNamedType && interface_exists($reflectionParameter->getType()->getName()))
+                )
+            ) {
+                $convertedValue = self::convertValue($value);
+                if (is_array($convertedValue)) {
+                    $convertedValue[ OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME ] = str_replace('\\', '_', $value::class);
+                    return $convertedValue;
+                } else {
+                    throw new \DomainException('Interface type was mit an array ' . get_class($value));
+                }
             } elseif (IsDataTransferObjectCollection::isSatisfiedByReflectionClass(new \ReflectionClass($value))) {
                 return self::convertCollection($value, new \ReflectionClass($value));
             } elseif (IsDataTransferObject::isSatisfiedByReflectionClass(new \ReflectionClass($value))) {
@@ -58,12 +72,12 @@ class SchemaNormalizer
         $values = array_values(get_object_vars($value));
         if (count($values) === 1 && is_array($values[0])) {
             $reflectionParameter = $reflectionClass->getConstructor()?->getParameters()[0] ?? null;
-            return array_map(
+            return array_values(array_map(
                 fn($subvalue) => self::convertValue($subvalue, $reflectionParameter),
                 $values[0]
-            );
+            ));
         }
-        throw new \DomainException('Collections must have a single array property');
+        throw new \DomainException('Collections must have a single public array property');
     }
 
     /**

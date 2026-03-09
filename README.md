@@ -34,7 +34,6 @@ For faster development pace while maintaining high quality and end to end type s
 #### Caveats:
 - Everything going in an out must use named and supported types.
 - You must not use plain arrays as type.
-- Other than in method returns union types are not yet supported.
 
 ### Authors & Sponsors
 
@@ -90,6 +89,20 @@ class ExampleOpenApiController extends OpenApiController
 }
 ```
 
+Note that it's crucial to set one or more `httpMethods`, while Flow does not enforce this and catches all request types, OpenApi needs an explicit configuration.
+
+```yaml
+-
+  name: 'Example'
+  uriPattern: 'api/example'
+  httpMethods: ['GET']
+  defaults:
+    '@package': 'Vendor.Example'
+    '@controller': 'ExampleOpenApi'
+    '@action': 'index'
+    '@format': 'json'
+```
+
 ### PHP Attributes
 
 The following PHP Attributes allow to specify the details of the parameter and schema handling.
@@ -120,6 +133,7 @@ The values are serialized as string with a predefined format.
 ### Backed Enums
 
 Value backed enums are supported by converting to and from the underlying value.
+
 
 ### Data Transfer Objects (DTOs)
 
@@ -183,7 +197,14 @@ final readonly class AddressCollection
 ```
 
 _!!! There is a small chance the arguments passed to the constructor are not stored in the class property. We have to accept that until variadic arguments can be promoted. !!!_
-  
+
+### Union-Types, PHP Intersection-Types, Interfaces
+
+- PHP Union-Types are supported as DTO Properties and will render as `oneOf` schema as long as every item is a DTO
+- PHP Interfaces are supported as DTO Properties and will render as `oneOf` schema as long as every implementation is a DTO
+- !!! PHP Intersection-Types are NOT supported and are unlikely to be implemented in future !!!
+- !!! Collections require a named type for now, this may be adjusted in future !!! 
+
 ## Installation
 
 Sitegeist.SchemeOnYou is available via packagist. Run `composer require sitegeist/schemeonyou` to require this package. 

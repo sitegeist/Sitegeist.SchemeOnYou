@@ -29,6 +29,7 @@ use Sitegeist\SchemeOnYou\Domain\Path\ParameterLocation;
 use Sitegeist\SchemeOnYou\Domain\Path\PathDefinition;
 use Sitegeist\SchemeOnYou\Domain\Schema\IsSupportedInSchema;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaCollection;
+use Sitegeist\SchemeOnYou\Infrastructure\InterfaceImplementationDetector;
 
 class OpenApiDocumentFactory
 {
@@ -37,6 +38,7 @@ class OpenApiDocumentFactory
         private readonly RoutesProviderInterface $routesProvider,
         private readonly ObjectManager $objectManager,
         private readonly UriFactoryInterface $uriFactory,
+        private readonly InterfaceImplementationDetector $interfaceImplementationDetector,
     ) {
     }
 
@@ -269,6 +271,15 @@ class OpenApiDocumentFactory
                 // no need to look for constructor arguments in here
                 continue;
             }
+            if ($classReflection->isInterface()) {
+                $subclasses = $this->interfaceImplementationDetector->detect($className);
+                foreach ($subclasses as $subclass) {
+                    $classesToCheckStack[] = $subclass;
+                    $requiredSchemaClasses[ $subclass ] = $subclass;
+                }
+                $requiredSchemaClasses[ $className ] = $className;
+                continue;
+            }
             $constructorReflection = $classReflection->getConstructor();
             foreach ($constructorReflection->getParameters() as $constructorParameter) {
                 $parameterType = $constructorParameter->getType();
@@ -281,6 +292,9 @@ class OpenApiDocumentFactory
                         continue;
                     }
                     if (class_exists($parameterTypeName) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterType)) {
+                        $requiredSchemaClasses[ $parameterTypeName ] = $parameterTypeName;
+                        $classesToCheckStack[] = $parameterTypeName;
+                    } elseif (interface_exists($parameterTypeName) && IsSupportedInSchema::isSatisfiedByReflectionType($parameterType)) {
                         $requiredSchemaClasses[$parameterTypeName] = $parameterTypeName;
                         $classesToCheckStack[] = $parameterTypeName;
                     } else {
