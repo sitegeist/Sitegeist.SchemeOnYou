@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Sitegeist\SchemeOnYou\Tests\Unit\Domain\Schema;
 
+use Neos\Flow\Reflection\ParameterReflection;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Domain\Schema\SchemaDenormalizer;
@@ -240,5 +241,46 @@ final class SchemaNormalizerTest extends TestCase
                 'expirationDate' => '2010-01-28',
             ]
         ];
+    }
+
+    public static function dateNormalizationAndDenormalizationDateProvider(): \Generator
+    {
+        yield "default" => [
+            '2010-01-28T15:00:00+02:00',
+            '2010-01-28T15:00:00+02:00',
+            '2010-01-28T15:00:00+02:00'
+        ];
+        yield "with microseconds" => [
+            '2025-07-08T09:37:07.937+02:00',
+            '2025-07-08T09:37:07.937+02:00',
+            '2025-07-08T09:37:07+02:00'
+        ];
+    }
+
+    /**
+     * @dataProvider dateNormalizationAndDenormalizationDateProvider
+     * @test
+     */
+    public function dateTimeImmutableNormalizationAndDenormalization(string $normalized, string $denormalized, string $renormalized): void
+    {
+        $expectedDate = new \DateTimeImmutable($denormalized);
+        $denormalizedDate = SchemaDenormalizer::denormalizeValue($normalized, \DateTimeImmutable::class);
+        $renormalizedDate = SchemaNormalizer::normalizeValue($denormalizedDate);
+        Assert::assertEquals($expectedDate, $denormalizedDate);
+        Assert::assertEquals($renormalized, $renormalizedDate);
+    }
+
+    /**
+     * @dataProvider dateNormalizationAndDenormalizationDateProvider
+     * @test
+     */
+    public function dateTimeNormalizationAndDenormalization(string $normalized, string $denormalized, string $renormalized): void
+    {
+
+        $expectedDate = new \DateTime($denormalized);
+        $denormalizedDate = SchemaDenormalizer::denormalizeValue($normalized, \DateTime::class);
+        $renormalizedDate = SchemaNormalizer::normalizeValue($denormalizedDate);
+        Assert::assertEquals($expectedDate, $denormalizedDate);
+        Assert::assertEquals($renormalized, $renormalizedDate);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sitegeist\SchemeOnYou\Domain;
 
 use Neos\Flow\Annotations as Flow;
+use Neos\Utility\Arrays;
 
 #[Flow\Scope('singleton')]
 final class OpenApiDocumentRepository
@@ -16,7 +17,7 @@ final class OpenApiDocumentRepository
     protected array $rootObjectConfiguration;
 
     /**
-     * @var array<string,array{name:string, classNames: class-string[]}>
+     * @var array<string,array{name:string, classNames: class-string[], rootObject?:array<string,mixed>}>
      */
     #[Flow\InjectConfiguration(path: 'documents')]
     protected array $documentConfiguration;
@@ -34,11 +35,17 @@ final class OpenApiDocumentRepository
 
         $documentName = $this->documentConfiguration[$name]['name'] ?? '';
         $documentClassNamePatterns = $this->documentConfiguration[$name]['classNames'];
+        $documentRootObjectConfiguration = $this->documentConfiguration[$name]['rootObject'] ?? [];
+
+        $rootObjectConfiguration = Arrays::arrayMergeRecursiveOverrule(
+            $this->rootObjectConfiguration,
+            $documentRootObjectConfiguration
+        );
 
         return $this->documentFactory->createOpenApiDocumentFromNameAndClassNamePattern(
             $documentName,
             $documentClassNamePatterns,
-            $this->rootObjectConfiguration
+            $rootObjectConfiguration
         );
     }
 }
