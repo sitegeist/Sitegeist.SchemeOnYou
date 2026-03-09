@@ -95,6 +95,38 @@ final class DtoSpecificationTest extends TestCase
             'isSVDTO' => false,
         ];
 
+        yield Fixtures\Stuff\CollectionOfStuffViaInterface::class => [
+            'typeName' => Fixtures\Stuff\CollectionOfStuffViaInterface::class,
+            'isSupported' => true,
+            'isDTO' => false,
+            'isDTC' => true,
+            'isSVDTO' => false,
+        ];
+
+        yield Fixtures\Stuff\CollectionOfStuffViaUnion::class => [
+            'typeName' => Fixtures\Stuff\CollectionOfStuffViaUnion::class,
+            'isSupported' => true,
+            'isDTO' => false,
+            'isDTC' => true,
+            'isSVDTO' => false,
+        ];
+
+        yield Fixtures\Stuff\ClassWithStuffViaInterface::class => [
+            'typeName' => Fixtures\Stuff\ClassWithStuffViaInterface::class,
+            'isSupported' => true,
+            'isDTO' => true,
+            'isDTC' => false,
+            'isSVDTO' => false,
+        ];
+
+        yield Fixtures\Stuff\ClassWithStuffViaUnion::class => [
+            'typeName' => Fixtures\Stuff\ClassWithStuffViaUnion::class,
+            'isSupported' => true,
+            'isDTO' => true,
+            'isDTC' => false,
+            'isSVDTO' => false,
+        ];
+
         // invalid collections
 
         yield Fixtures\InvalidObjects\CollectionWithTooManyConstructorArguments::class => [
@@ -162,7 +194,7 @@ final class DtoSpecificationTest extends TestCase
      */
     public function testIsSupportedIn(string $className, bool $isSupported, bool $isDTO, bool $isDTC, bool $isSVDTO): void
     {
-        $this->assertEquals($isSupported, IsSupportedInSchema::isSatisfiedByClassName($className), sprintf('IsSupportedInSchema should return "%s" for class "%s"', $isSupported ? 'true' : 'false', $className));
+        $this->assertEquals($isSupported, IsSupportedInSchema::isSatisfiedByTypeName($className), sprintf('IsSupportedInSchema should return "%s" for class "%s"', $isSupported ? 'true' : 'false', $className));
         $this->assertEquals($isDTO, IsDataTransferObject::isSatisfiedByClassName($className), sprintf('IsDataTransferObject should return "%s" for class "%s"', $isSupported ? 'true' : 'false', $className));
         $this->assertEquals($isDTC, IsDataTransferObjectCollection::isSatisfiedByClassName($className), sprintf('IsDataTransferObjectCollection should return "%s" for class "%s"', $isSupported ? 'true' : 'false', $className));
         $this->assertEquals($isSVDTO, IsSingleValueDataTransferObject::isSatisfiedByClassName($className), sprintf('IsSingleValueDataTransferObject should return "%s" for class "%s"', $isSupported ? 'true' : 'false', $className));
