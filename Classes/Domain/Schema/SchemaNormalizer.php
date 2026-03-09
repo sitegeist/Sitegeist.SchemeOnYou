@@ -58,12 +58,12 @@ class SchemaNormalizer
         $values = array_values(get_object_vars($value));
         if (count($values) === 1 && is_array($values[0])) {
             $reflectionParameter = $reflectionClass->getConstructor()?->getParameters()[0] ?? null;
-            return array_map(
+            return array_values(array_map(
                 fn($subvalue) => self::convertValue($subvalue, $reflectionParameter),
                 $values[0]
-            );
+            ));
         }
-        throw new \DomainException('Collections must have a single array property');
+        throw new \DomainException('Collections must have a single public array property');
     }
 
     /**
