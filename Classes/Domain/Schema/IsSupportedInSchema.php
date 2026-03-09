@@ -9,10 +9,24 @@ use Neos\Flow\Annotations as Flow;
 #[Flow\Proxy(false)]
 final class IsSupportedInSchema
 {
+    public static function isSatisfiedByTypeName(string $name): bool
+    {
+        return self::isSatisfiedByClassName($name) || self::isSatisfiedByInterfaceName($name);
+    }
+
     public static function isSatisfiedByClassName(string $className): bool
     {
-        if (class_exists($className) || interface_exists($className)) {
+        if (class_exists($className)) {
             return self::isSatisfiedByReflectionClass(new \ReflectionClass($className));
+        }
+        return false;
+    }
+
+    public static function isSatisfiedByInterfaceName(string $interfaceName): bool
+    {
+        if (interface_exists($interfaceName, true)) {
+            // we accept all interfaces ... for now
+            return true;
         }
         return false;
     }
@@ -23,7 +37,18 @@ final class IsSupportedInSchema
             if (in_array($reflection->getName(), ['string', 'bool', 'int', 'float'])) {
                 return true;
             }
-            return self::isSatisfiedByClassName($reflection->getName());
+            return self::isSatisfiedByTypeName($reflection->getName());
+        } elseif ($reflection instanceof \ReflectionUnionType) {
+            foreach ($reflection->getTypes() as $type) {
+                if ($type instanceof \ReflectionNamedType) {
+                    if (self::isSatisfiedByReflectionType($type) === false) {
+                        return false; // every part of a union has to be a named type that matched the conditions
+                    }
+                } else {
+                    return false; // only named types in unions are allowed
+                }
+            }
+            return true;
         }
         return false;
     }

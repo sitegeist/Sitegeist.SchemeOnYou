@@ -55,9 +55,18 @@ class SchemaDenormalizer
             return self::convertCollection($value, $targetType);
         } elseif (class_exists($targetType) && IsDataTransferObject::isSatisfiedByClassName($targetType)) {
             return self::convertValueObject($value, $targetType);
+        } elseif (interface_exists($targetType) && is_array($value) && array_key_exists(OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME, $value)) {
+            $selectedTargetType = $value[OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME];
+            /** @var string $fqn*/
+            $fqn = str_replace('_', '\\', $selectedTargetType);
+            if (
+                class_exists($fqn) && is_a($fqn, $targetType, true)
+                && (IsDataTransferObject::isSatisfiedByClassName($fqn) || IsDataTransferObjectCollection::isSatisfiedByClassName($fqn))
+            ) {
+                return self::convertValueObject($value, $fqn);
+            }
         }
-
-        throw new \DomainException('Unsupported type. Only scalar types, BackedEnums, Collections, ValueObjects are supported');
+        throw new \DomainException('Unsupported type "' .  $targetType . '". Only scalar types, BackedEnums, Collections, ValueObjects are supported');
     }
 
     /**
@@ -68,15 +77,44 @@ class SchemaDenormalizer
         $reflection = new ClassReflection($targetType);
         $parameterReflection = $reflection->getConstructor()->getParameters()[0];
         $parameterType = $parameterReflection->getType();
-        if (!$parameterType instanceof \ReflectionNamedType) {
-            throw new \DomainException('Only named parameters are supported');
+        if ($parameterType instanceof \ReflectionNamedType) {
+            return new $targetType(
+                ...array_map(
+                    fn($item) => self::convertValue($item, $parameterType->getName()),
+                    $value
+                )
+            );
         }
-        return new $targetType(
-            ...array_map(
-                fn($item) => self::convertValue($item, $parameterType->getName()),
-                $value
-            )
-        );
+        if ($parameterType instanceof \ReflectionUnionType) {
+            return new $targetType(
+                ...array_map(
+                    fn($item) => self::convertValueObjectFromUnion($item, $parameterType),
+                    $value
+                )
+            );
+        }
+
+        throw new \DomainException('Only collections of named type and union type are supported');
+    }
+
+    /**
+     * @param array<string,mixed>|int|float|string|bool $value
+     */
+    private static function convertValueObjectFromUnion(array|int|float|string|bool $value, \ReflectionUnionType $reflectionType): object
+    {
+        if (is_array($value) && array_key_exists(OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME, $value)) {
+            foreach ($reflectionType->getTypes() as $subType) {
+                if ($subType instanceof \ReflectionNamedType) {
+                    $fqn = str_replace('_', '\\', $value[ OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME ]);
+                    if ($subType->getName() === $fqn) {
+                        return self::convertValueObject($value, $fqn);
+                    }
+                } else {
+                    throw new \DomainException('Only unions of Named Types are supported');
+                }
+            }
+        }
+        throw new \DomainException('Only arrays with __discriminator can be converted to UnionTypes');
     }
 
     /**
@@ -97,6 +135,7 @@ class SchemaDenormalizer
                 $convertedArguments[$name] = match (true) {
                     $type === null => throw new \DomainException('Cannot convert untyped property ' . $reflectionParameter->getName()),
                     $type instanceof \ReflectionNamedType => self::convertValue($value[$reflectionParameter->getName()], $type->getName(), $reflectionParameter),
+                    $type instanceof \ReflectionUnionType => self::convertValueObjectFromUnion($value[$reflectionParameter->getName()], $type),
                     default => throw new \DomainException('Cannot convert ' . get_class($type) . ' yet'),
                 };
             }
