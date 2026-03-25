@@ -136,6 +136,10 @@ final class OpenApiSchemaTest extends TestCase
                 name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_PostalAddress',
                 description: 'see https://schema.org/PostalAddress',
                 properties: [
+                    '__type__' => new SchemaType([
+                        'type' => 'string',
+                        'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_PostalAddress']
+                    ]),
                     'streetAddress' => new SchemaType([
                         'type' => 'string',
                     ]),
@@ -170,6 +174,7 @@ final class OpenApiSchemaTest extends TestCase
                         ],
                     ]),
                 ],
+                additionalProperties: false,
                 required: [
                     'streetAddress',
                     'addressRegion',
@@ -184,6 +189,10 @@ final class OpenApiSchemaTest extends TestCase
                 name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_WeirdThing',
                 description: 'a thing composed of all primitive types',
                 properties: [
+                    '__type__' => new SchemaType([
+                        'type' => 'string',
+                        'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_WeirdThing']
+                    ]),
                     'if' => new SchemaType([
                         'type' => 'boolean',
                     ]),
@@ -205,6 +214,7 @@ final class OpenApiSchemaTest extends TestCase
                         'format' => 'duration'
                     ]),
                 ],
+                additionalProperties: false,
                 required: [
                     'if',
                     'what',
@@ -233,6 +243,10 @@ final class OpenApiSchemaTest extends TestCase
                 name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Composition',
                 description: 'a composition of types',
                 properties: [
+                    '__type__' => new SchemaType([
+                        'type' => 'string',
+                        'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Composition']
+                    ]),
                     'dayOfWeek' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_DayOfWeek'),
                     'identifier' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Identifier'),
                     'importantNumber' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_ImportantNumber'),
@@ -242,6 +256,7 @@ final class OpenApiSchemaTest extends TestCase
                     'quantitativeValue' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_QuantitativeValue'),
                     'weirdThing' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_WeirdThing'),
                 ],
+                additionalProperties: false,
                 required: [
                     'dayOfWeek',
                     'identifier',
@@ -262,6 +277,10 @@ final class OpenApiSchemaTest extends TestCase
                 name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Credentials',
                 description: 'credentials',
                 properties: [
+                    '__type__' => new SchemaType([
+                        'type' => 'string',
+                        'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Credentials']
+                    ]),
                     'username' => new SchemaType([
                         'type' => 'string',
                         'description' => 'a username'
@@ -272,6 +291,7 @@ final class OpenApiSchemaTest extends TestCase
                         'format' => 'date'
                     ]),
                 ],
+                additionalProperties: false,
                 required: [
                     'username',
                     'password',
@@ -303,11 +323,16 @@ final class OpenApiSchemaTest extends TestCase
                 name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithStuffViaInterface',
                 description: '',
                 properties: [
+                    '__type__' => new SchemaType([
+                        'type' => 'string',
+                        'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithStuffViaInterface']
+                    ]),
                     'name' => new SchemaType([
                         'type' => 'string',
                     ]),
                     'stuff' => new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_StuffInterface'),
                 ],
+                additionalProperties: false,
                 required: [
                     'name',
                     'stuff',
@@ -325,6 +350,10 @@ final class OpenApiSchemaTest extends TestCase
                 name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithStuffViaUnion',
                 description: '',
                 properties: [
+                    '__type__' => new SchemaType([
+                        'type' => 'string',
+                        'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithStuffViaUnion']
+                    ]),
                     'name' => new SchemaType([
                         'type' => 'string',
                     ]),
@@ -349,6 +378,7 @@ final class OpenApiSchemaTest extends TestCase
                         'discriminator' => new OpenApiSchemaDiscriminator(),
                     ]),
                 ],
+                additionalProperties: false,
                 required: [
                     'name',
                     'stuff',
