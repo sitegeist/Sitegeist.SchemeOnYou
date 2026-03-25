@@ -521,10 +521,15 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             type: 'object',
                             description: 'the endpoint response',
                             properties: [
+                                '__type__' => new SchemaType([
+                                    'type' => 'string',
+                                    'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointResponse']
+                                ]),
                                 'thing' => new SchemaType([
                                     'type' => 'string'
-                                ])
+                                ]),
                             ],
+                            additionalProperties: false,
                             required: [
                             'thing'
                             ]
@@ -534,10 +539,15 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             type: 'object',
                             description: 'the endpoint query',
                             properties: [
+                                '__type__' => new SchemaType([
+                                    'type' => 'string',
+                                    'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQuery']
+                                ]),
                                 'language' => new SchemaType([
                                     'type' => 'string'
                                 ])
                             ],
+                            additionalProperties: false,
                             required: [
                             'language'
                             ]
@@ -547,10 +557,15 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             type: 'object',
                             description: 'the endpoint query failure response',
                             properties: [
+                                '__type__' => new SchemaType([
+                                    'type' => 'string',
+                                    'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Path_EndpointQueryFailed']
+                                ]),
                                 'reason' => new SchemaType([
                                     'type' => 'string'
                                 ])
                             ],
+                            additionalProperties: false,
                             required: [
                             'reason'
                             ]
@@ -560,10 +575,15 @@ final class OpenApiDocumentFactoryTest extends TestCase
                             type: 'object',
                             description: 'another endpoint query',
                             properties: [
+                                '__type__' => new SchemaType([
+                                    'type' => 'string',
+                                    'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Path_AnotherEndpointQuery']
+                                ]),
                                 'pleaseFail' => new SchemaType([
                                     'type' => 'boolean'
                                 ])
                             ],
+                            additionalProperties: false,
                             required: [
                             'pleaseFail'
                             ]
