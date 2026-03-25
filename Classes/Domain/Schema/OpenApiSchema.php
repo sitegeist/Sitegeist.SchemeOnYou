@@ -249,6 +249,12 @@ final readonly class OpenApiSchema implements \JsonSerializable
             }
         }
 
+        if (array_key_exists(OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME, $properties)) {
+            throw new \DomainException(sprintf('Object "%s" must not specify reserved property "%s".', $reflectionClass->getName(), OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME), 1774439490);
+        }
+
+        $properties[OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME] = self::discriminatorPropertyTypeForClassName($reflectionClass->getName());
+
         return new self(
             type: 'object',
             name: $schemaMetadata->name ?: $reflectionClass->getShortName(),
@@ -322,15 +328,17 @@ final readonly class OpenApiSchema implements \JsonSerializable
     {
         return new self(
             type: 'object',
-            properties: [
-                OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME => new SchemaType(
-                    [
-                        'type' => 'string',
-                        'enum' => [str_replace('\\', '_', $className)]
-                    ]
-                )
-            ],
             required: [OpenApiSchemaDiscriminator::DISCRIMINATOR_NAME]
+        );
+    }
+
+    public static function discriminatorPropertyTypeForClassName(string $className): SchemaType
+    {
+        return new SchemaType(
+            [
+                'type' => 'string',
+                'enum' => [str_replace('\\', '_', $className)]
+            ]
         );
     }
 
