@@ -41,7 +41,9 @@ final class IsSupportedInSchema
         } elseif ($reflection instanceof \ReflectionUnionType) {
             foreach ($reflection->getTypes() as $type) {
                 if ($type instanceof \ReflectionNamedType) {
-                    if (self::isSatisfiedByReflectionType($type) === false) {
+                    if ($type->getName() === 'null') {
+                        return true;
+                    } elseif (self::isSatisfiedByReflectionType($type) === false) {
                         return false; // every part of a union has to be a named type that matched the conditions
                     }
                 } else {

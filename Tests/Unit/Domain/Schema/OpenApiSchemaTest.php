@@ -8,7 +8,6 @@ use Neos\Flow\Annotations as Flow;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiReference;
-use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiOneOfCollection;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchema;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaDiscriminator;
 use Sitegeist\SchemeOnYou\Domain\Schema\OpenApiSchemaOrReferenceCollection;
@@ -26,10 +25,10 @@ use Sitegeist\SchemeOnYou\Tests\Fixtures\PostalAddressCollection;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\QuantitativeValue;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\BoringStuff;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithStuffViaInterface;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithStuffViaOptionalUnion;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithStuffViaUnion;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\InterestingStuff;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\StuffInterface;
-use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\WeirdStuff;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\WeirdThing;
 
 #[Flow\Proxy(false)]
@@ -353,6 +352,43 @@ final class OpenApiSchemaTest extends TestCase
                     'name',
                     'stuff',
                 ]
+            )
+        ];
+
+        yield 'ClassWithStuffViaOptionalUnion' => [
+            'className' => ClassWithStuffViaOptionalUnion::class,
+            'expectedDefinition' => new OpenApiSchema(
+                type: 'object',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithStuffViaOptionalUnion',
+                description: '',
+                properties: [
+                    '__type__' => new SchemaType([
+                        'type' => 'string',
+                        'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithStuffViaOptionalUnion']
+                    ]),
+                    'stuff' => new SchemaType([
+                        'type' => 'object',
+                        'oneOf' => new OpenApiSchemaOrReferenceCollection(
+                            new OpenApiSchema(
+                                type: 'object',
+                                allOf: new OpenApiSchemaOrReferenceCollection(
+                                    OpenApiSchema::discriminatorForClassName(BoringStuff::class),
+                                    new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff'),
+                                )
+                            ),
+                            new OpenApiSchema(
+                                type: 'object',
+                                allOf: new OpenApiSchemaOrReferenceCollection(
+                                    OpenApiSchema::discriminatorForClassName(InterestingStuff::class),
+                                    new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_InterestingStuff'),
+                                )
+                            )
+                        ),
+                        'discriminator' => new OpenApiSchemaDiscriminator(),
+                    ]),
+                ],
+                additionalProperties: false,
+                required: []
             )
         ];
     }
