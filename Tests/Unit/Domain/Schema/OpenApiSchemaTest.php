@@ -342,7 +342,7 @@ final class OpenApiSchemaTest extends TestCase
                                 type: 'object',
                                 allOf: new OpenApiSchemaOrReferenceCollection(
                                     OpenApiSchema::discriminatorForClassName(InterestingStuff::class),
-                                    new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_InterestingStuff'),
+                                    new OpenApiReference('#/components/schemas/Interesting Stuff'),
                                 )
                             )
                         ),
