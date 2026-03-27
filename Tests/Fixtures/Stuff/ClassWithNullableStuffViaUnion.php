@@ -7,7 +7,7 @@ namespace Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff;
 use Neos\Flow\Annotations as Flow;
 
 #[Flow\Proxy(false)]
-readonly class ClassWithStuffViaOptionalUnion
+readonly class ClassWithNullableStuffViaUnion
 {
     public function __construct(
         public BoringStuff|InterestingStuff|null $stuff

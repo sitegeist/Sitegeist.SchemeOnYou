@@ -127,8 +127,8 @@ final class DtoSpecificationTest extends TestCase
             'isSVDTO' => false,
         ];
 
-        yield Fixtures\Stuff\ClassWithStuffViaOptionalUnion::class => [
-            'typeName' => Fixtures\Stuff\ClassWithStuffViaOptionalUnion::class,
+        yield Fixtures\Stuff\ClassWithNullableStuffViaUnion::class => [
+            'typeName' => Fixtures\Stuff\ClassWithNullableStuffViaUnion::class,
             'isSupported' => true,
             'isDTO' => true,
             'isDTC' => false,

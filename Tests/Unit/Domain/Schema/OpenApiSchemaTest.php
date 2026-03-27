@@ -25,7 +25,7 @@ use Sitegeist\SchemeOnYou\Tests\Fixtures\PostalAddressCollection;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\QuantitativeValue;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\BoringStuff;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithStuffViaInterface;
-use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithStuffViaOptionalUnion;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithNullableStuffViaUnion;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithStuffViaUnion;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\InterestingStuff;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\StuffInterface;
@@ -355,16 +355,16 @@ final class OpenApiSchemaTest extends TestCase
             )
         ];
 
-        yield 'ClassWithStuffViaOptionalUnion' => [
-            'className' => ClassWithStuffViaOptionalUnion::class,
+        yield 'ClassWithNullableStuffViaUnion' => [
+            'className' => ClassWithNullableStuffViaUnion::class,
             'expectedDefinition' => new OpenApiSchema(
                 type: 'object',
-                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithStuffViaOptionalUnion',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithNullableStuffViaUnion',
                 description: '',
                 properties: [
                     '__type__' => new SchemaType([
                         'type' => 'string',
-                        'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithStuffViaOptionalUnion']
+                        'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithNullableStuffViaUnion']
                     ]),
                     'stuff' => new SchemaType([
                         'type' => 'object',
