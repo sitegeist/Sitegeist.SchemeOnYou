@@ -24,6 +24,7 @@ use Sitegeist\SchemeOnYou\Tests\Fixtures\PostalAddress;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\PostalAddressCollection;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\QuantitativeValue;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\BoringStuff;
+use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithNullableStuff;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithStuffViaInterface;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithNullableStuffViaUnion;
 use Sitegeist\SchemeOnYou\Tests\Fixtures\Stuff\ClassWithStuffViaUnion;
@@ -352,6 +353,41 @@ final class OpenApiSchemaTest extends TestCase
                     'name',
                     'stuff',
                 ]
+            )
+        ];
+
+        yield 'ClassWithNullableStuff' => [
+            'className' => ClassWithNullableStuff::class,
+            'expectedDefinition' => new OpenApiSchema(
+                type: 'object',
+                name: 'Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithNullableStuff',
+                description: '',
+                properties: [
+                    '__type__' => new SchemaType([
+                        'type' => 'string',
+                        'enum' => ['Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_ClassWithNullableStuff']
+                    ]),
+                    'stuff' => new SchemaType([
+                        'oneOf' => [
+                            new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_BoringStuff'),
+                            [
+                                'type' => 'null'
+                            ]
+                        ]
+                    ]),
+                    'name' => new SchemaType([
+                        'oneOf' => [
+                            [
+                                'type' => 'string'
+                            ],
+                            [
+                                'type' => 'null'
+                            ]
+                        ]
+                    ])
+                ],
+                additionalProperties: false,
+                required: ['name', 'stuff']
             )
         ];
 
