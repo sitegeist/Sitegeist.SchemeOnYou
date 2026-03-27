@@ -10,7 +10,7 @@ use Neos\Flow\Annotations as Flow;
 readonly class ClassWithStuffViaOptionalUnion
 {
     public function __construct(
-        public BoringStuff|InterestingStuff|null $stuff = null
+        public BoringStuff|InterestingStuff|null $stuff
     ) {
     }
 }

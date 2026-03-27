@@ -105,6 +105,9 @@ final readonly class SchemaType implements \JsonSerializable
             }
             $reflectionTypeName = $reflectionType->getName();
             if ($reflectionTypeName === 'null') {
+                $subschemas[] = new OpenApiSchema(
+                    type: 'null'
+                );
                 continue;
             }
             if (class_exists($reflectionTypeName) || enum_exists($reflectionTypeName)) {

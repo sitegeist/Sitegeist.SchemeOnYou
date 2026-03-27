@@ -382,13 +382,16 @@ final class OpenApiSchemaTest extends TestCase
                                     OpenApiSchema::discriminatorForClassName(InterestingStuff::class),
                                     new OpenApiReference('#/components/schemas/Sitegeist_SchemeOnYou_Tests_Fixtures_Stuff_InterestingStuff'),
                                 )
+                            ),
+                            new OpenApiSchema(
+                                type: 'null'
                             )
                         ),
                         'discriminator' => new OpenApiSchemaDiscriminator(),
                     ]),
                 ],
                 additionalProperties: false,
-                required: []
+                required: ['stuff']
             )
         ];
     }
