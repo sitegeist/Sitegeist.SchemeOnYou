@@ -104,6 +104,12 @@ final readonly class SchemaType implements \JsonSerializable
                 );
             }
             $reflectionTypeName = $reflectionType->getName();
+            if ($reflectionTypeName === 'null') {
+                $subschemas[] = new OpenApiSchema(
+                    type: 'null'
+                );
+                continue;
+            }
             if (class_exists($reflectionTypeName) || enum_exists($reflectionTypeName)) {
                 $subschemas[] = new OpenApiSchema(
                     type: 'object',
@@ -118,13 +124,6 @@ final readonly class SchemaType implements \JsonSerializable
                     1709560367
                 );
             }
-        }
-
-        if ($reflectionUnionType->allowsNull()) {
-            throw new \DomainException(
-                'nullable types are not supported in unions yet',
-                1709560368
-            );
         }
 
         return new self([

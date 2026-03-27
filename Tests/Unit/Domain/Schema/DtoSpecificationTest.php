@@ -95,6 +95,14 @@ final class DtoSpecificationTest extends TestCase
             'isSVDTO' => false,
         ];
 
+        yield Fixtures\Stuff\ClassWithNullableStuff::class => [
+            'typeName' => Fixtures\Stuff\ClassWithNullableStuff::class,
+            'isSupported' => true,
+            'isDTO' => true,
+            'isDTC' => false,
+            'isSVDTO' => false,
+        ];
+
         yield Fixtures\Stuff\CollectionOfStuffViaInterface::class => [
             'typeName' => Fixtures\Stuff\CollectionOfStuffViaInterface::class,
             'isSupported' => true,
@@ -121,6 +129,14 @@ final class DtoSpecificationTest extends TestCase
 
         yield Fixtures\Stuff\ClassWithStuffViaUnion::class => [
             'typeName' => Fixtures\Stuff\ClassWithStuffViaUnion::class,
+            'isSupported' => true,
+            'isDTO' => true,
+            'isDTC' => false,
+            'isSVDTO' => false,
+        ];
+
+        yield Fixtures\Stuff\ClassWithNullableStuffViaUnion::class => [
+            'typeName' => Fixtures\Stuff\ClassWithNullableStuffViaUnion::class,
             'isSupported' => true,
             'isDTO' => true,
             'isDTC' => false,
